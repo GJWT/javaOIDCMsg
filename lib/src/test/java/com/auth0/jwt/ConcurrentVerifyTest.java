@@ -20,7 +20,7 @@ import static com.auth0.jwt.PemUtils.readPublicKeyFromFile;
 //@Ignore("Skipping concurrency tests")
 public class ConcurrentVerifyTest {
 
-    private static final long TIMEOUT = 10 * 1000 * 1000; //1 min
+/*    private static final long TIMEOUT = 10 * 1000 * 1000; //1 min
     private static final int THREAD_COUNT = 100;
     private static final int REPEAT_COUNT = 1000;
     private static final String PUBLIC_KEY_FILE = "src/test/resources/rsa-public.pem";
@@ -158,5 +158,5 @@ public class ConcurrentVerifyTest {
         JWTVerifier verifier = JWTVerifier.init(algorithm).withIssuer("auth0").build();
 
         concurrentVerify(verifier, token);
-    }
+    }*/
 }

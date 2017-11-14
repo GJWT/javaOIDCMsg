@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.hamcrest.collection.IsCollectionWithSize;
 import org.hamcrest.core.IsCollectionContaining;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class PayloadImplTest {
         issuedAt = Mockito.mock(Date.class);
         Map<String, JsonNode> tree = new HashMap<>();
         tree.put("extraClaim", new TextNode("extraValue"));
-        payload = new PayloadImpl("issuer", "subject", Collections.singletonList("audience"), expiresAt, notBefore, issuedAt, "jwtId", tree);
+        payload = new PayloadImpl(Collections.singletonList("issuer"), Collections.singletonList("subject"), Collections.singletonList("audience"), expiresAt, notBefore, issuedAt, "jwtId", tree);
     }
 
     @SuppressWarnings("Convert2Diamond")
@@ -50,7 +51,7 @@ public class PayloadImplTest {
     @Test
     public void shouldGetIssuer() throws Exception {
         assertThat(payload, is(notNullValue()));
-        assertThat(payload.getIssuer(), is("issuer"));
+        assertTrue(payload.getIssuer().contains("issuer"));
     }
 
     @Test
@@ -63,7 +64,7 @@ public class PayloadImplTest {
     @Test
     public void shouldGetSubject() throws Exception {
         assertThat(payload, is(notNullValue()));
-        assertThat(payload.getSubject(), is("subject"));
+        assertTrue(payload.getSubject().contains("subject"));
     }
 
     @Test

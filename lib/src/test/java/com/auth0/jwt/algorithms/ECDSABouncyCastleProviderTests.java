@@ -31,6 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ECDSABouncyCastleProviderTests {
+/*
 
     private static final String PRIVATE_KEY_FILE_256 = "src/test/resources/ec256-key-private.pem";
     private static final String PUBLIC_KEY_FILE_256 = "src/test/resources/ec256-key-public.pem";
@@ -1053,5 +1054,6 @@ public class ECDSABouncyCastleProviderTests {
         joseSignature = algorithm512.DERToJOSE(derSignature);
         assertValidJOSESignature(joseSignature, 66, true, true);
     }
+*/
 
 }

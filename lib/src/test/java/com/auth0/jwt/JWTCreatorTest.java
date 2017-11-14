@@ -138,7 +138,7 @@ public class JWTCreatorTest {
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(signed, is(notNullValue()));
-        assertThat(TokenUtils.splitToken(signed)[1], is("eyJpc3MiOiJhdXRoMCJ9"));
+        assertThat(TokenUtils.splitToken(signed)[1], is("eyJpc3MiOlsiYXV0aDAiXX0"));
     }
 
     @Test
@@ -148,7 +148,7 @@ public class JWTCreatorTest {
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(signed, is(notNullValue()));
-        assertThat(TokenUtils.splitToken(signed)[1], is("eyJzdWIiOiIxMjM0NTY3ODkwIn0"));
+        assertThat(TokenUtils.splitToken(signed)[1], is("eyJzdWIiOlsiMTIzNDU2Nzg5MCJdfQ"));
     }
 
     @Test
@@ -255,13 +255,13 @@ public class JWTCreatorTest {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("The Custom Claim's name can't be null.");
         JWTCreator.init()
-                .withClaim(null, "value");
+                .withNonStandardClaim(null, "value");
     }
 
     @Test
     public void shouldAcceptCustomClaimOfTypeString() throws Exception {
         String jwt = JWTCreator.init()
-                .withClaim("name", "value")
+                .withNonStandardClaim("name", "value")
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -272,7 +272,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeInteger() throws Exception {
         String jwt = JWTCreator.init()
-                .withClaim("name", 123)
+                .withNonStandardClaim("name", 123)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -283,7 +283,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeLong() throws Exception {
         String jwt = JWTCreator.init()
-                .withClaim("name", Long.MAX_VALUE)
+                .withNonStandardClaim("name", Long.MAX_VALUE)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -294,7 +294,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeDouble() throws Exception {
         String jwt = JWTCreator.init()
-                .withClaim("name", 23.45)
+                .withNonStandardClaim("name", 23.45)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -305,7 +305,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeBoolean() throws Exception {
         String jwt = JWTCreator.init()
-                .withClaim("name", true)
+                .withNonStandardClaim("name", true)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -317,7 +317,7 @@ public class JWTCreatorTest {
     public void shouldAcceptCustomClaimOfTypeDate() throws Exception {
         Date date = new Date(1478891521000L);
         String jwt = JWTCreator.init()
-                .withClaim("name", date)
+                .withNonStandardClaim("name", date)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
