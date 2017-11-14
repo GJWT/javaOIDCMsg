@@ -1,4 +1,4 @@
-package com.auth0.jwt;
+package com.auth0.jwt.creators;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -27,9 +27,7 @@ public class GoogleJwtCreator {
             put("Picture", false);
             put("Issuer", false);
             put("Subject", false);
-            put("Audience", false);
             put("Iat", false);
-            put("Exp", false);
         }};
         publicClaims = new HashSet<String>() {{
             add(PublicClaims.ISSUER);
@@ -49,7 +47,7 @@ public class GoogleJwtCreator {
      * @param name the Name value.
      * @return this same Builder instance.
      */
-    protected GoogleJwtCreator withName(String name) {
+    public GoogleJwtCreator withName(String name) {
         jwt.withNonStandardClaim("name", name);
         addedClaims.put("Name", true);
         return this;
@@ -61,7 +59,7 @@ public class GoogleJwtCreator {
      * @param email the Email value.
      * @return this same Builder instance.
      */
-    GoogleJwtCreator withEmail(String email) {
+    public GoogleJwtCreator withEmail(String email) {
         jwt.withNonStandardClaim("email", email);
         addedClaims.put("Email", true);
         return this;
@@ -73,7 +71,7 @@ public class GoogleJwtCreator {
      * @param picture the Picture value.
      * @return this same Builder instance.
      */
-    protected GoogleJwtCreator withPicture(String picture) {
+    public GoogleJwtCreator withPicture(String picture) {
         jwt.withNonStandardClaim("picture", picture);
         addedClaims.put("Picture", true);
         return this;
@@ -114,7 +112,6 @@ public class GoogleJwtCreator {
      */
     public GoogleJwtCreator withAudience(String... audience) {
         jwt.withAudience(audience);
-        addedClaims.put("Audience", true);
         return this;
     }
 
@@ -138,7 +135,6 @@ public class GoogleJwtCreator {
      */
     public GoogleJwtCreator withExp(Date exp) {
         jwt.withExpiresAt(exp);
-        addedClaims.put("Exp", true);
         return this;
     }
 

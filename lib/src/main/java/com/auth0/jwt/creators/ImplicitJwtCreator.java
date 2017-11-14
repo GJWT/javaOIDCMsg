@@ -1,4 +1,4 @@
-package com.auth0.jwt;
+package com.auth0.jwt.creators;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -24,7 +24,6 @@ public class ImplicitJwtCreator {
         addedClaims = new HashMap<String, Boolean>() {{
             put("Issuer", false);
             put("Subject", false);
-            put("Audience", false);
             put("Iat", false);
         }};
         publicClaims = new HashSet<String>() {{
@@ -70,7 +69,6 @@ public class ImplicitJwtCreator {
      */
     public ImplicitJwtCreator withAudience(String... audience) {
         jwt.withAudience(audience);
-        addedClaims.put("Audience", true);
         return this;
     }
 

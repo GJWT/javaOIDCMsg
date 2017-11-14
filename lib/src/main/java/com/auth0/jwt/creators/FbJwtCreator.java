@@ -1,4 +1,4 @@
-package com.auth0.jwt;
+package com.auth0.jwt.creators;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -24,7 +24,6 @@ public class FbJwtCreator {
         addedClaims = new HashMap<String, Boolean>() {{
             put("UserId", false);
             put("AppId", false);
-            put("Exp", false);
             put("Iat", false);
         }};
         publicClaims = new HashSet<String>() {{
@@ -53,7 +52,6 @@ public class FbJwtCreator {
      */
     public FbJwtCreator withExp(Date exp) {
         jwt.withExpiresAt(exp);
-        addedClaims.put("Exp", true);
         return this;
     }
 

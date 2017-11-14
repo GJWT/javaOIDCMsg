@@ -1,4 +1,4 @@
-package com.auth0.jwt;
+package com.auth0.jwt.creators;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -48,7 +48,7 @@ public final class JWTCreator {
      *
      * @return a JWTCreator.Builder instance to configure.
      */
-    static JWTCreator.Builder init() {
+    public static JWTCreator.Builder init() {
         return new Builder();
     }
 

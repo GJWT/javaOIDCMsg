@@ -1,4 +1,4 @@
-package com.auth0.jwt;
+package com.auth0.jwt.creators;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -12,7 +12,6 @@ public class ExtendedJwtCreator extends GoogleJwtCreator{
 
     public ExtendedJwtCreator() {
         super();
-        addedClaims.put("Nbf", false);
     }
 
     /**
@@ -23,7 +22,6 @@ public class ExtendedJwtCreator extends GoogleJwtCreator{
      */
     public GoogleJwtCreator withNbf(Date nbf) {
         jwt.withNotBefore(nbf);
-        addedClaims.put("Nbf", true);
         return this;
     }
 

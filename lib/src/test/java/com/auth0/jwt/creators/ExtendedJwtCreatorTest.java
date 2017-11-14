@@ -1,6 +1,6 @@
-package com.auth0.jwt;
+package com.auth0.jwt.creators;
 
-import static com.auth0.jwt.GoogleJwtCreatorTest.*;
+import static com.auth0.jwt.creators.GoogleJwtCreatorTest.*;
 import static com.auth0.jwt.TimeUtil.generateRandomExpDateInFuture;
 import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -157,29 +157,6 @@ public class ExtendedJwtCreatorTest {
                 .withExp(exp)
                 .withIat(iat)
                 .withName("invalid")
-                .sign(algorithm);
-        GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
-                NAME, 1, 1, 1).build();
-        DecodedJWT jwt = verifier.decode(token);
-        Map<String, Claim> claims = jwt.getClaims();
-        verifyClaims(claims, exp);
-    }
-
-    @Test
-    public void testExtendedJwtCreatorNbfNotProvided() throws Exception {
-        thrown.expect(Exception.class);
-        thrown.expectMessage("Standard claim: Nbf has not been set");
-        Algorithm algorithm = Algorithm.HMAC256("secret");
-        String token = ExtendedJwtCreator.build()
-                .withPicture(PICTURE)
-                .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
-                .withSubject("subject")
-                .withAudience("audience")
-                .withExp(exp)
-                .withIat(iat)
-                .withName(NAME)
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),

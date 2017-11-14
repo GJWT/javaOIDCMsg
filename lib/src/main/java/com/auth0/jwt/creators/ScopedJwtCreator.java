@@ -1,4 +1,4 @@
-package com.auth0.jwt;
+package com.auth0.jwt.creators;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -25,9 +25,7 @@ public class ScopedJwtCreator{
             put("Scope", false);
             put("Issuer", false);
             put("Subject", false);
-            put("Audience", false);
             put("Iat", false);
-            put("Exp", false);
         }};
         publicClaims = new HashSet<String>() {{
             add(PublicClaims.ISSUER);
@@ -88,7 +86,6 @@ public class ScopedJwtCreator{
      */
     public ScopedJwtCreator withAudience(String... audience) {
         jwt.withAudience(audience);
-        addedClaims.put("Audience", true);
         return this;
     }
 
@@ -112,7 +109,6 @@ public class ScopedJwtCreator{
      */
     public ScopedJwtCreator withExp(Date exp) {
         jwt.withExpiresAt(exp);
-        addedClaims.put("Exp", true);
         return this;
     }
 
