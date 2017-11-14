@@ -3,6 +3,7 @@ package com.auth0.jwt;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.jwts.JWT;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -10,85 +11,26 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * The ScopedJwtCreator class holds the sign method to generate a complete Scoped JWT (with Signature) from a given Header and Payload content.
+ * The FbJwtCreator class holds the sign method to generate a complete FB JWT (with Signature) from a given Header and Payload content.
  */
-public class ScopedJwtCreator{
+public class FbJwtCreator {
 
     protected JWTCreator.Builder jwt;
     protected HashMap<String, Boolean> addedClaims;
     protected Set<String> publicClaims;
 
-    public ScopedJwtCreator() {
+    public FbJwtCreator() {
         jwt = JWT.create();
         addedClaims = new HashMap<String, Boolean>() {{
-            put("Scope", false);
-            put("Issuer", false);
-            put("Subject", false);
-            put("Audience", false);
-            put("Iat", false);
+            put("UserId", false);
+            put("AppId", false);
             put("Exp", false);
+            put("Iat", false);
         }};
         publicClaims = new HashSet<String>() {{
-            add(PublicClaims.ISSUER);
-            add(PublicClaims.SUBJECT);
-            add(PublicClaims.EXPIRES_AT);
-            add(PublicClaims.NOT_BEFORE);
             add(PublicClaims.ISSUED_AT);
-            add(PublicClaims.JWT_ID);
-            add(PublicClaims.AUDIENCE);
+            add(PublicClaims.EXPIRES_AT);
         }};
-    }
-
-    /**
-     * Add a specific Scope ("scope") claim to the Payload.
-     * Allows for multiple issuers
-     *
-     * @param scope the Scope value.
-     * @return this same Builder instance.
-     */
-    public ScopedJwtCreator withScope(String scope) {
-        jwt.withNonStandardClaim("scope", scope);
-        addedClaims.put("Scope", true);
-        return this;
-    }
-
-    /**
-     * Add a specific Issuer ("issuer") claim to the Payload.
-     * Allows for multiple issuers
-     *
-     * @param issuer the Issuer value.
-     * @return this same Builder instance.
-     */
-    public ScopedJwtCreator withIssuer(String... issuer) {
-        jwt.withIssuer(issuer);
-        addedClaims.put("Issuer", true);
-        return this;
-    }
-
-    /**
-     * Add a specific Subject ("subject") claim to the Payload.
-     * Allows for multiple subjects
-     *
-     * @param subject the Subject value.
-     * @return this same Builder instance.
-     */
-    public ScopedJwtCreator withSubject(String... subject) {
-        jwt.withSubject(subject);
-        addedClaims.put("Subject", true);
-        return this;
-    }
-
-    /**
-     * Add a specific Audience ("audience") claim to the Payload.
-     * Allows for multiple audience
-     *
-     * @param audience the Audience value.
-     * @return this same Builder instance.
-     */
-    public ScopedJwtCreator withAudience(String... audience) {
-        jwt.withAudience(audience);
-        addedClaims.put("Audience", true);
-        return this;
     }
 
     /**
@@ -97,7 +39,7 @@ public class ScopedJwtCreator{
      * @param iat the Issued At value.
      * @return this same Builder instance.
      */
-    public ScopedJwtCreator withIat(Date iat) {
+    public FbJwtCreator withIat(Date iat) {
         jwt.withIssuedAt(iat);
         addedClaims.put("Iat", true);
         return this;
@@ -109,9 +51,33 @@ public class ScopedJwtCreator{
      * @param exp the Expires At value.
      * @return this same Builder instance.
      */
-    public ScopedJwtCreator withExp(Date exp) {
+    public FbJwtCreator withExp(Date exp) {
         jwt.withExpiresAt(exp);
         addedClaims.put("Exp", true);
+        return this;
+    }
+
+    /**
+     * Require a specific userId ("userId") claim.
+     *
+     * @param userId the required userId value
+     * @return this same Verification instance.
+     */
+    public FbJwtCreator withUserId(String userId) {
+        jwt.withNonStandardClaim("userId", userId);
+        addedClaims.put("UserId", true);
+        return this;
+    }
+
+    /**
+     * Require a specific appId ("appId") claim.
+     *
+     * @param appId the required appId value
+     * @return this same Verification instance.
+     */
+    public FbJwtCreator withAppId(String appId) {
+        jwt.withNonStandardClaim("appId", appId);
+        addedClaims.put("AppId", true);
         return this;
     }
 
@@ -123,7 +89,7 @@ public class ScopedJwtCreator{
      * @return this same Verification instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ScopedJwtCreator withNonStandardClaim(String name, String value) {
+    public FbJwtCreator withNonStandardClaim(String name, String value) {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -136,7 +102,7 @@ public class ScopedJwtCreator{
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ScopedJwtCreator withNonStandardClaim(String name, Boolean value) throws IllegalArgumentException {
+    public FbJwtCreator withNonStandardClaim(String name, Boolean value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -149,7 +115,7 @@ public class ScopedJwtCreator{
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ScopedJwtCreator withNonStandardClaim(String name, Integer value) throws IllegalArgumentException {
+    public FbJwtCreator withNonStandardClaim(String name, Integer value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -162,7 +128,7 @@ public class ScopedJwtCreator{
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ScopedJwtCreator withNonStandardClaim(String name, Long value) throws IllegalArgumentException {
+    public FbJwtCreator withNonStandardClaim(String name, Long value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -175,7 +141,7 @@ public class ScopedJwtCreator{
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ScopedJwtCreator withNonStandardClaim(String name, Double value) throws IllegalArgumentException {
+    public FbJwtCreator withNonStandardClaim(String name, Double value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -188,7 +154,7 @@ public class ScopedJwtCreator{
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ScopedJwtCreator withNonStandardClaim(String name, Date value) throws IllegalArgumentException {
+    public FbJwtCreator withNonStandardClaim(String name, Date value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -201,7 +167,7 @@ public class ScopedJwtCreator{
      * @return this same Verification instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ScopedJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
+    public FbJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
         jwt.withArrayClaim(name, items);
         if(publicClaims.contains(name))
             addedClaims.put(name, true);
@@ -215,7 +181,7 @@ public class ScopedJwtCreator{
      * @param isNoneAlgorithmAllowed
      * @return
      */
-    public ScopedJwtCreator setIsNoneAlgorithmAllowed(boolean isNoneAlgorithmAllowed) {
+    public FbJwtCreator setIsNoneAlgorithmAllowed(boolean isNoneAlgorithmAllowed) {
         jwt.setIsNoneAlgorithmAllowed(isNoneAlgorithmAllowed);
         return this;
     }
@@ -248,7 +214,7 @@ public class ScopedJwtCreator{
                 throw new Exception("Standard claim: " + claim + " has not been set");
     }
 
-    public static ScopedJwtCreator build() {
-        return new ScopedJwtCreator();
+    public static FbJwtCreator build() {
+        return new FbJwtCreator();
     }
 }

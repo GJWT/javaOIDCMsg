@@ -3,6 +3,7 @@ package com.auth0.jwt;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.jwts.JWT;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -10,26 +11,67 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * The FbJwtCreator class holds the sign method to generate a complete FB JWT (with Signature) from a given Header and Payload content.
+ * The ImplicitJwtCreator class holds the sign method to generate a complete Implicit JWT (with Signature) from a given Header and Payload content.
  */
-public class FbJwtCreator {
+public class ImplicitJwtCreator {
 
     protected JWTCreator.Builder jwt;
     protected HashMap<String, Boolean> addedClaims;
     protected Set<String> publicClaims;
 
-    public FbJwtCreator() {
+    public ImplicitJwtCreator() {
         jwt = JWT.create();
         addedClaims = new HashMap<String, Boolean>() {{
-            put("UserId", false);
-            put("AppId", false);
-            put("Exp", false);
+            put("Issuer", false);
+            put("Subject", false);
+            put("Audience", false);
             put("Iat", false);
         }};
         publicClaims = new HashSet<String>() {{
+            add(PublicClaims.ISSUER);
+            add(PublicClaims.SUBJECT);
             add(PublicClaims.ISSUED_AT);
-            add(PublicClaims.EXPIRES_AT);
+            add(PublicClaims.AUDIENCE);
         }};
+    }
+
+    /**
+     * Add a specific Issuer ("issuer") claim to the Payload.
+     * Allows for multiple issuers
+     *
+     * @param issuer the Issuer value.
+     * @return this same Builder instance.
+     */
+    public ImplicitJwtCreator withIssuer(String... issuer) {
+        jwt.withIssuer(issuer);
+        addedClaims.put("Issuer", true);
+        return this;
+    }
+
+    /**
+     * Add a specific Subject ("subject") claim to the Payload.
+     * Allows for multiple subjects
+     *
+     * @param subject the Subject value.
+     * @return this same Builder instance.
+     */
+    public ImplicitJwtCreator withSubject(String... subject) {
+        jwt.withSubject(subject);
+        addedClaims.put("Subject", true);
+        return this;
+    }
+
+    /**
+     * Add a specific Audience ("audience") claim to the Payload.
+     * Allows for multiple audience
+     *
+     * @param audience the Audience value.
+     * @return this same Builder instance.
+     */
+    public ImplicitJwtCreator withAudience(String... audience) {
+        jwt.withAudience(audience);
+        addedClaims.put("Audience", true);
+        return this;
     }
 
     /**
@@ -38,45 +80,9 @@ public class FbJwtCreator {
      * @param iat the Issued At value.
      * @return this same Builder instance.
      */
-    public FbJwtCreator withIat(Date iat) {
+    public ImplicitJwtCreator withIat(Date iat) {
         jwt.withIssuedAt(iat);
         addedClaims.put("Iat", true);
-        return this;
-    }
-
-    /**
-     * Add a specific Expires At ("exp") claim to the Payload.
-     *
-     * @param exp the Expires At value.
-     * @return this same Builder instance.
-     */
-    public FbJwtCreator withExp(Date exp) {
-        jwt.withExpiresAt(exp);
-        addedClaims.put("Exp", true);
-        return this;
-    }
-
-    /**
-     * Require a specific userId ("userId") claim.
-     *
-     * @param userId the required userId value
-     * @return this same Verification instance.
-     */
-    public FbJwtCreator withUserId(String userId) {
-        jwt.withNonStandardClaim("userId", userId);
-        addedClaims.put("UserId", true);
-        return this;
-    }
-
-    /**
-     * Require a specific appId ("appId") claim.
-     *
-     * @param appId the required appId value
-     * @return this same Verification instance.
-     */
-    public FbJwtCreator withAppId(String appId) {
-        jwt.withNonStandardClaim("appId", appId);
-        addedClaims.put("AppId", true);
         return this;
     }
 
@@ -88,7 +94,7 @@ public class FbJwtCreator {
      * @return this same Verification instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public FbJwtCreator withNonStandardClaim(String name, String value) {
+    public ImplicitJwtCreator withNonStandardClaim(String name, String value) {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -101,7 +107,7 @@ public class FbJwtCreator {
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public FbJwtCreator withNonStandardClaim(String name, Boolean value) throws IllegalArgumentException {
+    public ImplicitJwtCreator withNonStandardClaim(String name, Boolean value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -114,7 +120,7 @@ public class FbJwtCreator {
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public FbJwtCreator withNonStandardClaim(String name, Integer value) throws IllegalArgumentException {
+    public ImplicitJwtCreator withNonStandardClaim(String name, Integer value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -127,7 +133,7 @@ public class FbJwtCreator {
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public FbJwtCreator withNonStandardClaim(String name, Long value) throws IllegalArgumentException {
+    public ImplicitJwtCreator withNonStandardClaim(String name, Long value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -140,7 +146,7 @@ public class FbJwtCreator {
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public FbJwtCreator withNonStandardClaim(String name, Double value) throws IllegalArgumentException {
+    public ImplicitJwtCreator withNonStandardClaim(String name, Double value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -153,7 +159,7 @@ public class FbJwtCreator {
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public FbJwtCreator withNonStandardClaim(String name, Date value) throws IllegalArgumentException {
+    public ImplicitJwtCreator withNonStandardClaim(String name, Date value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -166,7 +172,7 @@ public class FbJwtCreator {
      * @return this same Verification instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public FbJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
+    public ImplicitJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
         jwt.withArrayClaim(name, items);
         if(publicClaims.contains(name))
             addedClaims.put(name, true);
@@ -180,7 +186,7 @@ public class FbJwtCreator {
      * @param isNoneAlgorithmAllowed
      * @return
      */
-    public FbJwtCreator setIsNoneAlgorithmAllowed(boolean isNoneAlgorithmAllowed) {
+    public ImplicitJwtCreator setIsNoneAlgorithmAllowed(boolean isNoneAlgorithmAllowed) {
         jwt.setIsNoneAlgorithmAllowed(isNoneAlgorithmAllowed);
         return this;
     }
@@ -213,7 +219,7 @@ public class FbJwtCreator {
                 throw new Exception("Standard claim: " + claim + " has not been set");
     }
 
-    public static FbJwtCreator build() {
-        return new FbJwtCreator();
+    public static ImplicitJwtCreator build() {
+        return new ImplicitJwtCreator();
     }
 }

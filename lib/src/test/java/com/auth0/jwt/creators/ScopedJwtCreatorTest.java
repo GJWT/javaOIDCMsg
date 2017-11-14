@@ -9,6 +9,8 @@ import com.auth0.jwt.impl.PublicClaims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
+import com.auth0.jwt.jwts.JWT;
+import com.auth0.jwt.jwts.ScopedJWT;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertTrue;
 import org.junit.Rule;

@@ -3,6 +3,7 @@ package com.auth0.jwt;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.jwts.JWT;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -10,28 +11,72 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * The ImplicitJwtCreator class holds the sign method to generate a complete Implicit JWT (with Signature) from a given Header and Payload content.
+ * The GoogleJwtCreator class holds the sign method to generate a complete Google JWT (with Signature) from a given Header and Payload content.
  */
-public class ImplicitJwtCreator {
+public class GoogleJwtCreator {
 
     protected JWTCreator.Builder jwt;
     protected HashMap<String, Boolean> addedClaims;
     protected Set<String> publicClaims;
 
-    public ImplicitJwtCreator() {
+    public GoogleJwtCreator() {
         jwt = JWT.create();
         addedClaims = new HashMap<String, Boolean>() {{
+            put("Name", false);
+            put("Email", false);
+            put("Picture", false);
             put("Issuer", false);
             put("Subject", false);
             put("Audience", false);
             put("Iat", false);
+            put("Exp", false);
         }};
         publicClaims = new HashSet<String>() {{
             add(PublicClaims.ISSUER);
             add(PublicClaims.SUBJECT);
+            add(PublicClaims.EXPIRES_AT);
+            add(PublicClaims.NOT_BEFORE);
             add(PublicClaims.ISSUED_AT);
+            add(PublicClaims.JWT_ID);
             add(PublicClaims.AUDIENCE);
         }};
+    }
+
+
+    /**
+     * Add a specific Name ("name") claim to the Payload.
+     *
+     * @param name the Name value.
+     * @return this same Builder instance.
+     */
+    protected GoogleJwtCreator withName(String name) {
+        jwt.withNonStandardClaim("name", name);
+        addedClaims.put("Name", true);
+        return this;
+    }
+
+    /**
+     * Add a specific Email ("email") claim to the Payload.
+     *
+     * @param email the Email value.
+     * @return this same Builder instance.
+     */
+    GoogleJwtCreator withEmail(String email) {
+        jwt.withNonStandardClaim("email", email);
+        addedClaims.put("Email", true);
+        return this;
+    }
+
+    /**
+     * Add a specific Picture ("picture") claim to the Payload.
+     *
+     * @param picture the Picture value.
+     * @return this same Builder instance.
+     */
+    protected GoogleJwtCreator withPicture(String picture) {
+        jwt.withNonStandardClaim("picture", picture);
+        addedClaims.put("Picture", true);
+        return this;
     }
 
     /**
@@ -41,7 +86,7 @@ public class ImplicitJwtCreator {
      * @param issuer the Issuer value.
      * @return this same Builder instance.
      */
-    public ImplicitJwtCreator withIssuer(String... issuer) {
+    public GoogleJwtCreator withIssuer(String... issuer) {
         jwt.withIssuer(issuer);
         addedClaims.put("Issuer", true);
         return this;
@@ -54,7 +99,7 @@ public class ImplicitJwtCreator {
      * @param subject the Subject value.
      * @return this same Builder instance.
      */
-    public ImplicitJwtCreator withSubject(String... subject) {
+    public GoogleJwtCreator withSubject(String... subject) {
         jwt.withSubject(subject);
         addedClaims.put("Subject", true);
         return this;
@@ -67,7 +112,7 @@ public class ImplicitJwtCreator {
      * @param audience the Audience value.
      * @return this same Builder instance.
      */
-    public ImplicitJwtCreator withAudience(String... audience) {
+    public GoogleJwtCreator withAudience(String... audience) {
         jwt.withAudience(audience);
         addedClaims.put("Audience", true);
         return this;
@@ -79,9 +124,21 @@ public class ImplicitJwtCreator {
      * @param iat the Issued At value.
      * @return this same Builder instance.
      */
-    public ImplicitJwtCreator withIat(Date iat) {
+    public GoogleJwtCreator withIat(Date iat) {
         jwt.withIssuedAt(iat);
         addedClaims.put("Iat", true);
+        return this;
+    }
+
+    /**
+     * Add a specific Expires At ("exp") claim to the Payload.
+     *
+     * @param exp the Expires At value.
+     * @return this same Builder instance.
+     */
+    public GoogleJwtCreator withExp(Date exp) {
+        jwt.withExpiresAt(exp);
+        addedClaims.put("Exp", true);
         return this;
     }
 
@@ -93,7 +150,7 @@ public class ImplicitJwtCreator {
      * @return this same Verification instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ImplicitJwtCreator withNonStandardClaim(String name, String value) {
+    public GoogleJwtCreator withNonStandardClaim(String name, String value) {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -106,7 +163,7 @@ public class ImplicitJwtCreator {
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ImplicitJwtCreator withNonStandardClaim(String name, Boolean value) throws IllegalArgumentException {
+    public GoogleJwtCreator withNonStandardClaim(String name, Boolean value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -119,7 +176,7 @@ public class ImplicitJwtCreator {
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ImplicitJwtCreator withNonStandardClaim(String name, Integer value) throws IllegalArgumentException {
+    public GoogleJwtCreator withNonStandardClaim(String name, Integer value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -132,7 +189,7 @@ public class ImplicitJwtCreator {
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ImplicitJwtCreator withNonStandardClaim(String name, Long value) throws IllegalArgumentException {
+    public GoogleJwtCreator withNonStandardClaim(String name, Long value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -145,7 +202,7 @@ public class ImplicitJwtCreator {
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ImplicitJwtCreator withNonStandardClaim(String name, Double value) throws IllegalArgumentException {
+    public GoogleJwtCreator withNonStandardClaim(String name, Double value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -158,7 +215,7 @@ public class ImplicitJwtCreator {
      * @return this same Builder instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ImplicitJwtCreator withNonStandardClaim(String name, Date value) throws IllegalArgumentException {
+    public GoogleJwtCreator withNonStandardClaim(String name, Date value) throws IllegalArgumentException {
         jwt.withNonStandardClaim(name, value);
         return this;
     }
@@ -171,7 +228,7 @@ public class ImplicitJwtCreator {
      * @return this same Verification instance.
      * @throws IllegalArgumentException if the name is null.
      */
-    public ImplicitJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
+    public GoogleJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
         jwt.withArrayClaim(name, items);
         if(publicClaims.contains(name))
             addedClaims.put(name, true);
@@ -185,7 +242,7 @@ public class ImplicitJwtCreator {
      * @param isNoneAlgorithmAllowed
      * @return
      */
-    public ImplicitJwtCreator setIsNoneAlgorithmAllowed(boolean isNoneAlgorithmAllowed) {
+    public GoogleJwtCreator setIsNoneAlgorithmAllowed(boolean isNoneAlgorithmAllowed) {
         jwt.setIsNoneAlgorithmAllowed(isNoneAlgorithmAllowed);
         return this;
     }
@@ -218,7 +275,7 @@ public class ImplicitJwtCreator {
                 throw new Exception("Standard claim: " + claim + " has not been set");
     }
 
-    public static ImplicitJwtCreator build() {
-        return new ImplicitJwtCreator();
+    public static GoogleJwtCreator build() {
+        return new GoogleJwtCreator();
     }
 }

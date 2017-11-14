@@ -9,6 +9,8 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.GoogleVerification;
+import com.auth0.jwt.jwts.ExtendedJWT;
+import com.auth0.jwt.jwts.JWT;
 import static java.util.Arrays.asList;
 import org.junit.Rule;
 import org.junit.Test;
