@@ -10,21 +10,21 @@ import java.util.Map;
 public interface Payload {
 
     /**
-     * Get the value of the "iss" claim, or null if it's not available.
+     * Get the value(s) of the "iss" claim, or null if it's not available.
      *
      * @return the Issuer value or null.
      */
-    String getIssuer();
+    List<String> getIssuer();
 
     /**
-     * Get the value of the "sub" claim, or null if it's not available.
+     * Get the value(s) of the "sub" claim, or null if it's not available.
      *
      * @return the Subject value or null.
      */
-    String getSubject();
+    List<String> getSubject();
 
     /**
-     * Get the value of the "aud" claim, or null if it's not available.
+     * Get the value(s) of the "aud" claim, or null if it's not available.
      *
      * @return the Audience value or null.
      */

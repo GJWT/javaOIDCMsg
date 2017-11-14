@@ -58,10 +58,12 @@ public final class JWTCreator {
     public static class Builder {
         private final Map<String, Object> payloadClaims;
         private Map<String, Object> headerClaims;
+        private boolean isNoneAlgorithmAllowed;
 
         Builder() {
             this.payloadClaims = new HashMap<>();
             this.headerClaims = new HashMap<>();
+            this.isNoneAlgorithmAllowed = false;
         }
 
         /**
@@ -89,28 +91,31 @@ public final class JWTCreator {
 
         /**
          * Add a specific Issuer ("iss") claim to the Payload.
+         * Allows for multiple issuers
          *
          * @param issuer the Issuer value.
          * @return this same Builder instance.
          */
-        public Builder withIssuer(String issuer) {
+        public Builder withIssuer(String... issuer) {
             addClaim(PublicClaims.ISSUER, issuer);
             return this;
         }
 
         /**
          * Add a specific Subject ("sub") claim to the Payload.
+         * Allows for multiple subjects
          *
          * @param subject the Subject value.
          * @return this same Builder instance.
          */
-        public Builder withSubject(String subject) {
+        public Builder withSubject(String... subject) {
             addClaim(PublicClaims.SUBJECT, subject);
             return this;
         }
 
         /**
          * Add a specific Audience ("aud") claim to the Payload.
+         * Allows for multiple audience
          *
          * @param audience the Audience value.
          * @return this same Builder instance.
@@ -165,6 +170,22 @@ public final class JWTCreator {
         }
 
         /**
+         * Developer specifies whether they want to accept
+         * NONE algorithms or not.
+         *
+         * @param isNoneAlgorithmAllowed
+         * @return
+         */
+        public Builder setIsNoneAlgorithmAllowed(boolean isNoneAlgorithmAllowed) {
+            this.isNoneAlgorithmAllowed = isNoneAlgorithmAllowed;
+            return this;
+        }
+
+        public boolean getIsNoneAlgorithmAllowed() {
+            return this.isNoneAlgorithmAllowed;
+        }
+
+        /**
          * Add a custom Claim value.
          *
          * @param name  the Claim's name.
@@ -172,7 +193,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          * @throws IllegalArgumentException if the name is null.
          */
-        public Builder withClaim(String name, Boolean value) throws IllegalArgumentException {
+        public Builder withNonStandardClaim(String name, Boolean value) throws IllegalArgumentException {
             assertNonNull(name);
             addClaim(name, value);
             return this;
@@ -186,7 +207,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          * @throws IllegalArgumentException if the name is null.
          */
-        public Builder withClaim(String name, Integer value) throws IllegalArgumentException {
+        public Builder withNonStandardClaim(String name, Integer value) throws IllegalArgumentException {
             assertNonNull(name);
             addClaim(name, value);
             return this;
@@ -200,7 +221,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          * @throws IllegalArgumentException if the name is null.
          */
-        public Builder withClaim(String name, Long value) throws IllegalArgumentException {
+        public Builder withNonStandardClaim(String name, Long value) throws IllegalArgumentException {
             assertNonNull(name);
             addClaim(name, value);
             return this;
@@ -214,7 +235,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          * @throws IllegalArgumentException if the name is null.
          */
-        public Builder withClaim(String name, Double value) throws IllegalArgumentException {
+        public Builder withNonStandardClaim(String name, Double value) throws IllegalArgumentException {
             assertNonNull(name);
             addClaim(name, value);
             return this;
@@ -228,7 +249,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          * @throws IllegalArgumentException if the name is null.
          */
-        public Builder withClaim(String name, String value) throws IllegalArgumentException {
+        public Builder withNonStandardClaim(String name, String value) throws IllegalArgumentException {
             assertNonNull(name);
             addClaim(name, value);
             return this;
@@ -242,7 +263,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          * @throws IllegalArgumentException if the name is null.
          */
-        public Builder withClaim(String name, Date value) throws IllegalArgumentException {
+        public Builder withNonStandardClaim(String name, Date value) throws IllegalArgumentException {
             assertNonNull(name);
             addClaim(name, value);
             return this;
@@ -298,7 +319,7 @@ public final class JWTCreator {
          * @throws IllegalArgumentException if the provided algorithm is null.
          * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
          */
-        public String sign(Algorithm algorithm) throws IllegalArgumentException, JWTCreationException {
+        public String sign(Algorithm algorithm) throws Exception {
             if (algorithm == null) {
                 throw new IllegalArgumentException("The Algorithm cannot be null.");
             }
@@ -311,7 +332,7 @@ public final class JWTCreator {
             return new JWTCreator(algorithm, headerClaims, payloadClaims).sign();
         }
 
-        private void assertNonNull(String name) {
+        protected void assertNonNull(String name) {
             if (name == null) {
                 throw new IllegalArgumentException("The Custom Claim's name can't be null.");
             }

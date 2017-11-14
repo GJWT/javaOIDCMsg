@@ -64,12 +64,12 @@ final class JWTDecoder implements DecodedJWT {
     }
 
     @Override
-    public String getIssuer() {
+    public List<String> getIssuer() {
         return payload.getIssuer();
     }
 
     @Override
-    public String getSubject() {
+    public List<String> getSubject() {
         return payload.getSubject();
     }
 

@@ -373,4 +373,17 @@ public abstract class Algorithm {
      * @throws SignatureGenerationException if the Key is invalid.
      */
     public abstract byte[] sign(byte[] contentBytes) throws SignatureGenerationException;
+
+    @Override
+    public boolean equals(Object algorithmParam) {
+        if(this == algorithmParam)
+            return true;
+        if(algorithmParam == null)
+            return false;
+        if(getClass() != algorithmParam.getClass())
+            return false;
+
+        Algorithm algorithm = (Algorithm) algorithmParam;
+        return this.description.equals(algorithm.description) && this.name.equals(algorithm.name);
+    }
 }

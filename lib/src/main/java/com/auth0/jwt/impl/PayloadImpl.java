@@ -12,8 +12,8 @@ import static com.auth0.jwt.impl.JsonNodeClaim.extractClaim;
  * The PayloadImpl class implements the Payload interface.
  */
 class PayloadImpl implements Payload {
-    private final String issuer;
-    private final String subject;
+    private final List<String> issuer;
+    private final List<String> subject;
     private final List<String> audience;
     private final Date expiresAt;
     private final Date notBefore;
@@ -21,7 +21,7 @@ class PayloadImpl implements Payload {
     private final String jwtId;
     private final Map<String, JsonNode> tree;
 
-    PayloadImpl(String issuer, String subject, List<String> audience, Date expiresAt, Date notBefore, Date issuedAt, String jwtId, Map<String, JsonNode> tree) {
+    PayloadImpl(List<String> issuer, List<String> subject, List<String> audience, Date expiresAt, Date notBefore, Date issuedAt, String jwtId, Map<String, JsonNode> tree) {
         this.issuer = issuer;
         this.subject = subject;
         this.audience = audience;
@@ -37,12 +37,12 @@ class PayloadImpl implements Payload {
     }
 
     @Override
-    public String getIssuer() {
+    public List<String> getIssuer() {
         return issuer;
     }
 
     @Override
-    public String getSubject() {
+    public List<String> getSubject() {
         return subject;
     }
 

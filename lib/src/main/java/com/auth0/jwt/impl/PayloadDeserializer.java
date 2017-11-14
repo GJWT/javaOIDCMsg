@@ -31,8 +31,8 @@ class PayloadDeserializer extends StdDeserializer<Payload> {
             throw new JWTDecodeException("Parsing the Payload's JSON resulted on a Null map");
         }
 
-        String issuer = getString(tree, PublicClaims.ISSUER);
-        String subject = getString(tree, PublicClaims.SUBJECT);
+        List<String> issuer = getStringOrArray(tree, PublicClaims.ISSUER);
+        List<String> subject = getStringOrArray(tree, PublicClaims.SUBJECT);
         List<String> audience = getStringOrArray(tree, PublicClaims.AUDIENCE);
         Date expiresAt = getDateFromSeconds(tree, PublicClaims.EXPIRES_AT);
         Date notBefore = getDateFromSeconds(tree, PublicClaims.NOT_BEFORE);
