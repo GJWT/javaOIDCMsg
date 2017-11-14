@@ -1,6 +1,10 @@
-package com.auth0.jwt;
+package com.auth0.jwt.creators;
 
+import com.auth0.jwt.JsonMatcher;
+import com.auth0.jwt.PemUtils;
+import com.auth0.jwt.TokenUtils;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
 import org.apache.commons.codec.binary.Base64;

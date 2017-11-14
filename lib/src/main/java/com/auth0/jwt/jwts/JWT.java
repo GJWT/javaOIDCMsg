@@ -1,7 +1,7 @@
 package com.auth0.jwt.jwts;
 
 import com.auth0.jwt.ClockImpl;
-import com.auth0.jwt.JWTCreator;
+import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.JWTDecoder;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.*;

@@ -1,8 +1,9 @@
-package com.auth0.jwt;
+package com.auth0.jwt.creators;
 
 import static com.auth0.jwt.TimeUtil.generateRandomExpDateInFuture;
 import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.creators.GoogleJwtCreator;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.impl.PublicClaims;

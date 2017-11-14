@@ -1,6 +1,6 @@
 package com.auth0.jwt.interfaces;
 
-import com.auth0.jwt.JWT;
+import com.auth0.jwt.jwts.JWT;
 
 import java.util.Date;
 import java.util.List;
