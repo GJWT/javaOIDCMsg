@@ -446,6 +446,34 @@ public class GoogleJwtCreatorTest {
         DecodedJWT jwt = verifier.decode(token);
     }
 
+    @Test
+    public void testGoogleJwtCreatorTokenCantBeUsedBefore() throws Exception {
+        thrown.expect(InvalidClaimException.class);
+        thrown.expectMessage("The Token can't be used before Mon Oct 29 00:00:00 PDT 2018.");
+
+        String myDate = "2018/10/29";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+        Date date = sdf.parse(myDate);
+        long expLong = date.getTime();
+        Date iatDate = new Date(expLong);
+
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = GoogleJwtCreator.build()
+                .withPicture(PICTURE)
+                .withEmail(EMAIL)
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iatDate)
+                .withName(NAME)
+                .sign(algorithm);
+        GoogleVerification verification = GoogleJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+                NAME, 1, 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+    }
+
     protected static void verifyClaims(Map<String,Claim> claims, Date exp) {
         assertTrue(claims.get(PICTURE).asString().equals(PICTURE));
         assertTrue(claims.get(EMAIL).asString().equals(EMAIL));
