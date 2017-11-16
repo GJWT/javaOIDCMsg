@@ -14,7 +14,7 @@ public interface GoogleVerification extends Verification{
 
     GoogleVerification withName(String name);
 
-     Verification createVerifierForExtended(String picture, String email, List<String> issuer,
+    Verification createVerifierForExtended(String picture, String email, List<String> issuer,
                                            List<String> audience, String name, long nbf, long expLeeway, long iatLeeway);
 
 }

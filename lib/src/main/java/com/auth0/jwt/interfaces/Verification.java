@@ -52,5 +52,8 @@ public interface Verification {
 
     Verification withAppId(String appId);
 
+    Verification createVerifierForAccess(List<String> issuer,
+                                         List<String> audience, long expLeeway, long iatLeeway);
+
     JWT build();
 }

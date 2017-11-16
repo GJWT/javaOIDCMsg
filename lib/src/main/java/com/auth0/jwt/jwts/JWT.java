@@ -127,6 +127,11 @@ public class JWT {
             throw new UnsupportedOperationException("you shouldn't be calling this method");
         }
 
+        @Override
+        public Verification createVerifierForAccess(List<String> issuer, List<String> audience, long expLeeway, long iatLeeway) {
+            throw new UnsupportedOperationException("you shouldn't be calling this method");
+        }
+
         /**
          * Require a specific Issuer ("iss") claim.
          * Allows for multiple issuers

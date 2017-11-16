@@ -6,12 +6,14 @@ import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.auth0.jwt.impl.PublicClaims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.GoogleVerification;
 import com.auth0.jwt.jwts.ExtendedJWT;
 import com.auth0.jwt.jwts.JWT;
 import static java.util.Arrays.asList;
+import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -48,6 +50,7 @@ public class ExtendedJwtCreatorTest {
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
+        verifyNbf(claims);
     }
 
     @Test
@@ -116,6 +119,7 @@ public class ExtendedJwtCreatorTest {
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
+        verifyNbf(claims);
     }
 
     @Test
@@ -140,6 +144,7 @@ public class ExtendedJwtCreatorTest {
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
+        verifyNbf(claims);
     }
 
     @Test
@@ -164,6 +169,7 @@ public class ExtendedJwtCreatorTest {
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
+        verifyNbf(claims);
     }
 
     @Test
@@ -238,6 +244,7 @@ public class ExtendedJwtCreatorTest {
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
+        verifyNbf(claims);
     }
 
     @Test
@@ -401,5 +408,9 @@ public class ExtendedJwtCreatorTest {
         JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
+    }
+
+    private static void verifyNbf(Map<String, Claim> claims) {
+        assertTrue(claims.get(PublicClaims.NOT_BEFORE).asDate().toString().equals(nbf.toString()));
     }
 }
