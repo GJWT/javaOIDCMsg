@@ -4,9 +4,9 @@ import com.auth0.jwt.interfaces.Clock;
 
 import java.util.Date;
 
-final class ClockImpl implements Clock {
+public final class ClockImpl implements Clock {
 
-    ClockImpl() {
+    public ClockImpl() {
     }
 
     @Override

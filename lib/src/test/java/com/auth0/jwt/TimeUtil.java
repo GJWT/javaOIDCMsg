@@ -6,12 +6,12 @@ import java.util.Random;
 
 public class TimeUtil {
 
-    static Date generateRandomExpDateInFuture() {
+    public static Date generateRandomExpDateInFuture() {
         Random rnd = new Random();
         return new Date(Math.abs(System.currentTimeMillis() + rnd.nextLong()));
     }
 
-    static Date generateRandomIatDateInPast() {
+    public static Date generateRandomIatDateInPast() {
         GregorianCalendar gc = new GregorianCalendar();
         int year = randBetween(1900, 2010);
         gc.set(gc.YEAR, year);
@@ -21,7 +21,7 @@ public class TimeUtil {
         return new Date(gc.getTimeInMillis());
     }
 
-    static int randBetween(int start, int end) {
+    public static int randBetween(int start, int end) {
         return start + (int)Math.round(Math.random() * (end - start));
     }
 
