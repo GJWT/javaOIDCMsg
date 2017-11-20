@@ -474,6 +474,14 @@ public class GoogleJwtCreatorTest {
         DecodedJWT jwt = verifier.decode(token);
     }
 
+    @Test
+    public void testCreateVerifierForExtended() throws Exception{
+        thrown.expect(UnsupportedOperationException.class);
+        thrown.expectMessage("you shouldn't be calling this method");
+        GoogleVerification verification = GoogleJWT.require(Algorithm.HMAC256("secret"));
+        verification.createVerifierForExtended(null, null, null, null, null, 1L, 1L, 1L);
+    }
+
     protected static void verifyClaims(Map<String,Claim> claims, Date exp) {
         assertTrue(claims.get(PICTURE).asString().equals(PICTURE));
         assertTrue(claims.get(EMAIL).asString().equals(EMAIL));

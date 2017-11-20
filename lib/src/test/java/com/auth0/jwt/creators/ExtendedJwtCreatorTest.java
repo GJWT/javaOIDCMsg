@@ -50,7 +50,6 @@ public class ExtendedJwtCreatorTest {
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
-        verifyNbf(claims);
     }
 
     @Test
@@ -119,7 +118,6 @@ public class ExtendedJwtCreatorTest {
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
-        verifyNbf(claims);
     }
 
     @Test
@@ -144,7 +142,6 @@ public class ExtendedJwtCreatorTest {
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
-        verifyNbf(claims);
     }
 
     @Test
@@ -169,7 +166,6 @@ public class ExtendedJwtCreatorTest {
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
-        verifyNbf(claims);
     }
 
     @Test
@@ -244,7 +240,6 @@ public class ExtendedJwtCreatorTest {
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
-        verifyNbf(claims);
     }
 
     @Test
@@ -408,9 +403,5 @@ public class ExtendedJwtCreatorTest {
         JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
-    }
-
-    private static void verifyNbf(Map<String, Claim> claims) {
-        assertTrue(claims.get(PublicClaims.NOT_BEFORE).asDate().toString().equals(nbf.toString()));
     }
 }

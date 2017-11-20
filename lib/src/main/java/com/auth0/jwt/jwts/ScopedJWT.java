@@ -26,10 +26,6 @@ public class ScopedJWT extends JWT.BaseVerification implements Verification{
                 .acceptExpiresAt(expLeeway).acceptIssuedAt(iatLeeway);
     }
 
-    public Verification createVerifierForImplicit(List<String> issuer, List<String> audience, long iatLeeway) {
-        throw new UnsupportedOperationException("you shouldn't call this method");
-    }
-
     /**
      * Require a specific Scope ("scope") claim.
      *
