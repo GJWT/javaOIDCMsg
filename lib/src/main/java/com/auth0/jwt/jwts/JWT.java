@@ -103,6 +103,12 @@ public class JWT {
         }
 
         @Override
+        public Verification createVerifierForRisc(String jti, List<String> issuer,
+                                                  List<String> audience, long iatLeeway, long expLeeway, long nbf) {
+            throw new UnsupportedOperationException("you shouldn't be calling this method");
+        }
+
+        @Override
         public Verification createVerifierForScoped(String scope, List<String> issuer, List<String> audience, long expLeeway, long iatLeeway) {
             throw new UnsupportedOperationException("you shouldn't be calling this method");
         }

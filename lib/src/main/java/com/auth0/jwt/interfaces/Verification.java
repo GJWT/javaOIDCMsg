@@ -55,5 +55,8 @@ public interface Verification {
     Verification createVerifierForAccess(List<String> issuer,
                                          List<String> audience, long expLeeway, long iatLeeway);
 
+    Verification createVerifierForRisc(String jti, List<String> issuer,
+                                       List<String> audience, long iatLeeway, long expLeeway, long nbf);
+
     JWT build();
 }

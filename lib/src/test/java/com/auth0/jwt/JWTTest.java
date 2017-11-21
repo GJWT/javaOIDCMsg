@@ -34,6 +34,13 @@ public class JWTTest {
     }
 
     @Test
+    public void testCreateVerifierForRisc() {
+        thrown.expect(UnsupportedOperationException.class);
+        thrown.expectMessage("you shouldn't be calling this method");
+        JWT.require(Algorithm.none()).createVerifierForRisc(null, null, null, 5, 5, 5);
+    }
+
+    @Test
     public void testCreateVerifierForScoped() {
         thrown.expect(UnsupportedOperationException.class);
         thrown.expectMessage("you shouldn't be calling this method");
