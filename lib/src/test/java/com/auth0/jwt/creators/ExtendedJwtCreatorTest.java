@@ -53,6 +53,51 @@ public class ExtendedJwtCreatorTest {
     }
 
     @Test
+    public void testExtendedJwtCreatorBase16Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = ExtendedJwtCreator.build()
+                .withNbf(nbf)  //this must be called first since ExtendedJwtCreator.build() returns an instance of ExtendedJwtCreator
+                .withPicture(PICTURE)
+                .withEmail(EMAIL)
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iat)
+                .withName(NAME)
+                .signBase16Encoding(algorithm);
+        GoogleVerification verification = ExtendedJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+                NAME, 1, 1, 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims, exp);
+    }
+
+    @Test
+    public void testExtendedJwtCreatorBase32Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = ExtendedJwtCreator.build()
+                .withNbf(nbf)  //this must be called first since ExtendedJwtCreator.build() returns an instance of ExtendedJwtCreator
+                .withPicture(PICTURE)
+                .withEmail(EMAIL)
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iat)
+                .withName(NAME)
+                .signBase32Encoding(algorithm);
+        GoogleVerification verification = ExtendedJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+                NAME, 1, 1, 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims, exp);
+    }
+
+
+    @Test
     public void testExtendedJwtCreatorInvalidIssuer() throws Exception {
         thrown.expect(InvalidClaimException.class);
         thrown.expectMessage("The Claim 'iss' value doesn't match the required one.");

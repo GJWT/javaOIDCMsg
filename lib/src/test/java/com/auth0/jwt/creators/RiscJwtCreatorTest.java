@@ -49,6 +49,44 @@ public class RiscJwtCreatorTest {
     }
 
     @Test
+    public void testRiscJwtCreatorBase16Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = RiscJwtCreator.build()
+                .withJWTId(jti)
+                .withNbf(nbf)
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iat)
+                .signBase16Encoding(algorithm);
+        Verification verification = RiscJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims, exp);
+    }
+
+    @Test
+    public void testRiscJwtCreatorBase32Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = RiscJwtCreator.build()
+                .withJWTId(jti)
+                .withNbf(nbf)
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iat)
+                .signBase32Encoding(algorithm);
+        Verification verification = RiscJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims, exp);
+    }
+
+    @Test
     public void testRiscJwtCreatorJtiNotProvidedButRequired() throws Exception {
         thrown.expect(Exception.class);
         thrown.expectMessage("Jti has not been set");

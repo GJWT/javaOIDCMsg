@@ -48,6 +48,42 @@ public class ScopedJwtCreatorTest {
     }
 
     @Test
+    public void testScopedJwtCreatorBase16Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = ScopedJwtCreator.build()
+                .withScope("scope")
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iat)
+                .signBase16Encoding(algorithm);
+        Verification verification = ScopedJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForScoped("scope", asList("accounts.fake.com"), asList("audience"), 1, 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims, exp);
+    }
+
+    @Test
+    public void testScopedJwtCreatorBase32Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = ScopedJwtCreator.build()
+                .withScope("scope")
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iat)
+                .signBase32Encoding(algorithm);
+        Verification verification = ScopedJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForScoped("scope", asList("accounts.fake.com"), asList("audience"), 1, 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims, exp);
+    }
+
+    @Test
     public void testScopedJwtCreatorInvalidScope() throws Exception {
         thrown.expect(InvalidClaimException.class);
         thrown.expectMessage("The Claim 'scope' value doesn't match the required one.");

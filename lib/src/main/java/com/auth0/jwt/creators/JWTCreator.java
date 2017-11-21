@@ -10,8 +10,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -312,16 +315,33 @@ public final class JWTCreator {
         }
 
         /**
-         * Creates a new JWT and signs is with the given algorithm
+         * Creates a new JWT and signs it with the given algorithm
+         * Defaults to Base64 encoding
          *
          * @param algorithm used to sign the JWT
          * @return a new JWT token
          * @throws IllegalArgumentException if the provided algorithm is null.
          * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
          */
-        public String sign(Algorithm algorithm) throws Exception {
+        public String sign(Algorithm algorithm) throws Exception{
+            return sign(algorithm, EncodeType.Base64);
+        }
+
+        /**
+         * Creates a new JWT and signs it with the given algorithm
+         *
+         * @param algorithm used to sign the JWT
+         * @param encodeType specifies which base encoding is required
+         * @return a new JWT token
+         * @throws IllegalArgumentException if the provided algorithm is null.
+         * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
+         */
+        public String sign(Algorithm algorithm, EncodeType encodeType) throws Exception {
             if (algorithm == null) {
                 throw new IllegalArgumentException("The Algorithm cannot be null.");
+            }
+            if(encodeType == null) {
+                throw new IllegalArgumentException("Encodetype cannot be null.");
             }
             headerClaims.put(PublicClaims.ALGORITHM, algorithm.getName());
             headerClaims.put(PublicClaims.TYPE, "JWT");
@@ -329,7 +349,18 @@ public final class JWTCreator {
             if (signingKeyId != null) {
                 withKeyId(signingKeyId);
             }
-            return new JWTCreator(algorithm, headerClaims, payloadClaims).sign();
+            JWTCreator jwtCreator = new JWTCreator(algorithm, headerClaims, payloadClaims);
+            String token = null;
+            switch (encodeType) {
+                case Base16:
+                    token = jwtCreator.signBase16Encoding();
+                case Base32:
+                    token = jwtCreator.signBase32Encoding();
+                case Base64:
+                    token = jwtCreator.sign();
+            }
+
+            return token;
         }
 
         protected void assertNonNull(String name) {
@@ -345,6 +376,29 @@ public final class JWTCreator {
             }
             payloadClaims.put(name, value);
         }
+    }
+
+    private String signBase16Encoding() {
+        String header = Hex.encodeHexString(headerJson.getBytes(StandardCharsets.UTF_8));
+        String payload = Hex.encodeHexString(payloadJson.getBytes(StandardCharsets.UTF_8));
+        String content = String.format("%s.%s", header, payload);
+
+        byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
+        String signature = Hex.encodeHexString((signatureBytes));
+
+        return String.format("%s.%s", content, signature);
+    }
+
+    private String signBase32Encoding() {
+        Base32 base32 = new Base32();
+        String header = base32.encodeAsString(headerJson.getBytes(StandardCharsets.UTF_8));
+        String payload = base32.encodeAsString(payloadJson.getBytes(StandardCharsets.UTF_8));
+        String content = String.format("%s.%s", header, payload);
+
+        byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
+        String signature = base32.encodeAsString((signatureBytes));
+
+        return String.format("%s.%s", content, signature);
     }
 
     private String sign() throws SignatureGenerationException {

@@ -46,6 +46,40 @@ public class AccessJwtCreatorTest {
     }
 
     @Test
+    public void testAccessJwtCreatorBase16Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = AccessJwtCreator.build()
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iat)
+                .signBase16Encoding(algorithm);
+        Verification verification = AccessJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForAccess(asList("accounts.fake.com"), asList("audience"), 1, 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims, exp);
+    }
+
+    @Test
+    public void testAccessJwtCreatorBase32Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = AccessJwtCreator.build()
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iat)
+                .signBase32Encoding(algorithm);
+        Verification verification = AccessJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForAccess(asList("accounts.fake.com"), asList("audience"), 1, 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims, exp);
+    }
+
+    @Test
     public void testAccessJwtCreatorInvalidIssuer() throws Exception {
         thrown.expect(InvalidClaimException.class);
         thrown.expectMessage("The Claim 'iss' value doesn't match the required one.");

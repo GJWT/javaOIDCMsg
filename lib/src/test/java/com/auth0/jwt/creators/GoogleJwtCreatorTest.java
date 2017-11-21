@@ -55,6 +55,48 @@ public class GoogleJwtCreatorTest {
     }
 
     @Test
+    public void testGoogleJwtCreatorBase16Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = GoogleJwtCreator.build()
+                .withPicture(PICTURE)
+                .withEmail(EMAIL)
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iat)
+                .withName(NAME)
+                .signBase16Encoding(algorithm);
+        GoogleVerification verification = GoogleJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+                NAME, 1, 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims, exp);
+    }
+
+    @Test
+    public void testGoogleJwtCreatorBase32Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = GoogleJwtCreator.build()
+                .withPicture(PICTURE)
+                .withEmail(EMAIL)
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iat)
+                .withName(NAME)
+                .signBase32Encoding(algorithm);
+        GoogleVerification verification = GoogleJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+                NAME, 1, 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims, exp);
+    }
+
+    @Test
     public void testGoogleJwtCreatorWhenCertainRequiredClaimIsntProvided() throws Exception {
         thrown.expect(Exception.class);
         thrown.expectMessage("Standard claim: Picture has not been set");

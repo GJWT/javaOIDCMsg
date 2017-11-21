@@ -262,6 +262,43 @@ public class GoogleJwtCreator {
     }
 
     /**
+     * Creates a new JWT and signs it with the given algorithm.
+     *
+     * @param algorithm used to sign the JWT
+     * @return a new JWT token
+     * @throws IllegalAccessException   if the developer didn't want NONE algorithm to be allowed and it was passed in
+     * @throws IllegalArgumentException if the provided algorithm is null.
+     * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
+     */
+    public String signBase16Encoding(Algorithm algorithm) throws Exception {
+        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+            throw new IllegalAccessException("None algorithm isn't allowed");
+        }
+        String JWS = jwt.sign(algorithm, EncodeType.Base16);
+        verifyClaims();
+        return JWS;
+    }
+
+    /**
+     * Creates a new JWT and signs it with the given algorithm.
+     *
+     * @param algorithm used to sign the JWT
+     * @return a new JWT token
+     * @throws IllegalAccessException   if the developer didn't want NONE algorithm to be allowed and it was passed in
+     * @throws IllegalArgumentException if the provided algorithm is null.
+     * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
+     */
+    public String signBase32Encoding(Algorithm algorithm) throws Exception {
+        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+            throw new IllegalAccessException("None algorithm isn't allowed");
+        }
+        String JWS = jwt.sign(algorithm, EncodeType.Base32);
+        verifyClaims();
+        return JWS;
+    }
+
+
+    /**
      * Verifies that all the standard claims were provided
      * @throws Exception if all the standard claims weren't provided
      */

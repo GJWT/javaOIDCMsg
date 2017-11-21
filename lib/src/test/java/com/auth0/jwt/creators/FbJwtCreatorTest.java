@@ -46,6 +46,38 @@ public class FbJwtCreatorTest {
     }
 
     @Test
+    public void testFbJwtCreatorBase16Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = FbJwtCreator.build()
+                .withExp(exp)
+                .withIat(iat)
+                .withUserId(USER_ID)
+                .withAppId(APP_ID)
+                .signBase16Encoding(algorithm);
+        Verification verification = FbJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForFb(USER_ID, APP_ID).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims);
+    }
+
+    @Test
+    public void testFbJwtCreatorBase32Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = FbJwtCreator.build()
+                .withExp(exp)
+                .withIat(iat)
+                .withUserId(USER_ID)
+                .withAppId(APP_ID)
+                .signBase32Encoding(algorithm);
+        Verification verification = FbJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForFb(USER_ID, APP_ID).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims);
+    }
+
+    @Test
     public void testFbJwtCreatorInvalidUserId() throws Exception {
         thrown.expect(InvalidClaimException.class);
         thrown.expectMessage("The Claim 'userId' value doesn't match the required one.");

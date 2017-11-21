@@ -43,6 +43,38 @@ public class ImplicitJwtCreatorTest {
     }
 
     @Test
+    public void testImplicitJwtCreatorBase16Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = ImplicitJwtCreator.build()
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withIat(iat)
+                .signBase16Encoding(algorithm);
+        Verification verification = ImplicitJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForImplicit(asList("accounts.fake.com"), asList("audience"), 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims);
+    }
+
+    @Test
+    public void testImplicitJwtCreatorBase32Encoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = ImplicitJwtCreator.build()
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withIat(iat)
+                .signBase32Encoding(algorithm);
+        Verification verification = ImplicitJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForImplicit(asList("accounts.fake.com"), asList("audience"), 1).build();
+        DecodedJWT jwt = verifier.decode(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims);
+    }
+
+    @Test
     public void testImplicitJwtCreatorInvalidIssuer() throws Exception {
         thrown.expect(InvalidClaimException.class);
         thrown.expectMessage("The Claim 'iss' value doesn't match the required one.");
