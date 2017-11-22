@@ -44,7 +44,43 @@ The library implements JWT Verification and Signing using the following algorith
 | ES384 | ECDSA384 | ECDSA with curve P-384 and SHA-384 |
 | ES512 | ECDSA512 | ECDSA with curve P-521 and SHA-512 |
 
-## Usage
+## Supported token profile types
+
+#### Basic Token
+
+- Standard claims: *iss, sub, iat, jti*
+- Nonstandard claims: *aud, exp, nbf*
+
+#### Extended Token
+- Standard claims: *name, email, picture, iss, sub, iat*
+- Nonstandard claims: *aud, exp, nbf*
+
+#### Access Token
+- Standard claims: *iss, sub, iat*
+- Nonstandard claims: *aud, exp*
+
+#### Facebook Token
+- Standard claims: *user_id, app_id, issued_at*
+- Nonstandard claims: *expired_at*
+
+#### Google Token
+- Standard claims: *name, email, picture, iss, sub, iat*
+- Nonstandard claims: *exp, aud*
+
+#### Implicit Access Token
+- Standard claims: *iss, sub, iat*
+- Nonstandard claims: *aud*
+
+#### Refresh Token
+- Standard claims: *refresh_token, access_token*
+
+#### Risc Token
+- Standard claims: *jti, iss, sub, iat*
+- Nonstandard claims: *aud, nbf, exp*
+
+#### Scoped Access Token
+- Standard claims: *iss, sub, iat, scope*
+- Nonstandard claims: *aud, exp*
 
 ### Pick the Algorithm
 
@@ -147,23 +183,22 @@ If a Claim couldn't be converted to JSON or the Key used in the signing process 
 
 ### Verify a Token
 
-You'll first need to create a `JWTVerifier` instance by calling `JWT.require()` and passing the `Algorithm` instance. If you require the token to have specific Claim values, use the builder to define them. The instance returned by the method `build()` is reusable, so you can define it once and use it to verify different tokens. Finally call `verifier.verify()` passing the token.
+You'll first need to create a `Verification` instance by calling `JWT.require()` and passing the `Algorithm` instance. Once you have the `Verification` instance, you can call the corresponding verifier method.  For the example of Google,
+you would have a `GoogleVerificiation` instance that has inherited from the `Verification` instance in order to call `createVerifierForGoogle()`, and you would pass in the claims that you would want to be verified.
+Once you call `build`, you would get back a `JWT` object and with that, you would call `decode()` while passing in the token that was created after signing.  You will get back a `DecodedJWT` object, which contains all of the claims, and you can verify
+those claims against what's the expected claims by calling `verifyClaims()`.
 
 * Example using `HS256`
 
 ```java
 String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXUyJ9.eyJpc3MiOiJhdXRoMCJ9.AbIJTDMFc7yUa5MhvcP03nJPyCPzZtQcGEp-zWfOkEE";
-try {
-    Algorithm algorithm = Algorithm.HMAC256("secret");
-    JWTVerifier verifier = JWT.require(algorithm)
-        .withIssuer("auth0")
-        .build(); //Reusable verifier instance
-    DecodedJWT jwt = verifier.verify(token);
-} catch (UnsupportedEncodingException exception){
-    //UTF-8 encoding not supported
-} catch (JWTVerificationException exception){
-    //Invalid signature/claims
-}
+Algorithm algorithm = Algorithm.HMAC256("secret");
+GoogleVerification verification = GoogleJWT.require(algorithm);
+JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+       NAME, 1, 1).build();
+DecodedJWT jwt = verifier.decode(token);
+Map<String, Claim> claims = jwt.getClaims();
+verifyClaims(claims, exp);
 ```
 
 * Example using `RS256`
@@ -172,19 +207,18 @@ try {
 String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXUyJ9.eyJpc3MiOiJhdXRoMCJ9.AbIJTDMFc7yUa5MhvcP03nJPyCPzZtQcGEp-zWfOkEE";
 RSAPublicKey publicKey = //Get the key instance
 RSAPrivateKey privateKey = //Get the key instance
-try {
-    Algorithm algorithm = Algorithm.RSA256(publicKey, privateKey);
-    JWTVerifier verifier = JWT.require(algorithm)
-        .withIssuer("auth0")
-        .build(); //Reusable verifier instance
-    DecodedJWT jwt = verifier.verify(token);
-} catch (JWTVerificationException exception){
-    //Invalid signature/claims
-}
+
+Algorithm algorithm = Algorithm.RSA256(publicKey, privateKey);
+GoogleVerification verification = GoogleJWT.require(algorithm);
+JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+    NAME, 1, 1).build();
+DecodedJWT jwt = verifier.decode(token);
+Map<String, Claim> claims = jwt.getClaims();
+verifyClaims(claims, exp);
 ```
 
-If the token has an invalid signature or the Claim requirement is not met, a `JWTVerificationException` will raise.
-
+If the token has a Claim requirement that has not been met, an `InvalidClaimException` will raise.
+If the token has an invalid signature, an `AlgorithmMismatchException` will raise.
 
 #### Time Validation
 
@@ -195,20 +229,20 @@ The JWT token may include DateNumber fields that can be used to validate that:
 
 When verifying a token the time validation occurs automatically, resulting in a `JWTVerificationException` being throw when the values are invalid. If any of the previous fields are missing they won't be considered in this validation.
 
-To specify a **leeway window** in which the Token should still be considered valid, use the `acceptLeeway()` method in the `JWTVerifier` builder and pass a positive seconds value. This applies to every item listed above.
-
+To specify a **nbf value** in which the Token should still be considered valid, use the `withNbf()` method in the respective `Creator` builder and pass a Date object. This applies to every item listed above.
+**NOTE:**  `Nbf` and `iat` date values should be in the past, but the `exp` value should be in the future.
 ```java
-JWTVerifier verifier = JWT.require(algorithm)
-    .acceptLeeway(1) // 1 sec for nbf, iat and exp
+Verification verifier = JWT.require(algorithm)
+    .withNbf(new Date(2016,1,1))
     .build();
 ```
 
 You can also specify a custom value for a given Date claim and override the default one for only that claim.
 
 ```java
-JWTVerifier verifier = JWT.require(algorithm)
-    .acceptLeeway(1)   //1 sec for nbf and iat
-    .acceptExpiresAt(5)   //5 secs for exp
+Verification verifier = JWT.require(algorithm)
+    .withNbf(new Date(2016,1,1))
+    .withExp(new Date(2100,1,1))
     .build();
 ```
 
@@ -219,18 +253,17 @@ BaseVerification verification = (BaseVerification) JWT.require(algorithm)
     .acceptLeeway(1)
     .acceptExpiresAt(5);
 Clock clock = new CustomClock(); //Must implement Clock interface
-JWTVerifier verifier = verification.build(clock);
+JWT verifier = verification.build(clock);
 ```
 
 ### Decode a Token
 
+This example is for an Implicit JWT token and can be applied to all the types of tokens:
 ```java
-String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXUyJ9.eyJpc3MiOiJhdXRoMCJ9.AbIJTDMFc7yUa5MhvcP03nJPyCPzZtQcGEp-zWfOkEE";
-try {
-    DecodedJWT jwt = JWT.decode(token);
-} catch (JWTDecodeException exception){
-    //Invalid token
-}
+String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOlsic3ViamVjdCJdLCJpc3MiOlsiYWNjb3VudHMuZmFrZS5jb20iXSwiYXVkIjoiYXVkaWVuY2UiLCJpYXQiOi0xMjQ1MjgxNTI3fQ.-eRoMolUy7PnEcpvfs-jTEvP6qagBZ1G_lqp1jY3Nqg";
+Verification verification = ImplicitJWT.require(algorithm);
+JWT verifier = verification.createVerifierForImplicit(asList("accounts.fake.com"), asList("audience"), 1).build();
+DecodedJWT jwt = verifier.decode(token);
 ```
 
 If the token has an invalid syntax or the header or payload are not JSONs, a `JWTDecodeException` will raise.
@@ -278,12 +311,12 @@ Additional Claims defined in the token's Header can be obtained by calling `getH
 Claim claim = jwt.getHeaderClaim("owner");
 ```
 
-When creating a Token with the `JWT.create()` you can specify header Claims by calling `withHeader()` and passing both the map of claims.
+When creating a Token with the `JWTCreator.init()` you can specify header Claims by calling `withHeader()` and passing both the map of claims.
 
 ```java
 Map<String, Object> headerClaims = new HashMap();
 headerClaims.put("owner", "auth0");
-String token = JWT.create()
+String token = JWTCreator.init()
         .withHeader(headerClaims)
         .sign(algorithm);
 ```
@@ -349,9 +382,9 @@ Returns the JWT ID value or null if it's not defined in the Payload.
 String id = jwt.getId();
 ```
 
-#### Private Claims
+#### Nonstandard Claims
 
-Additional Claims defined in the token's Payload can be obtained by calling `getClaims()` or `getClaim()` and passing the Claim name. A Claim will always be returned, even if it can't be found. You can check if a Claim's value is null by calling `claim.isNull()`.
+Nonstandard Claims defined in the token's Payload can be obtained by calling `getClaims()` or `getClaim()` and passing the Claim name. A Claim will always be returned, even if it can't be found. You can check if a Claim's value is null by calling `claim.isNull()`.
 
 ```java
 Map<String, Claim> claims = jwt.getClaims();    //Key is the Claim name
@@ -364,24 +397,16 @@ or
 Claim claim = jwt.getClaim("isAdmin");
 ```
 
-When creating a Token with the `JWT.create()` you can specify a custom Claim by calling `withClaim()` and passing both the name and the value.
+When creating an Implicit Token for example with the `ImplicitJwtCreator.build()` you can specify a custom Claim by calling `withNonStandardClaim()` and passing both the name and the value.
 
 ```java
-String token = JWT.create()
-        .withClaim("name", 123)
+String token = ImplicitJwtCreator.build()
+        .withNonStandardClaim("nonStandardClaim", 123)
         .withArrayClaim("array", new Integer[]{1, 2, 3})
         .sign(algorithm);
 ```
 
-You can also verify custom Claims on the `JWT.require()` by calling `withClaim()` and passing both the name and the required value.
-
-```java
-JWTVerifier verifier = JWT.require(algorithm)
-    .withClaim("name", 123)
-    .withArrayClaim("array", 1, 2, 3)
-    .build();
-DecodedJWT jwt = verifier.verify("my.jwt.token");
-```
+**NOTE:** Nonstandard claims do not need to verified.
 
 > Currently supported classes for custom JWT Claim creation and verification are: Boolean, Integer, Double, String, Date and Arrays of type String and Integer.
 
@@ -407,31 +432,14 @@ To obtain a Claim as a Collection you'll need to provide the **Class Type** of t
 
 If the values can't be converted to the given **Class Type** a `JWTDecodeException` will raise.
 
-
-
-## What is Auth0?
-
-Auth0 helps you to:
-
-* Add authentication with [multiple authentication sources](https://docs.auth0.com/identityproviders), either social like **Google, Facebook, Microsoft Account, LinkedIn, GitHub, Twitter, Box, Salesforce, among others**, or enterprise identity systems like **Windows Azure AD, Google Apps, Active Directory, ADFS or any SAML Identity Provider**.
-* Add authentication through more traditional **[username/password databases](https://docs.auth0.com/mysql-connection-tutorial)**.
-* Add support for **[linking different user accounts](https://docs.auth0.com/link-accounts)** with the same user.
-* Support for generating signed [Json Web Tokens](https://docs.auth0.com/jwt) to call your APIs and **flow the user identity** securely.
-* Analytics of how, when and where users are logging in.
-* Pull data from other sources and add it to the user profile, through [JavaScript rules](https://docs.auth0.com/rules).
-
-## Create a free account in Auth0
-
-1. Go to [Auth0](https://auth0.com) and click Sign Up.
-2. Use Google, GitHub or Microsoft Account to login.
-
 ## Issue Reporting
 
-If you have found a bug or if you have a feature request, please report them at this repository issues section. Please do not report security vulnerabilities on the public GitHub issue tracker. The [Responsible Disclosure Program](https://auth0.com/whitehat) details the procedure for disclosing security issues.
+If you have found a bug or if you have a feature request, please report them at this repository issues section. Please do not report security vulnerabilities on the public GitHub issue tracker.
 
 ## Author
 
-[Auth0](https://auth0.com/)
+Justin Dahmubed\
+Application Engineer II @ Google
 
 ## License
 
