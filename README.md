@@ -406,7 +406,7 @@ String token = ImplicitJwtCreator.build()
         .sign(algorithm);
 ```
 
-**NOTE:** Nonstandard claims do not need to verified.
+**NOTE:** Nonstandard claims aside from `aud`, `exp`, and `nbf` do not need to verified.
 
 > Currently supported classes for custom JWT Claim creation and verification are: Boolean, Integer, Double, String, Date and Arrays of type String and Integer.
 
