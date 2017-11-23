@@ -1,5 +1,6 @@
 package com.auth0.jwt.algorithms;
 
+import com.auth0.jwt.creators.EncodeType;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -363,7 +364,7 @@ public abstract class Algorithm {
      * @param jwt the already decoded JWT that it's going to be verified.
      * @throws SignatureVerificationException if the Token's Signature is invalid, meaning that it doesn't match the signatureBytes, or if the Key is invalid.
      */
-    public abstract void verify(DecodedJWT jwt) throws SignatureVerificationException;
+    public abstract void verify(DecodedJWT jwt, EncodeType encodeType) throws Exception;
 
     /**
      * Sign the given content using this Algorithm instance.

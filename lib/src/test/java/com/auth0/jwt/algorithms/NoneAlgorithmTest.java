@@ -1,5 +1,6 @@
 package com.auth0.jwt.algorithms;
 
+import com.auth0.jwt.creators.EncodeType;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -23,7 +24,7 @@ public class NoneAlgorithmTest {
         String token = "eyJhbGciOiJub25lIiwiY3R5IjoiSldUIn0.eyJpc3MiOiJhdXRoMCJ9.";
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded);
+        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -34,7 +35,7 @@ public class NoneAlgorithmTest {
         Algorithm algorithm = Algorithm.none();
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded);
+        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -45,7 +46,7 @@ public class NoneAlgorithmTest {
         Algorithm algorithm = Algorithm.none();
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded);
+        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test

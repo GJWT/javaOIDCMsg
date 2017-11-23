@@ -56,7 +56,7 @@ public class FbJwtCreatorTest {
                 .signBase16Encoding(algorithm);
         Verification verification = FbJWT.require(algorithm);
         JWT verifier = verification.createVerifierForFb(USER_ID, APP_ID).build();
-        DecodedJWT jwt = verifier.decode(token);
+        DecodedJWT jwt = verifier.decode16Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
     }
@@ -72,7 +72,7 @@ public class FbJwtCreatorTest {
                 .signBase32Encoding(algorithm);
         Verification verification = FbJWT.require(algorithm);
         JWT verifier = verification.createVerifierForFb(USER_ID, APP_ID).build();
-        DecodedJWT jwt = verifier.decode(token);
+        DecodedJWT jwt = verifier.decode32Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
     }

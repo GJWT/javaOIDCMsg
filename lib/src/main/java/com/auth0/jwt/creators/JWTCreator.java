@@ -10,10 +10,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
+import org.apache.avro.file.DataFileStream;
+import org.apache.avro.generic.GenericDatumReader;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.*;
+import org.apache.commons.codec.Encoder;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 
+import java.io.*;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -354,10 +364,15 @@ public final class JWTCreator {
             switch (encodeType) {
                 case Base16:
                     token = jwtCreator.signBase16Encoding();
+                    break;
                 case Base32:
                     token = jwtCreator.signBase32Encoding();
+                    break;
                 case Base64:
-                    token = jwtCreator.sign();
+                    token = jwtCreator.defaultSign();
+                    break;
+                case JsonEncode:
+                    token = jwtCreator.signJsonEncode();
             }
 
             return token;
@@ -378,6 +393,96 @@ public final class JWTCreator {
         }
     }
 
+    private String signJsonEncode() throws Exception {
+        Schema schema = SchemaBuilder
+                .record("record").namespace("namespace")
+                .fields()
+                .name("alg").type().stringType().noDefault()
+                .name("typ").type().stringType().noDefault()
+                .endRecord();
+        /*String schema = "{" +
+                "\"type\":\"record\"," +
+                "\"namespace\":\"foo\"," +
+                "\"name\":\"Person\"," +
+                "\"fields\":" +
+                "{" +
+                    "\"alg\":\"string\"," +
+                    "\"typ\":\"string\"" +
+                "}" +
+            "}";*/
+        byte[] header = jsonToAvro(headerJson, schema.toString());
+        //.name("aud").type().array().items().stringType().noDefault()
+        schema = SchemaBuilder
+                .record("record").namespace("namespace")
+                .fields()
+                .name("sub").type().array().items().stringType().noDefault()
+                .name("iss").type().array().items().stringType().noDefault()
+                //.name("aud").type().array().items().stringType().noDefault()
+                .name("iat").type().intType().noDefault()
+                .endRecord();
+        byte[] payload = jsonToAvro(payloadJson, schema.toString());
+        String content = String.format("%s.%s", header, payload);
+
+        byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
+        //String signature = Hex.encodeHexString((signatureBytes));
+        ///String signature = avroToJson(signatureBytes);  ???
+        return String.format("%s.%s", content, new String(signatureBytes)); //for now
+    }
+
+    public static String avroToJson(byte[] avro) throws IOException {
+        boolean pretty = false;
+        GenericDatumReader<GenericRecord> reader = null;
+        JsonEncoder encoder = null;
+        ByteArrayOutputStream output = null;
+        try {
+            reader = new GenericDatumReader<GenericRecord>();
+            InputStream input = new ByteArrayInputStream(avro);
+            DataFileStream<GenericRecord> streamReader = new DataFileStream<GenericRecord>(input, reader);
+            output = new ByteArrayOutputStream();
+            Schema schema = streamReader.getSchema();
+            DatumWriter<GenericRecord> writer = new GenericDatumWriter<GenericRecord>(schema);
+            encoder = EncoderFactory.get().jsonEncoder(schema, output, pretty);
+            for (GenericRecord datum : streamReader) {
+                writer.write(datum, encoder);
+            }
+            encoder.flush();
+            output.flush();
+            return new String(output.toByteArray());
+        } finally {
+            try { if (output != null) output.close(); } catch (Exception e) { }
+        }
+    }
+
+    public static byte[] jsonToAvro(String json, String schemaStr) throws Exception {
+        InputStream input = null;
+        GenericDatumWriter<GenericRecord> writer = null;
+        BinaryEncoder encoder = null;
+        ByteArrayOutputStream output = null;
+        try {
+            Schema schema = new Schema.Parser().parse(schemaStr);
+            DatumReader<GenericRecord> reader = new GenericDatumReader<GenericRecord>(schema);
+            input = new ByteArrayInputStream(json.getBytes());
+            output = new ByteArrayOutputStream();
+            DataInputStream din = new DataInputStream(input);
+            writer = new GenericDatumWriter<GenericRecord>(schema);
+            Decoder decoder = DecoderFactory.get().jsonDecoder(schema, din);
+            encoder = EncoderFactory.get().binaryEncoder(output, null);
+            GenericRecord datum;
+            while (true) {
+                try {
+                    datum = reader.read(null, decoder);
+                } catch (EOFException eofe) {
+                    break;
+                }
+                writer.write(datum, encoder);
+            }
+            encoder.flush();
+            return output.toByteArray();
+        } finally {
+            try { input.close(); } catch (Exception e) { }
+        }
+    }
+
     private String signBase16Encoding() {
         String header = Hex.encodeHexString(headerJson.getBytes(StandardCharsets.UTF_8));
         String payload = Hex.encodeHexString(payloadJson.getBytes(StandardCharsets.UTF_8));
@@ -391,7 +496,7 @@ public final class JWTCreator {
 
     private String signBase32Encoding() {
         Base32 base32 = new Base32();
-        String header = base32.encodeAsString(headerJson.getBytes(StandardCharsets.UTF_8));
+        String header =  base32.encodeAsString(headerJson.getBytes(StandardCharsets.UTF_8));
         String payload = base32.encodeAsString(payloadJson.getBytes(StandardCharsets.UTF_8));
         String content = String.format("%s.%s", header, payload);
 
@@ -401,7 +506,7 @@ public final class JWTCreator {
         return String.format("%s.%s", content, signature);
     }
 
-    private String sign() throws SignatureGenerationException {
+    private String defaultSign() throws SignatureGenerationException {
         String header = Base64.encodeBase64URLSafeString(headerJson.getBytes(StandardCharsets.UTF_8));
         String payload = Base64.encodeBase64URLSafeString(payloadJson.getBytes(StandardCharsets.UTF_8));
         String content = String.format("%s.%s", header, payload);

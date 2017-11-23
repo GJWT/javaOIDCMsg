@@ -53,7 +53,7 @@ public class ImplicitJwtCreatorTest {
                 .signBase16Encoding(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
         JWT verifier = verification.createVerifierForImplicit(asList("accounts.fake.com"), asList("audience"), 1).build();
-        DecodedJWT jwt = verifier.decode(token);
+        DecodedJWT jwt = verifier.decode16Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
     }
@@ -67,6 +67,22 @@ public class ImplicitJwtCreatorTest {
                 .withAudience("audience")
                 .withIat(iat)
                 .signBase32Encoding(algorithm);
+        Verification verification = ImplicitJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForImplicit(asList("accounts.fake.com"), asList("audience"), 1).build();
+        DecodedJWT jwt = verifier.decode32Bytes(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims);
+    }
+
+    @Test
+    public void testImplicitJwtCreatorJSONEncoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        String token = ImplicitJwtCreator.build()
+                .withIssuer("accounts.fake.com")
+                .withSubject("subject")
+                //.withAudience("audience")
+                .withIat(iat)
+                .signJSONEncoding(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
         JWT verifier = verification.createVerifierForImplicit(asList("accounts.fake.com"), asList("audience"), 1).build();
         DecodedJWT jwt = verifier.decode(token);

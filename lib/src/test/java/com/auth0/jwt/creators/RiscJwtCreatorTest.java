@@ -62,7 +62,7 @@ public class RiscJwtCreatorTest {
                 .signBase16Encoding(algorithm);
         Verification verification = RiscJWT.require(algorithm);
         JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
-        DecodedJWT jwt = verifier.decode(token);
+        DecodedJWT jwt = verifier.decode16Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }
@@ -81,7 +81,7 @@ public class RiscJwtCreatorTest {
                 .signBase32Encoding(algorithm);
         Verification verification = RiscJWT.require(algorithm);
         JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
-        DecodedJWT jwt = verifier.decode(token);
+        DecodedJWT jwt = verifier.decode32Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }

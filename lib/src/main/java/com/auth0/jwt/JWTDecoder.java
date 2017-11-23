@@ -1,12 +1,15 @@
 package com.auth0.jwt;
 
+import com.auth0.jwt.creators.EncodeType;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.impl.JWTParser;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Header;
 import com.auth0.jwt.interfaces.Payload;
+import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.binary.StringUtils;
 
 import java.util.Date;
@@ -23,17 +26,34 @@ public final class JWTDecoder implements DecodedJWT {
     private final Header header;
     private final Payload payload;
 
-    public JWTDecoder(String jwt) throws JWTDecodeException {
+    public JWTDecoder(String jwt, EncodeType encodeType) throws Exception {
         parts = TokenUtils.splitToken(jwt);
         final JWTParser converter = new JWTParser();
-        String headerJson;
-        String payloadJson;
-        try {
-            headerJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[0]));
-            payloadJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[1]));
-        } catch (NullPointerException e) {
-            throw new JWTDecodeException("The UTF-8 Charset isn't initialized.", e);
+        String headerJson = null;
+        String payloadJson = null;
+        switch (encodeType) {
+            case Base16:
+                headerJson = StringUtils.newStringUtf8(Hex.decodeHex(parts[0]));
+                payloadJson = StringUtils.newStringUtf8(Hex.decodeHex(parts[1]));
+                break;
+            case Base32: {
+                Base32 base32 = new Base32();
+                headerJson = StringUtils.newStringUtf8(base32.decode(parts[0]));
+                payloadJson = StringUtils.newStringUtf8(base32.decode(parts[1]));
+                break;
+            }
+            case Base64:
+                headerJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[0]));
+                payloadJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[1]));
+                break;
+            case JsonEncode:
+                break;
+                    //token = jwtCreator.signJsonEncode();
         }
+            //headerJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[0]));
+            //headerJson = StringUtils.newStringUtf8(Hex.decodeHex(parts[0]));
+            //payloadJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[1]));
+            //payloadJson = StringUtils.newStringUtf8(Hex.decodeHex(parts[1]));
         header = converter.parseHeader(headerJson);
         payload = converter.parsePayload(payloadJson);
     }

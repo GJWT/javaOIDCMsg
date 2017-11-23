@@ -60,7 +60,7 @@ public class ScopedJwtCreatorTest {
                 .signBase16Encoding(algorithm);
         Verification verification = ScopedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForScoped("scope", asList("accounts.fake.com"), asList("audience"), 1, 1).build();
-        DecodedJWT jwt = verifier.decode(token);
+        DecodedJWT jwt = verifier.decode16Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }
@@ -78,7 +78,7 @@ public class ScopedJwtCreatorTest {
                 .signBase32Encoding(algorithm);
         Verification verification = ScopedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForScoped("scope", asList("accounts.fake.com"), asList("audience"), 1, 1).build();
-        DecodedJWT jwt = verifier.decode(token);
+        DecodedJWT jwt = verifier.decode32Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }

@@ -70,7 +70,7 @@ public class GoogleJwtCreatorTest {
         GoogleVerification verification = GoogleJWT.require(algorithm);
         JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
                 NAME, 1, 1).build();
-        DecodedJWT jwt = verifier.decode(token);
+        DecodedJWT jwt = verifier.decode16Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }
@@ -91,7 +91,7 @@ public class GoogleJwtCreatorTest {
         GoogleVerification verification = GoogleJWT.require(algorithm);
         JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
                 NAME, 1, 1).build();
-        DecodedJWT jwt = verifier.decode(token);
+        DecodedJWT jwt = verifier.decode32Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }

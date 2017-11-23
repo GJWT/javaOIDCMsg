@@ -57,7 +57,7 @@ public class AccessJwtCreatorTest {
                 .signBase16Encoding(algorithm);
         Verification verification = AccessJWT.require(algorithm);
         JWT verifier = verification.createVerifierForAccess(asList("accounts.fake.com"), asList("audience"), 1, 1).build();
-        DecodedJWT jwt = verifier.decode(token);
+        DecodedJWT jwt = verifier.decode16Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }
@@ -74,7 +74,7 @@ public class AccessJwtCreatorTest {
                 .signBase32Encoding(algorithm);
         Verification verification = AccessJWT.require(algorithm);
         JWT verifier = verification.createVerifierForAccess(asList("accounts.fake.com"), asList("audience"), 1, 1).build();
-        DecodedJWT jwt = verifier.decode(token);
+        DecodedJWT jwt = verifier.decode32Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }
