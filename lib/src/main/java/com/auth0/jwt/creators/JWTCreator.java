@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.file.DataFileStream;
+import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
@@ -39,6 +40,7 @@ public final class JWTCreator {
     private final Algorithm algorithm;
     private final String headerJson;
     private final String payloadJson;
+    public static Map<Schema, byte[]> schemaToHeaderAndPayloadByteArray;
 
     private JWTCreator(Algorithm algorithm, Map<String, Object> headerClaims, Map<String, Object> payloadClaims) throws JWTCreationException {
         this.algorithm = algorithm;
@@ -50,6 +52,7 @@ public final class JWTCreator {
             mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
             headerJson = mapper.writeValueAsString(headerClaims);
             payloadJson = mapper.writeValueAsString(new ClaimsHolder(payloadClaims));
+            schemaToHeaderAndPayloadByteArray = new HashMap<>();
         } catch (JsonProcessingException e) {
             throw new JWTCreationException("Some of the Claims couldn't be converted to a valid JSON format.", e);
         }
@@ -371,11 +374,24 @@ public final class JWTCreator {
                 case Base64:
                     token = jwtCreator.defaultSign();
                     break;
-                case JsonEncode:
-                    token = jwtCreator.signJsonEncode();
             }
 
             return token;
+        }
+
+        public String signJSON(Algorithm algorithm, Schema schemaHeader, Schema schemaPayload) throws Exception {
+            if (algorithm == null) {
+                throw new IllegalArgumentException("The Algorithm cannot be null.");
+            }
+            headerClaims.put(PublicClaims.ALGORITHM, algorithm.getName());
+            headerClaims.put(PublicClaims.TYPE, "JWT");
+            String signingKeyId = algorithm.getSigningKeyId();
+            if (signingKeyId != null) {
+                withKeyId(signingKeyId);
+            }
+            JWTCreator jwtCreator = new JWTCreator(algorithm, headerClaims, payloadClaims);
+
+            return jwtCreator.signJsonEncode(schemaHeader, schemaPayload);
         }
 
         protected void assertNonNull(String name) {
@@ -393,13 +409,13 @@ public final class JWTCreator {
         }
     }
 
-    private String signJsonEncode() throws Exception {
-        Schema schema = SchemaBuilder
+    private String signJsonEncode(Schema schemaForHeader, Schema schemaForPayload) throws Exception {
+        /*Schema schemaForHeader = SchemaBuilder
                 .record("record").namespace("namespace")
                 .fields()
                 .name("alg").type().stringType().noDefault()
                 .name("typ").type().stringType().noDefault()
-                .endRecord();
+                .endRecord();*/
         /*String schema = "{" +
                 "\"type\":\"record\"," +
                 "\"namespace\":\"foo\"," +
@@ -410,23 +426,73 @@ public final class JWTCreator {
                     "\"typ\":\"string\"" +
                 "}" +
             "}";*/
-        byte[] header = jsonToAvro(headerJson, schema.toString());
+        byte[] header = jsonToAvro(headerJson, schemaForHeader.toString());
+        schemaToHeaderAndPayloadByteArray.put(schemaForHeader, header);
+        System.out.println(avroToJson(header, schemaForHeader));
         //.name("aud").type().array().items().stringType().noDefault()
-        schema = SchemaBuilder
+        /*Schema schemaForPayload = SchemaBuilder
                 .record("record").namespace("namespace")
                 .fields()
                 .name("sub").type().array().items().stringType().noDefault()
                 .name("iss").type().array().items().stringType().noDefault()
-                //.name("aud").type().array().items().stringType().noDefault()
+                .name("aud").type().stringType().noDefault()
                 .name("iat").type().intType().noDefault()
-                .endRecord();
-        byte[] payload = jsonToAvro(payloadJson, schema.toString());
-        String content = String.format("%s.%s", header, payload);
+                .endRecord();*/
+        byte[] payload = jsonToAvro(payloadJson, schemaForPayload.toString());
+        schemaToHeaderAndPayloadByteArray.put(schemaForPayload, payload);
+        System.out.println(avroToJson(payload, schemaForPayload));
+        String content = String.format("%s.%s", new String(header), new String(payload));
 
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
-        //String signature = Hex.encodeHexString((signatureBytes));
-        ///String signature = avroToJson(signatureBytes);  ???
-        return String.format("%s.%s", content, new String(signatureBytes)); //for now
+        String signature = Base64.encodeBase64URLSafeString(signatureBytes);
+        System.out.println(signature);
+        System.out.println(Base64.decodeBase64(signature));
+
+        return String.format("%s.%s", content, signature); //for now
+    }
+
+    /*public static String avroToJson(byte[] avro, String schemaStr) throws IOException {
+        boolean pretty = false;
+        GenericDatumReader<GenericRecord> reader = null;
+        JsonEncoder encoder = null;
+        ByteArrayOutputStream output = null;
+        try {
+            Schema schema = new Schema.Parser().parse(schemaStr);
+            reader = new GenericDatumReader<GenericRecord>(schema);
+            InputStream input = new ByteArrayInputStream(avro);
+            output = new ByteArrayOutputStream();
+            DatumWriter<GenericRecord> writer = new GenericDatumWriter<GenericRecord>(schema);
+            encoder = EncoderFactory.get().jsonEncoder(schema, output, pretty);
+            Decoder decoder = DecoderFactory.get().binaryDecoder(input, null);
+            GenericRecord datum;
+            while (true) {
+                try {
+                    datum = reader.read(null, decoder);
+                } catch (EOFException eofe) {
+                    break;
+                }
+                writer.write(datum, encoder);
+            }
+            encoder.flush();
+            output.flush();
+            return new String(output.toByteArray());
+        } finally {
+            try { if (output != null) output.close(); } catch (Exception e) { }
+        }
+    }*/
+
+    public static String avroToJson(byte[] avro, Schema schema) throws IOException {
+        boolean pretty = false;
+        GenericDatumReader<Object> reader = new GenericDatumReader<>(schema);
+        DatumWriter<Object> writer = new GenericDatumWriter<>(schema);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        JsonEncoder encoder = EncoderFactory.get().jsonEncoder(schema, output, pretty);
+        Decoder decoder = DecoderFactory.get().binaryDecoder(avro, null);
+        Object datum = reader.read(null, decoder);
+        writer.write(datum, encoder);
+        encoder.flush();
+        output.flush();
+        return new String(output.toByteArray(), "UTF-8");
     }
 
     public static String avroToJson(byte[] avro) throws IOException {
@@ -501,7 +567,7 @@ public final class JWTCreator {
         String content = String.format("%s.%s", header, payload);
 
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
-        String signature = base32.encodeAsString((signatureBytes));
+        String signature = base32.encodeAsString(signatureBytes);
 
         return String.format("%s.%s", content, signature);
     }
@@ -512,7 +578,7 @@ public final class JWTCreator {
         String content = String.format("%s.%s", header, payload);
 
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
-        String signature = Base64.encodeBase64URLSafeString((signatureBytes));
+        String signature = Base64.encodeBase64URLSafeString(signatureBytes);
 
         return String.format("%s.%s", content, signature);
     }

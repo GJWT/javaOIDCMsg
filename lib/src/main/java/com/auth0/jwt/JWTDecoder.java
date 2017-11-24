@@ -1,12 +1,15 @@
 package com.auth0.jwt;
 
 import com.auth0.jwt.creators.EncodeType;
+import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.impl.JWTParser;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Header;
 import com.auth0.jwt.interfaces.Payload;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -46,14 +49,52 @@ public final class JWTDecoder implements DecodedJWT {
                 headerJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[0]));
                 payloadJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[1]));
                 break;
-            case JsonEncode:
+            case JsonEncode: {
+                Schema schemaForHeader = SchemaBuilder
+                        .record("record").namespace("namespace")
+                        .fields()
+                        .name("alg").type().stringType().noDefault()
+                        .name("typ").type().stringType().noDefault()
+                        .endRecord();
+
+                Schema schemaForPayload = SchemaBuilder
+                        .record("record").namespace("namespace")
+                        .fields()
+                        .name("sub").type().array().items().stringType().noDefault()
+                        .name("iss").type().array().items().stringType().noDefault()
+                        .name("aud").type().stringType().noDefault()
+                        .name("iat").type().intType().noDefault()
+                        .endRecord();
+                headerJson = JWTCreator.avroToJson(JWTCreator.schemaToHeaderAndPayloadByteArray.get(schemaForHeader), schemaForHeader);
+                payloadJson = JWTCreator.avroToJson(JWTCreator.schemaToHeaderAndPayloadByteArray.get(schemaForPayload), schemaForPayload);
                 break;
-                    //token = jwtCreator.signJsonEncode();
+            }
         }
-            //headerJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[0]));
-            //headerJson = StringUtils.newStringUtf8(Hex.decodeHex(parts[0]));
-            //payloadJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[1]));
-            //payloadJson = StringUtils.newStringUtf8(Hex.decodeHex(parts[1]));
+        header = converter.parseHeader(headerJson);
+        payload = converter.parsePayload(payloadJson);
+    }
+
+    public JWTDecoder(String jwt, Schema schemaForHeader, Schema schemaForPayload) throws Exception {
+        parts = TokenUtils.splitToken(jwt);
+        final JWTParser converter = new JWTParser();
+        /*Schema schemaForHeader = SchemaBuilder
+                .record("record").namespace("namespace")
+                .fields()
+                .name("alg").type().stringType().noDefault()
+                .name("typ").type().stringType().noDefault()
+                .endRecord();
+
+        Schema schemaForPayload = SchemaBuilder
+                .record("record").namespace("namespace")
+                .fields()
+                .name("sub").type().array().items().stringType().noDefault()
+                .name("iss").type().array().items().stringType().noDefault()
+                .name("aud").type().stringType().noDefault()
+                .name("iat").type().intType().noDefault()
+                .endRecord();*/
+        String headerJson = JWTCreator.avroToJson(JWTCreator.schemaToHeaderAndPayloadByteArray.get(schemaForHeader), schemaForHeader);
+        String payloadJson = JWTCreator.avroToJson(JWTCreator.schemaToHeaderAndPayloadByteArray.get(schemaForPayload), schemaForPayload);
+
         header = converter.parseHeader(headerJson);
         payload = converter.parsePayload(payloadJson);
     }

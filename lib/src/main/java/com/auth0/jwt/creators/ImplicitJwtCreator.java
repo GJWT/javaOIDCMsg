@@ -4,6 +4,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.impl.PublicClaims;
 import com.auth0.jwt.jwts.JWT;
+import org.apache.avro.Schema;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -252,11 +253,11 @@ public class ImplicitJwtCreator {
      * @throws IllegalArgumentException if the provided algorithm is null.
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
-    public String signJSONEncoding(Algorithm algorithm) throws Exception {
+    public String signJSONEncoding(Algorithm algorithm, Schema schemaHeader, Schema schemaPayload) throws Exception {
         if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
-        String JWS = jwt.sign(algorithm, EncodeType.JsonEncode);
+        String JWS = jwt.signJSON(algorithm, schemaHeader, schemaPayload);
         verifyClaims();
         return JWS;
     }
