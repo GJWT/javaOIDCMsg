@@ -49,26 +49,6 @@ public final class JWTDecoder implements DecodedJWT {
                 headerJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[0]));
                 payloadJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[1]));
                 break;
-            case JsonEncode: {
-                Schema schemaForHeader = SchemaBuilder
-                        .record("record").namespace("namespace")
-                        .fields()
-                        .name("alg").type().stringType().noDefault()
-                        .name("typ").type().stringType().noDefault()
-                        .endRecord();
-
-                Schema schemaForPayload = SchemaBuilder
-                        .record("record").namespace("namespace")
-                        .fields()
-                        .name("sub").type().array().items().stringType().noDefault()
-                        .name("iss").type().array().items().stringType().noDefault()
-                        .name("aud").type().stringType().noDefault()
-                        .name("iat").type().intType().noDefault()
-                        .endRecord();
-                headerJson = JWTCreator.avroToJson(JWTCreator.schemaToHeaderAndPayloadByteArray.get(schemaForHeader), schemaForHeader);
-                payloadJson = JWTCreator.avroToJson(JWTCreator.schemaToHeaderAndPayloadByteArray.get(schemaForPayload), schemaForPayload);
-                break;
-            }
         }
         header = converter.parseHeader(headerJson);
         payload = converter.parsePayload(payloadJson);
