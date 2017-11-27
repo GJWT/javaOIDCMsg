@@ -52,9 +52,6 @@ class RSAAlgorithm extends Algorithm {
             case Base64:
                 signatureBytes = Base64.decodeBase64(signature);
                 break;
-            case JsonEncode:
-                break;
-            //token = jwtCreator.signJsonEncode();
         }
 
         try {

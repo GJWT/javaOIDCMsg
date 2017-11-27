@@ -30,9 +30,6 @@ class NoneAlgorithm extends Algorithm {
             case Base64:
                 signatureBytes = Base64.decodeBase64(signature);
                 break;
-            case JsonEncode:
-                break;
-            //token = jwtCreator.signJsonEncode();
         }
         if (signatureBytes.length > 0) {
             throw new SignatureVerificationException(this);

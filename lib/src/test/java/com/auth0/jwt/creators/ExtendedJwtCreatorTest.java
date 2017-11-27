@@ -10,9 +10,13 @@ import com.auth0.jwt.impl.PublicClaims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.GoogleVerification;
+import com.auth0.jwt.interfaces.Verification;
+import com.auth0.jwt.jwts.AccessJWT;
 import com.auth0.jwt.jwts.ExtendedJWT;
 import com.auth0.jwt.jwts.JWT;
 import static java.util.Arrays.asList;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,7 +41,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)  //this must be called first since ExtendedJwtCreator.build() returns an instance of ExtendedJwtCreator
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -45,7 +49,7 @@ public class ExtendedJwtCreatorTest {
                 .withName(NAME)
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
@@ -59,7 +63,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)  //this must be called first since ExtendedJwtCreator.build() returns an instance of ExtendedJwtCreator
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -67,7 +71,7 @@ public class ExtendedJwtCreatorTest {
                 .withName(NAME)
                 .signBase16Encoding(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode16Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
@@ -81,7 +85,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)  //this must be called first since ExtendedJwtCreator.build() returns an instance of ExtendedJwtCreator
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -89,9 +93,50 @@ public class ExtendedJwtCreatorTest {
                 .withName(NAME)
                 .signBase32Encoding(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode32Bytes(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims, exp);
+    }
+
+    @Test
+    public void testExtendedJwtCreatorJSONEncoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Schema schemaForHeader = SchemaBuilder
+                .record("record").namespace("namespace")
+                .fields()
+                .name("alg").type().stringType().noDefault()
+                .name("typ").type().stringType().noDefault()
+                .endRecord();
+        Schema schemaForPayload = SchemaBuilder
+                .record("record").namespace("namespace")
+                .fields()
+                .name("nbf").type().longType().noDefault()
+                .name("picture").type().stringType().noDefault()
+                .name("email").type().stringType().noDefault()
+                .name("sub").type().array().items().stringType().noDefault()
+                .name("iss").type().array().items().stringType().noDefault()
+                .name("aud").type().stringType().noDefault()
+                .name("exp").type().longType().noDefault()
+                .name("iat").type().intType().noDefault()
+                .name("name").type().stringType().noDefault()
+                .endRecord();
+        String token = ExtendedJwtCreator.build()
+                .withNbf(nbf)  //this must be called first since ExtendedJwtCreator.build() returns an instance of ExtendedJwtCreator
+                .withPicture(PICTURE)
+                .withEmail(EMAIL)
+                .withIssuer("issuer")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iat)
+                .withName(NAME)
+                .signJSONEncoding(algorithm, schemaForHeader, schemaForPayload);
+        GoogleVerification verification = ExtendedJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
+                NAME, 1, 1, 1).build();
+        DecodedJWT jwt = verifier.decodeJSON(token, schemaForHeader, schemaForPayload);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }
@@ -114,7 +159,7 @@ public class ExtendedJwtCreatorTest {
                 .withName(NAME)
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
@@ -128,7 +173,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)  //this must be called first since ExtendedJwtCreator.build() returns an instance of ExtendedJwtCreator
                 .withPicture("invalid")
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -136,7 +181,7 @@ public class ExtendedJwtCreatorTest {
                 .withName(NAME)
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
@@ -150,7 +195,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)  //this must be called first since ExtendedJwtCreator.build() returns an instance of ExtendedJwtCreator
                 .withPicture(PICTURE)
                 .withEmail("invalid")
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -158,7 +203,7 @@ public class ExtendedJwtCreatorTest {
                 .withName(NAME)
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
@@ -174,7 +219,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)  //this must be called first since ExtendedJwtCreator.build() returns an instance of ExtendedJwtCreator
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("invalid")
                 .withExp(exp)
@@ -182,7 +227,7 @@ public class ExtendedJwtCreatorTest {
                 .withName(NAME)
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
@@ -198,7 +243,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)  //this must be called first since ExtendedJwtCreator.build() returns an instance of ExtendedJwtCreator
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -206,7 +251,7 @@ public class ExtendedJwtCreatorTest {
                 .withName("invalid")
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
@@ -223,7 +268,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -233,7 +278,7 @@ public class ExtendedJwtCreatorTest {
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
@@ -248,7 +293,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -258,7 +303,7 @@ public class ExtendedJwtCreatorTest {
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
@@ -270,7 +315,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -280,7 +325,7 @@ public class ExtendedJwtCreatorTest {
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
@@ -294,7 +339,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -304,7 +349,7 @@ public class ExtendedJwtCreatorTest {
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
@@ -316,7 +361,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -326,7 +371,7 @@ public class ExtendedJwtCreatorTest {
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
@@ -338,7 +383,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -348,7 +393,7 @@ public class ExtendedJwtCreatorTest {
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
@@ -360,7 +405,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -370,7 +415,7 @@ public class ExtendedJwtCreatorTest {
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
@@ -382,7 +427,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -392,7 +437,7 @@ public class ExtendedJwtCreatorTest {
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
@@ -404,7 +449,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -414,7 +459,7 @@ public class ExtendedJwtCreatorTest {
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
@@ -435,7 +480,7 @@ public class ExtendedJwtCreatorTest {
                 .withNbf(nbf)
                 .withPicture(PICTURE)
                 .withEmail(EMAIL)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(expDate)
@@ -445,7 +490,7 @@ public class ExtendedJwtCreatorTest {
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("accounts.fake.com"), asList("audience"),
+        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }

@@ -410,76 +410,17 @@ public final class JWTCreator {
     }
 
     private String signJsonEncode(Schema schemaForHeader, Schema schemaForPayload) throws Exception {
-        /*Schema schemaForHeader = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("alg").type().stringType().noDefault()
-                .name("typ").type().stringType().noDefault()
-                .endRecord();*/
-        /*String schema = "{" +
-                "\"type\":\"record\"," +
-                "\"namespace\":\"foo\"," +
-                "\"name\":\"Person\"," +
-                "\"fields\":" +
-                "{" +
-                    "\"alg\":\"string\"," +
-                    "\"typ\":\"string\"" +
-                "}" +
-            "}";*/
         byte[] header = jsonToAvro(headerJson, schemaForHeader.toString());
         schemaToHeaderAndPayloadByteArray.put(schemaForHeader, header);
-        System.out.println(avroToJson(header, schemaForHeader));
-        //.name("aud").type().array().items().stringType().noDefault()
-        /*Schema schemaForPayload = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("sub").type().array().items().stringType().noDefault()
-                .name("iss").type().array().items().stringType().noDefault()
-                .name("aud").type().stringType().noDefault()
-                .name("iat").type().intType().noDefault()
-                .endRecord();*/
         byte[] payload = jsonToAvro(payloadJson, schemaForPayload.toString());
         schemaToHeaderAndPayloadByteArray.put(schemaForPayload, payload);
-        System.out.println(avroToJson(payload, schemaForPayload));
         String content = String.format("%s.%s", new String(header), new String(payload));
 
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
         String signature = Base64.encodeBase64URLSafeString(signatureBytes);
-        System.out.println(signature);
-        System.out.println(Base64.decodeBase64(signature));
 
-        return String.format("%s.%s", content, signature); //for now
+        return String.format("%s.%s", content, signature);
     }
-
-    /*public static String avroToJson(byte[] avro, String schemaStr) throws IOException {
-        boolean pretty = false;
-        GenericDatumReader<GenericRecord> reader = null;
-        JsonEncoder encoder = null;
-        ByteArrayOutputStream output = null;
-        try {
-            Schema schema = new Schema.Parser().parse(schemaStr);
-            reader = new GenericDatumReader<GenericRecord>(schema);
-            InputStream input = new ByteArrayInputStream(avro);
-            output = new ByteArrayOutputStream();
-            DatumWriter<GenericRecord> writer = new GenericDatumWriter<GenericRecord>(schema);
-            encoder = EncoderFactory.get().jsonEncoder(schema, output, pretty);
-            Decoder decoder = DecoderFactory.get().binaryDecoder(input, null);
-            GenericRecord datum;
-            while (true) {
-                try {
-                    datum = reader.read(null, decoder);
-                } catch (EOFException eofe) {
-                    break;
-                }
-                writer.write(datum, encoder);
-            }
-            encoder.flush();
-            output.flush();
-            return new String(output.toByteArray());
-        } finally {
-            try { if (output != null) output.close(); } catch (Exception e) { }
-        }
-    }*/
 
     public static String avroToJson(byte[] avro, Schema schema) throws IOException {
         boolean pretty = false;
@@ -493,30 +434,6 @@ public final class JWTCreator {
         encoder.flush();
         output.flush();
         return new String(output.toByteArray(), "UTF-8");
-    }
-
-    public static String avroToJson(byte[] avro) throws IOException {
-        boolean pretty = false;
-        GenericDatumReader<GenericRecord> reader = null;
-        JsonEncoder encoder = null;
-        ByteArrayOutputStream output = null;
-        try {
-            reader = new GenericDatumReader<GenericRecord>();
-            InputStream input = new ByteArrayInputStream(avro);
-            DataFileStream<GenericRecord> streamReader = new DataFileStream<GenericRecord>(input, reader);
-            output = new ByteArrayOutputStream();
-            Schema schema = streamReader.getSchema();
-            DatumWriter<GenericRecord> writer = new GenericDatumWriter<GenericRecord>(schema);
-            encoder = EncoderFactory.get().jsonEncoder(schema, output, pretty);
-            for (GenericRecord datum : streamReader) {
-                writer.write(datum, encoder);
-            }
-            encoder.flush();
-            output.flush();
-            return new String(output.toByteArray());
-        } finally {
-            try { if (output != null) output.close(); } catch (Exception e) { }
-        }
     }
 
     public static byte[] jsonToAvro(String json, String schemaStr) throws Exception {

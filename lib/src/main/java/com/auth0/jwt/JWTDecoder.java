@@ -57,24 +57,8 @@ public final class JWTDecoder implements DecodedJWT {
     public JWTDecoder(String jwt, Schema schemaForHeader, Schema schemaForPayload) throws Exception {
         parts = TokenUtils.splitToken(jwt);
         final JWTParser converter = new JWTParser();
-        /*Schema schemaForHeader = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("alg").type().stringType().noDefault()
-                .name("typ").type().stringType().noDefault()
-                .endRecord();
-
-        Schema schemaForPayload = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("sub").type().array().items().stringType().noDefault()
-                .name("iss").type().array().items().stringType().noDefault()
-                .name("aud").type().stringType().noDefault()
-                .name("iat").type().intType().noDefault()
-                .endRecord();*/
         String headerJson = JWTCreator.avroToJson(JWTCreator.schemaToHeaderAndPayloadByteArray.get(schemaForHeader), schemaForHeader);
         String payloadJson = JWTCreator.avroToJson(JWTCreator.schemaToHeaderAndPayloadByteArray.get(schemaForPayload), schemaForPayload);
-
         header = converter.parseHeader(headerJson);
         payload = converter.parsePayload(payloadJson);
     }

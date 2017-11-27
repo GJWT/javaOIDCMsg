@@ -12,6 +12,8 @@ import com.auth0.jwt.interfaces.Verification;
 import com.auth0.jwt.jwts.JWT;
 import com.auth0.jwt.jwts.RiscJWT;
 import static java.util.Arrays.asList;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,14 +37,14 @@ public class RiscJwtCreatorTest {
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
                 .withNbf(nbf)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -54,14 +56,14 @@ public class RiscJwtCreatorTest {
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
                 .withNbf(nbf)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
                 .withIat(iat)
                 .signBase16Encoding(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode16Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -73,15 +75,51 @@ public class RiscJwtCreatorTest {
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
                 .withNbf(nbf)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
                 .withIat(iat)
                 .signBase32Encoding(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode32Bytes(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        verifyClaims(claims, exp);
+    }
+
+    @Test
+    public void testRiscJwtCreatorJSONEncoding() throws Exception {
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Schema schemaForHeader = SchemaBuilder
+                .record("record").namespace("namespace")
+                .fields()
+                .name("alg").type().stringType().noDefault()
+                .name("typ").type().stringType().noDefault()
+                .endRecord();
+        Schema schemaForPayload = SchemaBuilder
+                .record("record").namespace("namespace")
+                .fields()
+                .name("jti").type().stringType().noDefault()
+                .name("nbf").type().longType().noDefault()
+                .name("sub").type().array().items().stringType().noDefault()
+                .name("iss").type().array().items().stringType().noDefault()
+                .name("aud").type().stringType().noDefault()
+                .name("exp").type().longType().noDefault()
+                .name("iat").type().intType().noDefault()
+                .endRecord();
+        String token = RiscJwtCreator.build()
+                .withJWTId(jti)
+                .withNbf(nbf)
+                .withIssuer("issuer")
+                .withSubject("subject")
+                .withAudience("audience")
+                .withExp(exp)
+                .withIat(iat)
+                .signJSONEncoding(algorithm, schemaForHeader, schemaForPayload);
+        Verification verification = RiscJWT.require(algorithm);
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
+        DecodedJWT jwt = verifier.decodeJSON(token, schemaForHeader, schemaForPayload);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }
@@ -94,14 +132,14 @@ public class RiscJwtCreatorTest {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = RiscJwtCreator.build()
                 .withNbf(nbf)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -115,13 +153,13 @@ public class RiscJwtCreatorTest {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = RiscJwtCreator.build()
                 .withNbf(nbf)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, -1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, -1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -142,7 +180,7 @@ public class RiscJwtCreatorTest {
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -154,14 +192,14 @@ public class RiscJwtCreatorTest {
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
                 .withNbf(nbf)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("invalid")
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -174,7 +212,7 @@ public class RiscJwtCreatorTest {
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
                 .withNbf(nbf)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -182,7 +220,7 @@ public class RiscJwtCreatorTest {
                 .setIsNoneAlgorithmAllowed(false)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -195,14 +233,14 @@ public class RiscJwtCreatorTest {
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
                 .withNbf(nbf)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -212,7 +250,7 @@ public class RiscJwtCreatorTest {
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
                 .withNbf(nbf)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
@@ -220,7 +258,7 @@ public class RiscJwtCreatorTest {
                 .setIsNoneAlgorithmAllowed(true)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -229,7 +267,7 @@ public class RiscJwtCreatorTest {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withArrayClaim("arrayKey", "arrayValue1", "arrayValue2")
@@ -237,7 +275,7 @@ public class RiscJwtCreatorTest {
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -248,7 +286,7 @@ public class RiscJwtCreatorTest {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withNonStandardClaim("nonStandardClaim", "nonStandardClaimValue")
@@ -256,7 +294,7 @@ public class RiscJwtCreatorTest {
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -267,7 +305,7 @@ public class RiscJwtCreatorTest {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withNonStandardClaim("nonStandardClaim", 999)
@@ -275,7 +313,7 @@ public class RiscJwtCreatorTest {
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -286,7 +324,7 @@ public class RiscJwtCreatorTest {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withNonStandardClaim("nonStandardClaim", 9.99)
@@ -294,7 +332,7 @@ public class RiscJwtCreatorTest {
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -305,7 +343,7 @@ public class RiscJwtCreatorTest {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withNonStandardClaim("nonStandardClaim", 999L)
@@ -313,7 +351,7 @@ public class RiscJwtCreatorTest {
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -324,7 +362,7 @@ public class RiscJwtCreatorTest {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withNonStandardClaim("nonStandardClaim", true)
@@ -332,7 +370,7 @@ public class RiscJwtCreatorTest {
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -343,7 +381,7 @@ public class RiscJwtCreatorTest {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withNonStandardClaim("nonStandardClaim", new Date())
@@ -351,7 +389,7 @@ public class RiscJwtCreatorTest {
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -371,7 +409,7 @@ public class RiscJwtCreatorTest {
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = RiscJwtCreator.build()
                 .withJWTId(jti)
-                .withIssuer("accounts.fake.com")
+                .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
                 .withNonStandardClaim("nonStandardClaim", new Date())
@@ -379,14 +417,14 @@ public class RiscJwtCreatorTest {
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForRisc(jti, asList("accounts.fake.com"), asList("audience"), 1, 1, 1).build();
+        JWT verifier = verification.createVerifierForRisc(jti, asList("issuer"), asList("audience"), 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }
 
     private static void verifyClaims(Map<String,Claim> claims, Date exp) {
-        assertTrue(claims.get(PublicClaims.ISSUER).asList(String.class).get(0).equals("accounts.fake.com"));
+        assertTrue(claims.get(PublicClaims.ISSUER).asList(String.class).get(0).equals("issuer"));
         assertTrue(claims.get(PublicClaims.SUBJECT).asList(String.class).get(0).equals("subject"));
         assertTrue(claims.get(PublicClaims.AUDIENCE).asString().equals("audience"));
         assertTrue(claims.get(PublicClaims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
