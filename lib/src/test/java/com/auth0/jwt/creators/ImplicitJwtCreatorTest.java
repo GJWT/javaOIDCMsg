@@ -3,7 +3,6 @@ package com.auth0.jwt.creators;
 import com.auth0.jwt.TimeUtil;
 import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.creators.ImplicitJwtCreator;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.impl.PublicClaims;
 import com.auth0.jwt.interfaces.Claim;

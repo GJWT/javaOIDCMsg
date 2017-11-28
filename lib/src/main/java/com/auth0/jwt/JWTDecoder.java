@@ -15,6 +15,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.binary.StringUtils;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -36,15 +38,14 @@ public final class JWTDecoder implements DecodedJWT {
         String payloadJson = null;
         switch (encodeType) {
             case Base16:
-                headerJson = StringUtils.newStringUtf8(Hex.decodeHex(parts[0]));
-                payloadJson = StringUtils.newStringUtf8(Hex.decodeHex(parts[1]));
+                headerJson = URLDecoder.decode(new String(Hex.decodeHex(parts[0])), "UTF-8");
+                payloadJson = URLDecoder.decode(new String(Hex.decodeHex(parts[1])), "UTF-8");
                 break;
-            case Base32: {
+            case Base32:
                 Base32 base32 = new Base32();
-                headerJson = StringUtils.newStringUtf8(base32.decode(parts[0]));
-                payloadJson = StringUtils.newStringUtf8(base32.decode(parts[1]));
+                headerJson = URLDecoder.decode(new String(base32.decode(parts[0]), "UTF-8"));
+                payloadJson = URLDecoder.decode(new String(base32.decode(parts[1]), "UTF-8"));
                 break;
-            }
             case Base64:
                 headerJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[0]));
                 payloadJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[1]));

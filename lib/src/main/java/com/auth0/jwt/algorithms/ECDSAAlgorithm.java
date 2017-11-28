@@ -54,6 +54,9 @@ class ECDSAAlgorithm extends Algorithm {
             case Base64:
                 signatureBytes = Base64.decodeBase64(signature);
                 break;
+            case JsonEncode:
+                signatureBytes = Base64.decodeBase64(signature);
+                break;
         }
 
         try {

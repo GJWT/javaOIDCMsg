@@ -22,6 +22,7 @@ import org.apache.commons.codec.Encoder;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.binary.StringUtils;
 
 import java.io.*;
 import java.net.URLDecoder;
@@ -410,11 +411,11 @@ public final class JWTCreator {
     }
 
     private String signJsonEncode(Schema schemaForHeader, Schema schemaForPayload) throws Exception {
-        byte[] header = jsonToAvro(headerJson, schemaForHeader.toString());
-        schemaToHeaderAndPayloadByteArray.put(schemaForHeader, header);
-        byte[] payload = jsonToAvro(payloadJson, schemaForPayload.toString());
-        schemaToHeaderAndPayloadByteArray.put(schemaForPayload, payload);
-        String content = String.format("%s.%s", new String(header), new String(payload));
+        byte[] bHeader = jsonToAvro(headerJson, schemaForHeader.toString());
+        schemaToHeaderAndPayloadByteArray.put(schemaForHeader, bHeader);
+        byte[] bPayload = jsonToAvro(payloadJson, schemaForPayload.toString());
+        schemaToHeaderAndPayloadByteArray.put(schemaForPayload, bPayload);
+        String content = String.format("%s.%s", new String(bHeader), new String(bPayload));
 
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
         String signature = Base64.encodeBase64URLSafeString(signatureBytes);
@@ -466,23 +467,35 @@ public final class JWTCreator {
         }
     }
 
-    private String signBase16Encoding() {
-        String header = Hex.encodeHexString(headerJson.getBytes(StandardCharsets.UTF_8));
-        String payload = Hex.encodeHexString(payloadJson.getBytes(StandardCharsets.UTF_8));
-        String content = String.format("%s.%s", header, payload);
+    private String signBase16Encoding() throws UnsupportedEncodingException {
+        String header = URLEncoder.encode(headerJson, "UTF-8");
+        String payload = URLEncoder.encode(payloadJson, "UTF-8");
 
+        byte[] bHeader = header.getBytes("UTF-8");
+        String encodedHeader = Hex.encodeHexString(bHeader);
+
+        byte[] bPayload = payload.getBytes("UTF-8");
+        String encodedPayload = Hex.encodeHexString(bPayload);
+
+        String content = String.format("%s.%s", encodedHeader, encodedPayload);
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
-        String signature = Hex.encodeHexString((signatureBytes));
+        String signature = Hex.encodeHexString(signatureBytes);
 
         return String.format("%s.%s", content, signature);
     }
 
-    private String signBase32Encoding() {
+    private String signBase32Encoding() throws UnsupportedEncodingException{
         Base32 base32 = new Base32();
-        String header =  base32.encodeAsString(headerJson.getBytes(StandardCharsets.UTF_8));
-        String payload = base32.encodeAsString(payloadJson.getBytes(StandardCharsets.UTF_8));
-        String content = String.format("%s.%s", header, payload);
+        String header = URLEncoder.encode(headerJson, "UTF-8");
+        String payload = URLEncoder.encode(payloadJson, "UTF-8");
 
+        byte[] bHeader = header.getBytes("UTF-8");
+        String encodedHeader = base32.encodeAsString(bHeader);
+
+        byte[] bPayload = payload.getBytes("UTF-8");
+        String encodedPayload = base32.encodeAsString(bPayload);
+
+        String content = String.format("%s.%s", encodedHeader, encodedPayload);
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
         String signature = base32.encodeAsString(signatureBytes);
 

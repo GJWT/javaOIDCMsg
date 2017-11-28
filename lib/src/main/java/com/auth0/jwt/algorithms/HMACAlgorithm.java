@@ -11,8 +11,11 @@ import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.binary.StringUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -64,13 +67,12 @@ class HMACAlgorithm extends Algorithm {
             case Base64:
                 signatureBytes = Base64.decodeBase64(signature);
                 break;
-            case JsonEncode: {
+            case JsonEncode:
                 signatureBytes = Base64.decodeBase64(signature);
                 break;
-            }
 
         }
-
+        String signatureFirst = new String(signatureBytes);
         try {
             boolean valid = crypto.verifySignatureFor(getDescription(), secret, contentBytes, signatureBytes);
             if (!valid) {

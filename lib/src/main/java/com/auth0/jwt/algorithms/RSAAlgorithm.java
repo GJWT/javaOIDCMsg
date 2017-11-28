@@ -44,12 +44,14 @@ class RSAAlgorithm extends Algorithm {
             case Base16:
                 signatureBytes = Hex.decodeHex(signature);
                 break;
-            case Base32: {
+            case Base32:
                 Base32 base32 = new Base32();
                 signatureBytes = base32.decode(signature);
                 break;
-            }
             case Base64:
+                signatureBytes = Base64.decodeBase64(signature);
+                break;
+            case JsonEncode:
                 signatureBytes = Base64.decodeBase64(signature);
                 break;
         }
