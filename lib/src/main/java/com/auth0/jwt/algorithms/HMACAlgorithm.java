@@ -72,7 +72,7 @@ class HMACAlgorithm extends Algorithm {
                 break;
 
         }
-        String signatureFirst = new String(signatureBytes);
+
         try {
             boolean valid = crypto.verifySignatureFor(getDescription(), secret, contentBytes, signatureBytes);
             if (!valid) {

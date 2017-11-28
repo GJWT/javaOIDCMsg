@@ -36,6 +36,7 @@ compileJava {
 dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.2'
     compile 'commons-codec:commons-codec:1.11'
+    compile "org.apache.avro:avro:1.8.1"
     testCompile 'org.bouncycastle:bcprov-jdk15on:1.58'
     testCompile 'junit:junit:4.12'
     testCompile 'net.jodah:concurrentunit:0.4.3'

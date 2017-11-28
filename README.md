@@ -180,6 +180,21 @@ try {
 
 If a Claim couldn't be converted to JSON or the Key used in the signing process was invalid a `JWTCreationException` will raise.
 
+NOTE: Each token has a NoneAlgorithm boolean value which is set to False by default unless set explicitly.
+
+```java
+GoogleJwtCreator.build().setIsNoneAlgorithmAllowed(true)
+```
+
+If the none algorithm property is set to true as done above, the following error will be thrown when algorithm 'none' is used:
+"None algorithm isn't allowed".
+
+### Serializing a token
+
+When signing, you can encode via a 16-byte, 32-byte, the standard 64-byte, and a JSON encoding.
+When you call the method standard `sign()` as in the example above, the token is 64-byte encoded.
+To encode via a 16-byte, call `signBase16Encoding()`, via a 32-byte, call `signBase32Encoding()`, and
+via a JSON encoding, call `signJSONEncoding()`.
 
 ### Verify a Token
 
@@ -219,6 +234,13 @@ verifyClaims(claims, exp);
 
 If the token has a Claim requirement that has not been met, an `InvalidClaimException` will raise.
 If the token has an invalid signature, an `AlgorithmMismatchException` will raise.
+
+### Deserializing a token
+
+In order to recover the DecodedJWT after signing, you need to decode with the appropriate decode method
+corresponding to the appropriate encode method.  For the standard 64-byte encoding, to recover the DecodedJWT,
+you call `decode()` as in the example above.  When you encode via 16-bytes, you call `decode16Bytes()`,
+via 32-bytes, call `decode32Bytes()`, and via a JSON encoding, call `decodeJSON()`.
 
 #### Time Validation
 
