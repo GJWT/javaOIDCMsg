@@ -13,8 +13,6 @@ import com.auth0.jwt.interfaces.Verification;
 import com.auth0.jwt.jwts.JWT;
 import com.auth0.jwt.jwts.ScopedJWT;
 import static java.util.Arrays.asList;
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
@@ -81,40 +79,6 @@ public class ScopedJwtCreatorTest {
         Verification verification = ScopedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForScoped("scope", asList("issuer"), asList("audience"), 1, 1).build();
         DecodedJWT jwt = verifier.decode32Bytes(token);
-        Map<String, Claim> claims = jwt.getClaims();
-        verifyClaims(claims, exp);
-    }
-
-    @Test
-    public void testScopedJwtCreatorJSONEncoding() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
-        Schema schemaForHeader = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("alg").type().stringType().noDefault()
-                .name("typ").type().stringType().noDefault()
-                .endRecord();
-        Schema schemaForPayload = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("scope").type().stringType().noDefault()
-                .name("sub").type().array().items().stringType().noDefault()
-                .name("iss").type().array().items().stringType().noDefault()
-                .name("aud").type().stringType().noDefault()
-                .name("exp").type().longType().noDefault()
-                .name("iat").type().intType().noDefault()
-                .endRecord();
-        String token = ScopedJwtCreator.build()
-                .withScope("scope")
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
-                .withExp(exp)
-                .withIat(iat)
-                .signJSONEncoding(algorithm, schemaForHeader, schemaForPayload);
-        Verification verification = ScopedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForScoped("scope", asList("issuer"), asList("audience"), 1, 1).build();
-        DecodedJWT jwt = verifier.decodeJSON(token, schemaForHeader, schemaForPayload);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }

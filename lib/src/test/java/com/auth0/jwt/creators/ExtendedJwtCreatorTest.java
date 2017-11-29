@@ -15,8 +15,6 @@ import com.auth0.jwt.jwts.AccessJWT;
 import com.auth0.jwt.jwts.ExtendedJWT;
 import com.auth0.jwt.jwts.JWT;
 import static java.util.Arrays.asList;
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
@@ -99,48 +97,6 @@ public class ExtendedJwtCreatorTest {
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }
-
-    @Test
-    public void testExtendedJwtCreatorJSONEncoding() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
-        Schema schemaForHeader = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("alg").type().stringType().noDefault()
-                .name("typ").type().stringType().noDefault()
-                .endRecord();
-        Schema schemaForPayload = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("nbf").type().longType().noDefault()
-                .name("picture").type().stringType().noDefault()
-                .name("email").type().stringType().noDefault()
-                .name("sub").type().array().items().stringType().noDefault()
-                .name("iss").type().array().items().stringType().noDefault()
-                .name("aud").type().stringType().noDefault()
-                .name("exp").type().longType().noDefault()
-                .name("iat").type().intType().noDefault()
-                .name("name").type().stringType().noDefault()
-                .endRecord();
-        String token = ExtendedJwtCreator.build()
-                .withNbf(nbf)  //this must be called first since ExtendedJwtCreator.build() returns an instance of ExtendedJwtCreator
-                .withPicture(PICTURE)
-                .withEmail(EMAIL)
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
-                .withExp(exp)
-                .withIat(iat)
-                .withName(NAME)
-                .signJSONEncoding(algorithm, schemaForHeader, schemaForPayload);
-        GoogleVerification verification = ExtendedJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForExtended(PICTURE, EMAIL, asList("issuer"), asList("audience"),
-                NAME, 1, 1, 1).build();
-        DecodedJWT jwt = verifier.decodeJSON(token, schemaForHeader, schemaForPayload);
-        Map<String, Claim> claims = jwt.getClaims();
-        verifyClaims(claims, exp);
-    }
-
 
     @Test
     public void testExtendedJwtCreatorInvalidIssuer() throws Exception {

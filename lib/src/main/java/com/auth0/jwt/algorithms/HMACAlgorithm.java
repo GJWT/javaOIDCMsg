@@ -5,8 +5,6 @@ import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;

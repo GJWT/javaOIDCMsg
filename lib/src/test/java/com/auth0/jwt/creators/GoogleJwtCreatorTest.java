@@ -13,8 +13,6 @@ import com.auth0.jwt.interfaces.GoogleVerification;
 import com.auth0.jwt.jwts.GoogleJWT;
 import com.auth0.jwt.jwts.JWT;
 import static java.util.Arrays.asList;
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
@@ -94,45 +92,6 @@ public class GoogleJwtCreatorTest {
         JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("issuer"), asList("audience"),
                 NAME, 1, 1).build();
         DecodedJWT jwt = verifier.decode32Bytes(token);
-        Map<String, Claim> claims = jwt.getClaims();
-        verifyClaims(claims, exp);
-    }
-
-    @Test
-    public void testGoogleJwtCreatorJSONEncoding() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
-        Schema schemaForHeader = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("alg").type().stringType().noDefault()
-                .name("typ").type().stringType().noDefault()
-                .endRecord();
-        Schema schemaForPayload = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("picture").type().stringType().noDefault()
-                .name("email").type().stringType().noDefault()
-                .name("sub").type().array().items().stringType().noDefault()
-                .name("iss").type().array().items().stringType().noDefault()
-                .name("aud").type().stringType().noDefault()
-                .name("exp").type().longType().noDefault()
-                .name("iat").type().intType().noDefault()
-                .name("name").type().stringType().noDefault()
-                .endRecord();
-        String token = GoogleJwtCreator.build()
-                .withPicture(PICTURE)
-                .withEmail(EMAIL)
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
-                .withExp(exp)
-                .withIat(iat)
-                .withName(NAME)
-                .signJSONEncoding(algorithm, schemaForHeader, schemaForPayload);
-        GoogleVerification verification = GoogleJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("issuer"), asList("audience"),
-                NAME, 1, 1).build();
-        DecodedJWT jwt = verifier.decodeJSON(token, schemaForHeader, schemaForPayload);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }

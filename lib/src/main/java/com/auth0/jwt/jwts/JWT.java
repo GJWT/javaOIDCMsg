@@ -11,7 +11,6 @@ import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
 import com.auth0.jwt.verification.VerificationAndAssertion;
-import org.apache.avro.Schema;
 
 import java.util.*;
 
@@ -84,26 +83,6 @@ public class JWT {
         DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base32);
         VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
         algorithm.verify(jwt, EncodeType.Base32);
-        VerificationAndAssertion.verifyClaims(clock, jwt, claims);
-        return jwt;
-    }
-
-    /**
-     * Convert the given token to a DecodedJWT
-     * <p>
-     * Note that this method <b>doesn't verify the token's signature!</b> Use it only if you trust the token or you already verified it.
-     *
-     * @param token with jwt format as string.
-     * @return a decoded JWT.
-     * @throws AlgorithmMismatchException     if the algorithm stated in the token's header it's not equal to the one defined in the {@link JWT}.
-     * @throws SignatureVerificationException if the signature is invalid.
-     * @throws TokenExpiredException          if the token has expired.
-     * @throws InvalidClaimException          if a claim contained a different value than the expected one.
-     */
-    public DecodedJWT decodeJSON(String token, Schema headerSchema, Schema payloadSchema) throws Exception {
-        DecodedJWT jwt = new JWTDecoder(token, headerSchema, payloadSchema);
-        VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
-        algorithm.verify(jwt, EncodeType.JsonEncode);
         VerificationAndAssertion.verifyClaims(clock, jwt, claims);
         return jwt;
     }

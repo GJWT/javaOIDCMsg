@@ -10,14 +10,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
-import org.apache.avro.file.DataFileStream;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.*;
 import org.apache.commons.codec.Encoder;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
@@ -41,7 +33,6 @@ public final class JWTCreator {
     private final Algorithm algorithm;
     private final String headerJson;
     private final String payloadJson;
-    public static Map<Schema, byte[]> schemaToHeaderAndPayloadByteArray;
 
     private JWTCreator(Algorithm algorithm, Map<String, Object> headerClaims, Map<String, Object> payloadClaims) throws JWTCreationException {
         this.algorithm = algorithm;
@@ -53,7 +44,6 @@ public final class JWTCreator {
             mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
             headerJson = mapper.writeValueAsString(headerClaims);
             payloadJson = mapper.writeValueAsString(new ClaimsHolder(payloadClaims));
-            schemaToHeaderAndPayloadByteArray = new HashMap<>();
         } catch (JsonProcessingException e) {
             throw new JWTCreationException("Some of the Claims couldn't be converted to a valid JSON format.", e);
         }
@@ -380,21 +370,6 @@ public final class JWTCreator {
             return token;
         }
 
-        public String signJSON(Algorithm algorithm, Schema schemaHeader, Schema schemaPayload) throws Exception {
-            if (algorithm == null) {
-                throw new IllegalArgumentException("The Algorithm cannot be null.");
-            }
-            headerClaims.put(PublicClaims.ALGORITHM, algorithm.getName());
-            headerClaims.put(PublicClaims.TYPE, "JWT");
-            String signingKeyId = algorithm.getSigningKeyId();
-            if (signingKeyId != null) {
-                withKeyId(signingKeyId);
-            }
-            JWTCreator jwtCreator = new JWTCreator(algorithm, headerClaims, payloadClaims);
-
-            return jwtCreator.signJsonEncode(schemaHeader, schemaPayload);
-        }
-
         protected void assertNonNull(String name) {
             if (name == null) {
                 throw new IllegalArgumentException("The Custom Claim's name can't be null.");
@@ -407,63 +382,6 @@ public final class JWTCreator {
                 return;
             }
             payloadClaims.put(name, value);
-        }
-    }
-
-    private String signJsonEncode(Schema schemaForHeader, Schema schemaForPayload) throws Exception {
-        byte[] bHeader = jsonToAvro(headerJson, schemaForHeader.toString());
-        schemaToHeaderAndPayloadByteArray.put(schemaForHeader, bHeader);
-        byte[] bPayload = jsonToAvro(payloadJson, schemaForPayload.toString());
-        schemaToHeaderAndPayloadByteArray.put(schemaForPayload, bPayload);
-        String content = String.format("%s.%s", new String(bHeader), new String(bPayload));
-
-        byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
-        String signature = Base64.encodeBase64URLSafeString(signatureBytes);
-
-        return String.format("%s.%s", content, signature);
-    }
-
-    public static String avroToJson(byte[] avro, Schema schema) throws IOException {
-        boolean pretty = false;
-        GenericDatumReader<Object> reader = new GenericDatumReader<>(schema);
-        DatumWriter<Object> writer = new GenericDatumWriter<>(schema);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        JsonEncoder encoder = EncoderFactory.get().jsonEncoder(schema, output, pretty);
-        Decoder decoder = DecoderFactory.get().binaryDecoder(avro, null);
-        Object datum = reader.read(null, decoder);
-        writer.write(datum, encoder);
-        encoder.flush();
-        output.flush();
-        return new String(output.toByteArray(), "UTF-8");
-    }
-
-    public static byte[] jsonToAvro(String json, String schemaStr) throws Exception {
-        InputStream input = null;
-        GenericDatumWriter<GenericRecord> writer = null;
-        BinaryEncoder encoder = null;
-        ByteArrayOutputStream output = null;
-        try {
-            Schema schema = new Schema.Parser().parse(schemaStr);
-            DatumReader<GenericRecord> reader = new GenericDatumReader<GenericRecord>(schema);
-            input = new ByteArrayInputStream(json.getBytes());
-            output = new ByteArrayOutputStream();
-            DataInputStream din = new DataInputStream(input);
-            writer = new GenericDatumWriter<GenericRecord>(schema);
-            Decoder decoder = DecoderFactory.get().jsonDecoder(schema, din);
-            encoder = EncoderFactory.get().binaryEncoder(output, null);
-            GenericRecord datum;
-            while (true) {
-                try {
-                    datum = reader.read(null, decoder);
-                } catch (EOFException eofe) {
-                    break;
-                }
-                writer.write(datum, encoder);
-            }
-            encoder.flush();
-            return output.toByteArray();
-        } finally {
-            try { input.close(); } catch (Exception e) { }
         }
     }
 

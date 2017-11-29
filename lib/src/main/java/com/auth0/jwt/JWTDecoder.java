@@ -8,8 +8,6 @@ import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Header;
 import com.auth0.jwt.interfaces.Payload;
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -51,15 +49,6 @@ public final class JWTDecoder implements DecodedJWT {
                 payloadJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[1]));
                 break;
         }
-        header = converter.parseHeader(headerJson);
-        payload = converter.parsePayload(payloadJson);
-    }
-
-    public JWTDecoder(String jwt, Schema schemaForHeader, Schema schemaForPayload) throws Exception {
-        parts = TokenUtils.splitToken(jwt);
-        final JWTParser converter = new JWTParser();
-        String headerJson = JWTCreator.avroToJson(JWTCreator.schemaToHeaderAndPayloadByteArray.get(schemaForHeader), schemaForHeader);
-        String payloadJson = JWTCreator.avroToJson(JWTCreator.schemaToHeaderAndPayloadByteArray.get(schemaForPayload), schemaForPayload);
         header = converter.parseHeader(headerJson);
         payload = converter.parsePayload(payloadJson);
     }

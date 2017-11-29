@@ -11,8 +11,6 @@ import com.auth0.jwt.interfaces.Verification;
 import com.auth0.jwt.jwts.ImplicitJWT;
 import com.auth0.jwt.jwts.JWT;
 import static java.util.Arrays.asList;
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
@@ -71,36 +69,6 @@ public class ImplicitJwtCreatorTest {
         Verification verification = ImplicitJWT.require(algorithm);
         JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
         DecodedJWT jwt = verifier.decode32Bytes(token);
-        Map<String, Claim> claims = jwt.getClaims();
-        verifyClaims(claims);
-    }
-
-    @Test
-    public void testImplicitJwtCreatorJSONEncoding() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
-        Schema schemaForHeader = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("alg").type().stringType().noDefault()
-                .name("typ").type().stringType().noDefault()
-                .endRecord();
-        Schema schemaForPayload = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("sub").type().array().items().stringType().noDefault()
-                .name("iss").type().array().items().stringType().noDefault()
-                .name("aud").type().stringType().noDefault()
-                .name("iat").type().intType().noDefault()
-                .endRecord();
-        String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
-                .withIat(iat)
-                .signJSONEncoding(algorithm, schemaForHeader, schemaForPayload);
-        Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
-        DecodedJWT jwt = verifier.decodeJSON(token, schemaForHeader, schemaForPayload);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
     }

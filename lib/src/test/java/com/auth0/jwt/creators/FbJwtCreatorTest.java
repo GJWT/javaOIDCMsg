@@ -12,8 +12,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
 import com.auth0.jwt.jwts.FbJWT;
 import com.auth0.jwt.jwts.JWT;
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
@@ -75,36 +73,6 @@ public class FbJwtCreatorTest {
         Verification verification = FbJWT.require(algorithm);
         JWT verifier = verification.createVerifierForFb(USER_ID, APP_ID).build();
         DecodedJWT jwt = verifier.decode32Bytes(token);
-        Map<String, Claim> claims = jwt.getClaims();
-        verifyClaims(claims);
-    }
-
-    @Test
-    public void testFbJwtCreatorJSONEncoding() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
-        Schema schemaForHeader = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("alg").type().stringType().noDefault()
-                .name("typ").type().stringType().noDefault()
-                .endRecord();
-        Schema schemaForPayload = SchemaBuilder
-                .record("record").namespace("namespace")
-                .fields()
-                .name("userId").type().stringType().noDefault()
-                .name("appId").type().stringType().noDefault()
-                .name("exp").type().longType().noDefault()
-                .name("iat").type().intType().noDefault()
-                .endRecord();
-        String token = FbJwtCreator.build()
-                .withExp(exp)
-                .withIat(iat)
-                .withUserId(USER_ID)
-                .withAppId(APP_ID)
-                .signJSONEncoding(algorithm, schemaForHeader, schemaForPayload);
-        Verification verification = FbJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForFb(USER_ID, APP_ID).build();
-        DecodedJWT jwt = verifier.decodeJSON(token, schemaForHeader, schemaForPayload);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
     }
