@@ -8,6 +8,8 @@ import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 
+import java.net.URLDecoder;
+
 class NoneAlgorithm extends Algorithm {
 
     NoneAlgorithm() {
@@ -18,18 +20,18 @@ class NoneAlgorithm extends Algorithm {
     public void verify(DecodedJWT jwt, EncodeType encodeType) throws Exception {
         byte[] signatureBytes = null;
         String signature = jwt.getSignature();
+        String urlDecoded = null;
         switch (encodeType) {
             case Base16:
-                signatureBytes = Hex.decodeHex(signature);
+                urlDecoded = URLDecoder.decode(signature, "UTF-8");
+                signatureBytes = Hex.decodeHex(urlDecoded);
                 break;
             case Base32:
                 Base32 base32 = new Base32();
-                signatureBytes = base32.decode(signature);
+                urlDecoded = URLDecoder.decode(signature, "UTF-8");
+                signatureBytes = base32.decode(urlDecoded);
                 break;
             case Base64:
-                signatureBytes = Base64.decodeBase64(signature);
-                break;
-            case JsonEncode:
                 signatureBytes = Base64.decodeBase64(signature);
                 break;
         }

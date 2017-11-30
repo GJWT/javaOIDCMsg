@@ -10,6 +10,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.binary.StringUtils;
 
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -43,18 +44,18 @@ class ECDSAAlgorithm extends Algorithm {
         byte[] contentBytes = String.format("%s.%s", jwt.getHeader(), jwt.getPayload()).getBytes(StandardCharsets.UTF_8);
         byte[] signatureBytes = null;
         String signature = jwt.getSignature();
+        String urlDecoded = null;
         switch (encodeType) {
             case Base16:
-                signatureBytes = Hex.decodeHex(signature);
+                urlDecoded = URLDecoder.decode(signature, "UTF-8");
+                signatureBytes = Hex.decodeHex(urlDecoded);
                 break;
             case Base32:
                 Base32 base32 = new Base32();
-                signatureBytes = base32.decode(signature);
+                urlDecoded = URLDecoder.decode(signature, "UTF-8");
+                signatureBytes = base32.decode(urlDecoded);
                 break;
             case Base64:
-                signatureBytes = Base64.decodeBase64(signature);
-                break;
-            case JsonEncode:
                 signatureBytes = Base64.decodeBase64(signature);
                 break;
         }

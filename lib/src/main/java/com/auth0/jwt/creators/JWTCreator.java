@@ -398,8 +398,9 @@ public final class JWTCreator {
         String content = String.format("%s.%s", encodedHeader, encodedPayload);
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
         String signature = Hex.encodeHexString(signatureBytes);
+        String signatureFinal = URLEncoder.encode(signature, "UTF-8");
 
-        return String.format("%s.%s", content, signature);
+        return String.format("%s.%s", content, signatureFinal);
     }
 
     private String signBase32Encoding() throws UnsupportedEncodingException{
@@ -416,8 +417,9 @@ public final class JWTCreator {
         String content = String.format("%s.%s", encodedHeader, encodedPayload);
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
         String signature = base32.encodeAsString(signatureBytes);
+        String signatureFinal = URLEncoder.encode(signature, "UTF-8");
 
-        return String.format("%s.%s", content, signature);
+        return String.format("%s.%s", content, signatureFinal);
     }
 
     private String defaultSign() throws SignatureGenerationException {
