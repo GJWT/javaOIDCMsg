@@ -1,7 +1,6 @@
 
 
-# Java JWT
-
+# JWTs for Java 
 This is not an officially supported Google product
 
 [![CircleCI](https://img.shields.io/circleci/project/github/auth0/java-jwt.svg?style=flat-square)](https://circleci.com/gh/auth0/java-jwt/tree/master)
@@ -460,10 +459,9 @@ If the values can't be converted to the given **Class Type** a `JWTDecodeExcepti
 
 If you have found a bug or if you have a feature request, please report them at this repository issues section. Please do not report security vulnerabilities on the public GitHub issue tracker.
 
-## Author
+## Authors
 
-Justin Dahmubed\
-Application Engineer II @ Google
+Auth0 LLC, Google LLC
 
 ## License
 
