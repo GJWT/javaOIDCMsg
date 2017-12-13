@@ -19,7 +19,11 @@
 
 package com.auth0.jwt.algorithms;
 
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.creators.EncodeType;
+import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -28,18 +32,24 @@ import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 
+import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SignatureException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 
 class RSAAlgorithm extends Algorithm {
 
     private final RSAKeyProvider keyProvider;
     private final CryptoHelper crypto;
+    public static byte[] bytesAfterBeingDecoded;
 
     //Visible for testing
     RSAAlgorithm(CryptoHelper crypto, String id, String algorithm, RSAKeyProvider keyProvider) throws IllegalArgumentException {
@@ -70,14 +80,46 @@ class RSAAlgorithm extends Algorithm {
                 Base32 base32 = new Base32();
                 urlDecoded = URLDecoder.decode(signature, "UTF-8");
                 signatureBytes = base32.decode(urlDecoded);
+                System.out.println("signature bytes after being decoded: " + Arrays.toString(signatureBytes));
+                bytesAfterBeingDecoded = signatureBytes;
+                System.out.println("Are they equal? " + Arrays.equals(JWTCreator.bytesBeforeBeingDecoded, bytesAfterBeingDecoded));
                 break;
             case Base64:
                 signatureBytes = Base64.decodeBase64(signature);
+                System.out.println("signature bytes after being decoded: " + Arrays.toString(signatureBytes));
+                bytesAfterBeingDecoded = signatureBytes;
+                System.out.println("Are they equal? " + Arrays.equals(JWTCreator.bytesBeforeBeingDecoded, bytesAfterBeingDecoded));
                 break;
         }
 
         try {
-            RSAPublicKey publicKey = keyProvider.getPublicKeyById(jwt.getKeyId());
+            //RSAPublicKey publicKey = keyProvider.getPublicKeyById(jwt.getKeyId());
+            /*String kid = jwt.getKeyId();
+            JwkProvider provider = new UrlJwkProvider(new File("/Users/jdahmubed/documents/jwksRSA.json").toURI().toURL());
+            Jwk jwk = provider.get(kid);
+            PublicKey publicKey = jwk.getPublicKey();*/
+
+            String kid = jwt.getKeyId();
+            JwkProvider provider = new UrlJwkProvider(new File("/Users/jdahmubed/documents/jwksRSA.json").toURI().toURL());
+            Jwk jwk = provider.get(kid);
+            String cert = jwk.getCertificateChain().get(0);
+            try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream("/Users/jdahmubed/workspace/javaOIDCMsgForCOMMENTS/lib/src/main/java/com/auth0/jwt/algorithms/jwks.cert"), "utf-8"))) {
+                writer.write("-----BEGIN CERTIFICATE-----");
+                writer.append("\n"+ cert + "\n");
+                writer.append("-----END CERTIFICATE-----");
+            }
+            CertificateFactory fact = CertificateFactory.getInstance("X.509");
+            FileInputStream is = new FileInputStream ("/Users/jdahmubed/workspace/javaOIDCMsgForCOMMENTS/lib/src/main/java/com/auth0/jwt/algorithms/jwks.cert");
+            X509Certificate cer = (X509Certificate) fact.generateCertificate(is);
+            PublicKey publicKey = cer.getPublicKey();
+
+/*
+            FileInputStream fin = new FileInputStream("/Users/jdahmubed/documents/jwksRSA.json");
+            CertificateFactory f = CertificateFactory.getInstance("X.509");
+            X509Certificate certificate = (X509Certificate)f.generateCertificate(fin);
+            PublicKey publicKey = certificate.getPublicKey();*/
+
             if (publicKey == null) {
                 throw new IllegalStateException("The given Public Key is null.");
             }

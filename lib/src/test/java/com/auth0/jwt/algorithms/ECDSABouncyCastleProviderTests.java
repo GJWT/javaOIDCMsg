@@ -96,6 +96,17 @@ public class ECDSABouncyCastleProviderTests {
     // Verify
 
     @Test
+    public void shouldPassECDSA256VerificationWithJOSESignatureMightNeedToDelete() throws Exception {
+        //String token = "eyJhbGciOiJFUzI1NiIsImtpZCI6IlJrSTVNakk1T1VZNU9EYzFOMFE0UXpNME9VWXpOa1ZHTVRKRE9VRXpRa0ZDT1RVM05qRTJSZyJ9.eyJpc3MiOiJhdXRoMCJ9.Z3fsrmVQjqff3_3goVHvak5CemN3YLyyI4VUH5__P1E";
+        String token = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Im15LWtleS1pZCJ9.eyJpc3MiOlsiYXV0aDAiXX0.HnxxDIkrm_dPb8KoAVxkD1Ex__Q0VWX-QvgP0MdnR52XBuMQDJYC_bK3bHvzkXz8B2DU_TeW6erx-YTy-t2oFA";
+        ECKey key = (ECKey) readPublicKeyFromFile(PUBLIC_KEY_FILE_256, "EC");
+        Algorithm algorithm = Algorithm.ECDSA256(key);
+        JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
+        DecodedJWT decoded = jwt.decode(token);
+        algorithm.verify(decoded, EncodeType.Base64);
+    }
+
+    @Test
     public void shouldPassECDSA256VerificationWithJOSESignature() throws Exception {
         String token = "eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJhdXRoMCJ9.4iVk3-Y0v4RT4_9IaQlp-8dZ_4fsTzIylgrPTDLrEvTHBTyVS3tgPbr2_IZfLETtiKRqCg0aQ5sh9eIsTTwB1g";
         ECKey key = (ECKey) readPublicKeyFromFile(PUBLIC_KEY_FILE_256, "EC");

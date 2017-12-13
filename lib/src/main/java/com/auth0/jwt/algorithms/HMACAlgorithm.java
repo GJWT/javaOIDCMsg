@@ -90,6 +90,8 @@ class HMACAlgorithm extends Algorithm {
         }
 
         try {
+            //need to add fucntionality to pass in secret or pass in x509 public key
+            //jwks uri
             boolean valid = crypto.verifySignatureFor(getDescription(), secret, contentBytes, signatureBytes);
             if (!valid) {
                 throw new SignatureVerificationException(this);

@@ -19,23 +19,43 @@
 
 package com.auth0.jwt.algorithms;
 
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.creators.EncodeType;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
+import com.auth0.jwt.interfaces.Payload;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.JWK;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.binary.StringUtils;
 
+import java.io.File;
+import java.io.FileReader;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 
 class ECDSAAlgorithm extends Algorithm {
 
@@ -80,10 +100,48 @@ class ECDSAAlgorithm extends Algorithm {
         }
 
         try {
-            ECPublicKey publicKey = keyProvider.getPublicKeyById(jwt.getKeyId());
+
+            //create a http request that gets back a response for the jwks uri and then once you get back the response,
+            //parse it to get back the x509 DER string and get the public key from that string
+            //from the public key of that string, pass it into verifySignatureFor()
+            PublicKey publicKey = null;
+            String kid = jwt.getKeyId();
+            String algorithm = jwt.getAlgorithm();
+            if(kid == null) {
+                publicKey = keyProvider.getPublicKeyById(kid);
+            } else if(algorithm.equals("RSA")){
+                //JwkProvider provider = new UrlJwkProvider("https://sandrino.auth0.com/.well-known/jwks.json");
+                JwkProvider provider = new UrlJwkProvider(new File("/Users/jdahmubed/documents/jwksRSA.json").toURI().toURL());//"file:///);
+                Jwk jwk = provider.get(kid);
+                publicKey = jwk.getPublicKey();
+            } /*else if(algorithm.contains("ES")) {
+               // JSONParser parser = new JSONParser();
+               // JSONArray a = (JSONArray) parser.parse(new FileReader("/Users/jdahmubed/documents/jwks.json"));
+
+                JsonObject gsonObject = new JsonObject();
+
+
+                JsonParser parser = new JsonParser();
+                JsonElement jsonElement = parser.parse(new FileReader("/Users/jdahmubed/documents/jwks.json"));
+                gsonObject = jsonElement.getAsJsonObject();
+
+                JSONObject jsonObject = new JSONObject();
+                for(String key : gsonObject.keySet()) {
+                    jsonObject.put(key, gsonObject.get(key));
+                }
+                jsonObject.put("alg", "ES256");
+                JWSHeader jwsHeader = JWSHeader.parse(jsonObject);
+
+                JWSHeader header = new JWSHeader(JWSAlgorithm.ES256);
+                header.setJWKURL(new File("/Users/jdahmubed/documents/jwks.json").toURI().toURL());
+                List<com.nimbusds.jose.util.Base64> list = header.getX509CertChain();
+                System.out.print(list);
+            }*/
+
             if (publicKey == null) {
                 throw new IllegalStateException("The given Public Key is null.");
             }
+            //pass in publicKey from x509 or the current key (look up)
             boolean valid = crypto.verifySignatureFor(getDescription(), publicKey, contentBytes, JOSEToDER(signatureBytes));
 
             if (!valid) {
@@ -241,6 +299,7 @@ class ECDSAAlgorithm extends Algorithm {
         if (publicKey == null && privateKey == null) {
             throw new IllegalArgumentException("Both provided Keys cannot be null.");
         }
+
         return new ECDSAKeyProvider() {
             @Override
             public ECPublicKey getPublicKeyById(String keyId) {
