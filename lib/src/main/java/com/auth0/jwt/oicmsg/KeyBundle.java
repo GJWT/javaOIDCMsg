@@ -21,15 +21,12 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.Key;
 import java.security.KeyException;
 import java.util.*;
 
 public class KeyBundle {
 
-    final static Logger logger = LoggerFactory.getLogger(KeyBundle.class);
+    final private static Logger logger = LoggerFactory.getLogger(KeyBundle.class);
     private static final Map<String, Key> K2C =
             ImmutableMap.of("RSA", new RSAKey(),
                     "EC", new ECKey(),
@@ -70,7 +67,7 @@ public class KeyBundle {
 
         if (keys != null) {
             this.source = null;
-            doKeys(this.keys);
+            //doKeys(this.keys); why is this here?
         } else {
             if (source.startsWith("file://")) {
                 this.source = source.substring(7);
@@ -94,7 +91,11 @@ public class KeyBundle {
 
             if (!this.remote) {
                 if (this.fileFormat.equals("jwks") || this.fileFormat.equals("jwk")) {
-                    this.doLocalJwk(this.source);
+                    try {
+                        this.doLocalJwk(this.source);
+                    } catch (UpdateFailed updateFailed) {
+                        logger.error("Local key updated from " + this.source + " failed.");
+                    }
                 } else if (this.fileFormat.equals("der")) {
                     doLocalDer(this.source, this.keyType, this.keyUsage);
                 }
@@ -244,7 +245,7 @@ public class KeyBundle {
                 exception.printStackTrace();
             }
 
-            if(!this.impJwks.keySet().contains("keys")) {
+            if (!this.impJwks.keySet().contains("keys")) {
                 throw new UpdateFailed(this.source);
             }
 
@@ -258,7 +259,7 @@ public class KeyBundle {
             }
 
             Header[] headers = response.getHeaders("Etag");
-            if(headers != null) {
+            if (headers != null) {
                 this.eTag = headers;
             } else {
                 throw new KeyException("No 'Etag' keyword in headers");
@@ -272,7 +273,7 @@ public class KeyBundle {
     }
 
     private JSONObject parseRemoteResponse(HttpResponse response) throws IOException, ParseException {
-        if(!response.getHeaders("Content-Type").equals("application/json")) {
+        if (!response.getHeaders("Content-Type").equals("application/json")) {
             logger.warn("Wrong Content_type");
         }
 
@@ -284,16 +285,16 @@ public class KeyBundle {
     private boolean upToDate() {
 
         boolean result = false;
-        if(!this.keys.isEmpty()) {
-            if(this.remote) {
-                if(System.currentTimeMillis() > this.timeOut) {
-                    if(update()) {
+        if (!this.keys.isEmpty()) {
+            if (this.remote) {
+                if (System.currentTimeMillis() > this.timeOut) {
+                    if (update()) {
                         result = true;
                     }
                 }
             }
-        } else if(this.remote) {
-            if(update()) {
+        } else if (this.remote) {
+            if (update()) {
                 result = true;
             }
         }
@@ -303,7 +304,7 @@ public class KeyBundle {
 
     public boolean update() {
         boolean result = true;
-        if(!this.source.isEmpty()) {
+        if (!this.source.isEmpty()) {
             List<Key> keys = this.keys;
             this.keys = new ArrayList<Key>();
             try {
@@ -323,13 +324,11 @@ public class KeyBundle {
             }
 
             long now = System.currentTimeMillis();
-            for(Key key : keys) {
-                try {
-                    if (!keys.contains(key)) {
-                        key.setInActiveSince();
-                    }
-                } catch (ValueError error) {
-                    key.setInActiveSince(now);
+            for (Key key : keys) {
+                if (!keys.contains(key)) {
+                    key.setInactiveSince();
+                } else {
+                    key.setInactiveSince(now);
                 }
                 this.keys.add(key);
             }
@@ -342,10 +341,10 @@ public class KeyBundle {
         this.upToDate();
         List<String> types = Arrays.asList(typ.toLowerCase(), typ.toUpperCase());
 
-        if(!typ.isEmpty()) {
+        if (!typ.isEmpty()) {
             List<Key> keys = new ArrayList<>();
-            for(Key key : this.keys) {
-                if(types.contains(key.getKty())) {
+            for (Key key : this.keys) {
+                if (types.contains(key.getKty())) {
                     keys.add(key);
                 }
             }
@@ -362,8 +361,8 @@ public class KeyBundle {
 
     public List<Key> getActiveKeys() {
         List<Key> activeKeys = new ArrayList<>();
-        for(Key key : this.keys) {
-            if(key.getInactiveSince() == 0) {
+        for (Key key : this.keys) {
+            if (key.getInactiveSince() == 0) {
                 activeKeys.add(key);
             }
         }
@@ -374,8 +373,8 @@ public class KeyBundle {
     public void removeKeysByType(String typ) {
         List<String> types = Arrays.asList(typ.toLowerCase(), typ.toUpperCase());
 
-        for(Key key : this.keys) {
-            if(!types.contains(key.getKty())) {
+        for (Key key : this.keys) {
+            if (!types.contains(key.getKty())) {
                 this.keys.remove(key);
             }
         }
@@ -393,8 +392,8 @@ public class KeyBundle {
         this.upToDate();
         List<Key> keys = new ArrayList<>();
         Key key;
-        for(Key keyIndex : this.keys) {
-            if(isPrivate) {
+        for (Key keyIndex : this.keys) {
+            if (isPrivate) {
                 key = keyIndex.serialize(isPrivate);
             } else {
                 key = keyIndex.toDict();
@@ -416,16 +415,16 @@ public class KeyBundle {
     }
 
     public Key getKeyWithKid(String kid) {
-        for(Key key : this.keys) {
-            if(key.getKid().equals(kid)) {
+        for (Key key : this.keys) {
+            if (key.getKid().equals(kid)) {
                 return key;
             }
         }
 
         update();
 
-        for(Key key : this.keys) {
-            if(key.getKid().equals(kid)) {
+        for (Key key : this.keys) {
+            if (key.getKid().equals(kid)) {
                 return key;
             }
         }
@@ -436,8 +435,8 @@ public class KeyBundle {
     public List<String> getKids() {
         this.upToDate();
         List<String> kids = new ArrayList<>();
-        for(Key key : this.keys) {
-            if(!key.getKid().isEmpty()) {
+        for (Key key : this.keys) {
+            if (!key.getKid().isEmpty()) {
                 kids.add(key.getKid());
             }
         }
@@ -452,15 +451,15 @@ public class KeyBundle {
 
     public void removeOutdated(float after, int when) throws TypeError {
         long now;
-        if(when != 0) {
-          now = when;
+        if (when != 0) {
+            now = when;
         } else {
             now = System.currentTimeMillis();
         }
 
         List<Key> keys = new ArrayList<>();
-        for(Key key : this.keys) {
-            if(!(key.getInactiveSince() && (key.getInactiveSince() + after < now))) {
+        for (Key key : this.keys) {
+            if (!(key.getInactiveSince() && (key.getInactiveSince() + after < now))) {
                 keys.add(key);
             }
         }
@@ -474,9 +473,9 @@ public class KeyBundle {
         usage = harmonizeUsage(usage);
         KeyBundle keyBundle;
         type = type.toLowerCase();
-        if(type.equals("jwks")) {
+        if (type.equals("jwks")) {
             keyBundle = new KeyBundle(filename, "jwks", usage);
-        } else if(type.equals("der")) {
+        } else if (type.equals("der")) {
             keyBundle = new KeyBundle(filename, "der", usage);
         } else {
             throw new UnknownKeyType("Unsupported key type");
