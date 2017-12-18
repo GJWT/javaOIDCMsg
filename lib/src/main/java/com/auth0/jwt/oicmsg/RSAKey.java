@@ -10,7 +10,7 @@ import java.util.*;
 
 public class RSAKey extends Key {
 
-    final private static Logger logger = LoggerFactory.getLogger(KeyBundle.class);
+    final private static Logger logger = LoggerFactory.getLogger(RSAKey.class);
     private static Set<String> longs = new HashSet<String>(Arrays.asList("n", "e", "d", "p", "q", "dp", "dq", "di", "qi"));
     private String n;
     private String e;
@@ -49,8 +49,8 @@ public class RSAKey extends Key {
         }
     }
 
-    public RSAKey() {
-        this("RSA", "", "", "", "", "", "", null, "", "", "", "", "", "", "", "", "", null);
+    public RSAKey(String use) {
+        this("RSA", "", use, "", "", "", "", null, "", "", "", "", "", "", "", "", "", null);
     }
 
     public void deserialize() throws DeserializationNotPossible {

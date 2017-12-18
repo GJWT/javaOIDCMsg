@@ -20,9 +20,9 @@ public class Key {
     protected String x5c;
     protected String x5t;
     protected String x5u;
-    private Key key;
-    private long inactiveSince;
-    private Map<String, String> args;
+    protected Key key;
+    protected long inactiveSince;
+    protected Map<String, String> args;
     private static Map<String, Object> longs = new HashMap<String, Object>();
     protected static Set<String> members = new HashSet<>(Arrays.asList("kty", "alg", "use", "kid", "x5c", "x5t", "x5u"));
     public static Set<String> publicMembers = new HashSet<>(Arrays.asList("kty", "alg", "use", "kid", "x5c", "x5t", "x5u"));

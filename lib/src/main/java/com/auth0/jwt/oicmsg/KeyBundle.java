@@ -3,7 +3,6 @@ package com.auth0.jwt.oicmsg;
 import com.auth0.jwt.exceptions.oicmsg_exceptions.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
-import com.nimbusds.jose.jwk.RSAKey;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -16,6 +15,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.auth0.jwt.oicmsg.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
@@ -123,18 +123,29 @@ public class KeyBundle {
                     add(kty.toLowerCase());
                     add(kty.toUpperCase());
                 }};
-                boolean isError = false;
+                boolean isSuccess = true;
                 Key key;
                 for (String typeIndex : types) {
                     try {
-                        key = K2C.get(typeIndex);
-                        //call key's constructor afterwards
+                        switch(typeIndex) {
+                            case "RSA":
+                                key = new RSAKey("use");
+                                break;
+                            case "EC":
+                                key = new ECKey("use");
+                                break;
+                            case "SYMKey":
+                                key = new SYMKey("use");
+                                break;
+                            default:
+                                throw new IllegalArgumentException("Encryption type: " + typeIndex + " isn't supported");
+                        }
                     } catch (JWKException exception) {
                         logger.warn("While loading keys: " + exception);
-                        isError = true;
+                        isSuccess = false;
                     }
 
-                    if (isError) {
+                    if (isSuccess) {
                         this.keys.add(key);
                         flag = true;
                         break;
