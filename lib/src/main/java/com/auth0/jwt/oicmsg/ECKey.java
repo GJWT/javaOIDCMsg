@@ -1,3 +1,4 @@
+/*
 package com.auth0.jwt.oicmsg;
 
 import com.auth0.jwt.exceptions.oicmsg_exceptions.HeaderError;
@@ -18,6 +19,7 @@ public class ECKey extends Key{
     private Object curve;
     final private static Logger logger = LoggerFactory.getLogger(ECKey.class);
     private static Set<String> longs = new HashSet<String>(Arrays.asList("x", "y", "d"));
+
     protected static Set<String> members = new HashSet<>(Arrays.asList("kty", "alg", "use", "kid", "crv", "x", "y", "d"));
     public static Set<String> publicMembers = new HashSet<>(Arrays.asList("kty", "alg", "use", "kid", "crv", "x", "y"));
     protected static Set<String> required = new HashSet<>(Arrays.asList("crv", "key", "x", "y"));
@@ -115,4 +117,81 @@ public class ECKey extends Key{
     public List<Object> getEncryptionKey(boolean isPrivate) {
         return this.getKey(isPrivate);
     }
+
+    public String getCrv() {
+        return crv;
+    }
+
+    public void setCrv(String crv) {
+        this.crv = crv;
+    }
+
+    public Object getX() {
+        return x;
+    }
+
+    public void setX(Object x) {
+        this.x = x;
+    }
+
+    public Object getY() {
+        return y;
+    }
+
+    public void setY(Object y) {
+        this.y = y;
+    }
+
+    public Object getD() {
+        return d;
+    }
+
+    public void setD(Object d) {
+        this.d = d;
+    }
+
+    public Object getCurve() {
+        return curve;
+    }
+
+    public void setCurve(Object curve) {
+        this.curve = curve;
+    }
+
+    public static Logger getLogger() {
+        return logger;
+    }
+
+    public static Set<String> getLongs() {
+        return longs;
+    }
+
+    public static void setLongs(Set<String> longs) {
+        ECKey.longs = longs;
+    }
+
+    public static Set<String> getMembers() {
+        return members;
+    }
+
+    public static void setMembers(Set<String> members) {
+        ECKey.members = members;
+    }
+
+    public static Set<String> getPublicMembers() {
+        return publicMembers;
+    }
+
+    public static void setPublicMembers(Set<String> publicMembers) {
+        ECKey.publicMembers = publicMembers;
+    }
+
+    public static Set<String> getRequired() {
+        return required;
+    }
+
+    public static void setRequired(Set<String> required) {
+        ECKey.required = required;
+    }
 }
+*/

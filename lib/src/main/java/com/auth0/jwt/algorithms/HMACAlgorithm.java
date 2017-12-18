@@ -19,6 +19,9 @@
 
 package com.auth0.jwt.algorithms;
 
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.creators.EncodeType;
 import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
@@ -30,12 +33,15 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.binary.StringUtils;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 class HMACAlgorithm extends Algorithm {
 
@@ -90,6 +96,32 @@ class HMACAlgorithm extends Algorithm {
         }
 
         try {
+            //String kid = jwt.getKeyId();
+            String kid = "RkI5MjI5OUY5ODc1N0Q4QzM0OUYzNkVGMTJDOUEzQkFCOTU3NjE2Rg";
+            JwkProvider provider = new UrlJwkProvider(new File("jwksRSA.json").toURI().toURL());
+            Jwk jwk = provider.get(kid);
+            //String cert = jwk.getCertificateChain().get(0);
+            try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream("jwks.cert"), "utf-8"))) {
+                writer.write("-----BEGIN CERTIFICATE-----");
+                writer.append("\n"+ "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuGbXWiK3dQTyCbX5xdE4\n" +
+                        "yCuYp0AF2d15Qq1JSXT/lx8CEcXb9RbDddl8jGDv+spi5qPa8qEHiK7FwV2KpRE9\n" +
+                        "83wGPnYsAm9BxLFb4YrLYcDFOIGULuk2FtrPS512Qea1bXASuvYXEpQNpGbnTGVs\n" +
+                        "WXI9C+yjHztqyL2h8P6mlThPY9E9ue2fCqdgixfTFIF9Dm4SLHbphUS2iw7w1JgT\n" +
+                        "69s7of9+I9l5lsJ9cozf1rxrXX4V1u/SotUuNB3Fp8oB4C1fLBEhSlMcUJirz1E8\n" +
+                        "AziMCxS+VrRPDM+zfvpIJg3JljAh3PJHDiLu902v9w+Iplu1WyoB2aPfitxEhRN0\n" +
+                        "YwIDAQAB" + "\n");
+                writer.append("-----END CERTIFICATE-----");
+            }
+            CertificateFactory fact = CertificateFactory.getInstance("X.509");
+            FileInputStream is = new FileInputStream ("jwks.cert");
+            X509Certificate cer = (X509Certificate) fact.generateCertificate(is);
+            PublicKey publicKey = cer.getPublicKey();
+
+            if (publicKey == null) {
+                throw new IllegalStateException("The given Public Key is null.");
+            }
+
             //need to add fucntionality to pass in secret or pass in x509 public key
             //jwks uri
             boolean valid = crypto.verifySignatureFor(getDescription(), secret, contentBytes, signatureBytes);
@@ -97,7 +129,7 @@ class HMACAlgorithm extends Algorithm {
                 throw new SignatureVerificationException(this);
             }
         } catch (IllegalStateException | InvalidKeyException | NoSuchAlgorithmException e) {
-            throw new SignatureVerificationException(this, e);
+             throw new SignatureVerificationException(this, e);
         }
     }
 

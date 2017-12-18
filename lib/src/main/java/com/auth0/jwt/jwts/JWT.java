@@ -159,43 +159,43 @@ public class JWT {
 
         @Override
         public Verification withNbf(long nbf) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification createVerifierForRisc(String jti, List<String> issuer,
                                                   List<String> audience, long iatLeeway, long expLeeway, long nbf) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification createVerifierForScoped(String scope, List<String> issuer, List<String> audience, long expLeeway, long iatLeeway) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification createVerifierForImplicit(List<String> issuer, List<String> audience, long iatLeeway) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification createVerifierForFb(String userId, String appId) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification withUserId(String userId) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification withAppId(String appId) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification createVerifierForAccess(List<String> issuer, List<String> audience, long expLeeway, long iatLeeway) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         /**

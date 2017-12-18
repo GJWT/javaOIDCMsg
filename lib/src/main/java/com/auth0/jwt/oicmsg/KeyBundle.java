@@ -1,3 +1,4 @@
+/*
 package com.auth0.jwt.oicmsg;
 
 import com.auth0.jwt.exceptions.oicmsg_exceptions.*;
@@ -105,6 +106,18 @@ public class KeyBundle {
 
     public KeyBundle() throws ImportException {
         this(null, "", 300, true, "jwk", "RSA", null);
+    }
+
+    public KeyBundle(List<Key> keyList, String keyType) throws ImportException {
+        this(keyList, "", 300, true, "jwk", keyType, null);
+    }
+
+    public KeyBundle(List<Key> keyList, String keyType, List<String> usage) throws ImportException {
+        this(keyList, "", 300, true, "jwk", keyType, usage);
+    }
+
+    public KeyBundle(String source, boolean verifySSL) throws ImportException {
+        this(null, source, 300, verifySSL, "jwk", "RSA", null);
     }
 
     public KeyBundle(String source, String fileFormat, List<String> usage) throws ImportException {
@@ -501,3 +514,4 @@ public class KeyBundle {
 
 
 }
+*/
