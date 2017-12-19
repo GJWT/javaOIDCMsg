@@ -156,30 +156,12 @@ class RSAAlgorithm extends Algorithm {
                 writer.append("\n"+ cert + "\n");
                 writer.append("-----END CERTIFICATE-----");
             }
-            /*CertificateFactory fact = CertificateFactory.getInstance("X.509");
-            FileInputStream is = new FileInputStream ("./src/main/java/com/auth0/jwt/algorithms/jwks.pem");
-            X509Certificate cer = (X509Certificate) fact.generateCertificate(is);*/
 
             FileReader file = new FileReader("./src/main/java/com/auth0/jwt/algorithms/jwks.pem");
             PemReader reader = new PemReader(file);
             X509EncodedKeySpec caKeySpec = new X509EncodedKeySpec(reader.readPemObject().getContent());
             KeyFactory kf = KeyFactory.getInstance("RSA");
             PublicKey publicKey = kf.generatePublic(caKeySpec);
-
-
-
-
-            /*final String PUBLIC_KEY_FILE_RSA = "src/test/resources/rsa-public-from-Roland.pem";
-            RSAPublicKey publicKey = (RSAPublicKey) PemUtils.readPublicKeyFromFile(PUBLIC_KEY_FILE_RSA, "RSA");*/
-
-
-            //PublicKey publicKey = cer.getPublicKey();
-
-/*
-            FileInputStream fin = new FileInputStream("/Users/jdahmubed/documents/jwksRSA.json");
-            CertificateFactory f = CertificateFactory.getInstance("X.509");
-            X509Certificate certificate = (X509Certificate)f.generateCertificate(fin);
-            PublicKey publicKey = certificate.getPublicKey();*/
 
             if (publicKey == null) {
                 throw new IllegalStateException("The given Public Key is null.");

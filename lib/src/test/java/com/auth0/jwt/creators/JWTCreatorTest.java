@@ -23,20 +23,16 @@ import com.auth0.jwt.JsonMatcher;
 import com.auth0.jwt.PemUtils;
 import com.auth0.jwt.TokenUtils;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
 import com.auth0.jwt.jwts.JWT;
 import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.asn1.eac.RSAPublicKey;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.security.SecureRandom;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Date;
@@ -46,16 +42,14 @@ import java.util.Map;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import org.mockito.Mockito;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import javax.crypto.Cipher;
 
 public class JWTCreatorTest {
+
     private static final String PRIVATE_KEY_FILE_RSA = "src/test/resources/rsa-private-from-Roland.pem";
     private static final String PRIVATE_KEY_FILE_EC_256 = "src/test/resources/ec256-key-private.pem";
-
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -112,7 +106,7 @@ public class JWTCreatorTest {
     }
 
     @Test
-    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsDELETEEEEE16() throws Exception {
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase16() throws Exception {
         RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
         RSAKeyProvider provider = mock(RSAKeyProvider.class);
         when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
@@ -127,38 +121,10 @@ public class JWTCreatorTest {
         JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode16Bytes(signed);
         algorithm.verify(decoded, EncodeType.Base16);
-
-        /*assertThat(signed, is(notNullValue()));
-        String[] parts = signed.split("\\.");
-        String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));*/
     }
 
     @Test
-    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsDELETEEEEE32() throws Exception {
-        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
-        RSAKeyProvider provider = mock(RSAKeyProvider.class);
-        when(provider.getPrivateKeyId()).thenReturn("RkI5MjI5OUY5ODc1N0Q4QzM0OUYzNkVGMTJDOUEzQkFCOTU3NjE2Rg");
-        when(provider.getPrivateKey()).thenReturn(privateKey);
-        Algorithm algorithm = Algorithm.RSA256(provider);
-
-        String signed = JWTCreator.init()
-                .withKeyId("RkI5MjI5OUY5ODc1N0Q4QzM0OUYzNkVGMTJDOUEzQkFCOTU3NjE2Rg")
-                .withIssuer("auth0")
-                .sign(algorithm, EncodeType.Base32);
-
-        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
-        DecodedJWT decoded = jwt.decode32Bytes(signed);
-        algorithm.verify(decoded, EncodeType.Base32);
-
-        /*assertThat(signed, is(notNullValue()));
-        String[] parts = signed.split("\\.");
-        String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));*/
-    }
-
-    @Test
-    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsDELETEEEEE32Roland() throws Exception {
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase32() throws Exception {
         RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
         RSAKeyProvider provider = mock(RSAKeyProvider.class);
         when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
@@ -173,48 +139,17 @@ public class JWTCreatorTest {
         JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode32Bytes(signed);
         algorithm.verify(decoded, EncodeType.Base32);
-
-        /*assertThat(signed, is(notNullValue()));
-        String[] parts = signed.split("\\.");
-        String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));*/
     }
 
     @Test
-    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsDELETEEEEE() throws Exception {
-        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
-        RSAKeyProvider provider = mock(RSAKeyProvider.class);
-        when(provider.getPrivateKeyId()).thenReturn("RkI5MjI5OUY5ODc1N0Q4QzM0OUYzNkVGMTJDOUEzQkFCOTU3NjE2Rg");
-        when(provider.getPrivateKey()).thenReturn(privateKey);
-        Algorithm algorithm = Algorithm.RSA256(provider);
-
-        String signed = JWTCreator.init()
-                .withKeyId("RkI5MjI5OUY5ODc1N0Q4QzM0OUYzNkVGMTJDOUEzQkFCOTU3NjE2Rg")
-                .withIssuer("auth0")
-                .sign(algorithm);
-
-        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
-        DecodedJWT decoded = jwt.decode(signed);
-        algorithm.verify(decoded, EncodeType.Base64);
-
-        /*assertThat(signed, is(notNullValue()));
-        String[] parts = signed.split("\\.");
-        String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));*/
-    }
-
-    @Test
-    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsDELETEEEEERoland() throws Exception {
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase64() throws Exception {
         RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
         RSAKeyProvider provider = mock(RSAKeyProvider.class);
         when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
         when(provider.getPrivateKey()).thenReturn(privateKey);
         Algorithm algorithm = Algorithm.RSA256(provider);
 
-        String signed = /*JWTCreator.init()
-                .withKeyId("RkI5MjI5OUY5ODc1N0Q4QzM0OUYzNkVGMTJDOUEzQkFCOTU3NjE2Rg")
-                .withIssuer("auth0")
-                .sign(algorithm);*/
+        String signed =
                 "eyJhbGciOiJSUzI1NiIsImtpZCI6IjhSR29WZFZqRDhmSXR5UjNGRm8waFZOYVpZdFBHd29QNnhLaTllX1Y3YkkifQ.eyJpc3MiOiAiaHR0cHM6Ly9hZ2F0b24tc2F4LmNvbS8iLCAiaWF0IjogMTUxMzYyODc3OSwgImV4cCI6IDE1MTM3MTUxNzksICJraWQiOiAiOFJHb1ZkVmpEOGZJdHlSM0ZGbzBoVk5hWll0UEd3b1A2eEtpOWVfVjdiSSIsICJmb28iOiAiYmFyIiwgImtpdCI6ICJrYXQifQ.OMSHRJRW3J2MHFvPZhRaxxJhHJ5WFBaRzdPb3KpxWsF1Y3Or4BH-2pL8HE1CAoUTTqGYvNSShi2O-NFupGmaY5SRehOma_6XHcL2OrKKwFkG21M57T13_qagG7VUF7n7yhaLXMKWNli9JZ9iwHqLfA__j2X4XqxqPRxr5LxLXz-eynRp1jax2-eqiAMVYdSnH02e_bmnO89nIys6VUPoOAQFJjoPNtUo0urG8vTsiFPHFCgWUljDUFIu-TiRVTu5gJea-cigUJeG7i_4cp0qkWHo7POrS4Dq-gyzUSbkqBNdg-4LAAU40staTA236MPekQkzeTQlHa9418davEvfboYnCYeAhhX9Pnn7YotZSsD6S9HnTh5OjJ5E3O_Y-5MSK-eIYHV79FLQbaG1Xmcuv7WsRyhPadAwmNYLuWBtgaQDVV58ZmZPB9EaBDczqJDymjLkz2NpfLVI1kKFFDdLDC6ZBnKSsksDKvyrCS3JT3nHLR9LTIBN6mPii5xKy9Ysa1AQ1lK9ytcHCbG2iJJMZ57zpcjEevncvfGkB8RALe6GAthrNclA3mosB9b_z1TBPAzUZVh7VZLCsST7RIO1olDKEtZDvG-qGBEdjNS885nxoYe6ASCcEiUZ16Rixo8xw6lBb9l6qUkw3KST29W7_tcSGC3GnWQCN6q_SS-SD90";
 
         JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("https://agaton-sax.com/")
@@ -222,11 +157,6 @@ public class JWTCreatorTest {
                 .withNonStandardClaim("kit", "kat").build();
         DecodedJWT decoded = jwt.decode(signed);
         algorithm.verify(decoded, EncodeType.Base64);
-
-        /*assertThat(signed, is(notNullValue()));
-        String[] parts = signed.split("\\.");
-        String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));*/
     }
 
     @Test
@@ -260,28 +190,6 @@ public class JWTCreatorTest {
         String[] parts = signed.split("\\.");
         String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
         assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));
-    }
-
-    @Test
-    public void shouldAddKeyIdIfAvailableFromECDSAAlgorithmsDELETEEEEEE() throws Exception {
-        ECPrivateKey privateKey = (ECPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_EC_256, "EC");
-        ECDSAKeyProvider provider = mock(ECDSAKeyProvider.class);
-        when(provider.getPrivateKeyId()).thenReturn("RkI5MjI5OUY5ODc1N0Q4QzM0OUYzNkVGMTJDOUEzQkFCOTU3NjE2Rg");
-        when(provider.getPrivateKey()).thenReturn(privateKey);
-
-        String signed = JWTCreator.init()
-                .withKeyId("RkI5MjI5OUY5ODc1N0Q4QzM0OUYzNkVGMTJDOUEzQkFCOTU3NjE2Rg")
-                .withIssuer("auth0")
-                .sign(Algorithm.ECDSA256(provider));
-
-        JWT jwt = JWT.require(Algorithm.ECDSA256(provider)).withIssuer("auth0").build();
-        DecodedJWT decoded = jwt.decode(signed);
-        Algorithm.ECDSA256(provider).verify(decoded, EncodeType.Base64);
-
-        assertThat(signed, is(notNullValue()));
-        String[] parts = signed.split("\\.");
-        String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        //assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));
     }
 
     @Test

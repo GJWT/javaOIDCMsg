@@ -100,48 +100,10 @@ class ECDSAAlgorithm extends Algorithm {
         }
 
         try {
-
-            //create a http request that gets back a response for the jwks uri and then once you get back the response,
-            //parse it to get back the x509 DER string and get the public key from that string
-            //from the public key of that string, pass it into verifySignatureFor()
-            PublicKey publicKey = null;
-            String kid = jwt.getKeyId();
-            String algorithm = jwt.getAlgorithm();
-            if(kid == null) {
-                publicKey = keyProvider.getPublicKeyById(kid);
-            } else if(algorithm.equals("RSA")){
-                //JwkProvider provider = new UrlJwkProvider("https://sandrino.auth0.com/.well-known/jwks.json");
-                JwkProvider provider = new UrlJwkProvider(new File("/Users/jdahmubed/documents/jwksRSA.json").toURI().toURL());//"file:///);
-                Jwk jwk = provider.get(kid);
-                publicKey = jwk.getPublicKey();
-            } /*else if(algorithm.contains("ES")) {
-               // JSONParser parser = new JSONParser();
-               // JSONArray a = (JSONArray) parser.parse(new FileReader("/Users/jdahmubed/documents/jwks.json"));
-
-                JsonObject gsonObject = new JsonObject();
-
-
-                JsonParser parser = new JsonParser();
-                JsonElement jsonElement = parser.parse(new FileReader("/Users/jdahmubed/documents/jwks.json"));
-                gsonObject = jsonElement.getAsJsonObject();
-
-                JSONObject jsonObject = new JSONObject();
-                for(String key : gsonObject.keySet()) {
-                    jsonObject.put(key, gsonObject.get(key));
-                }
-                jsonObject.put("alg", "ES256");
-                JWSHeader jwsHeader = JWSHeader.parse(jsonObject);
-
-                JWSHeader header = new JWSHeader(JWSAlgorithm.ES256);
-                header.setJWKURL(new File("/Users/jdahmubed/documents/jwks.json").toURI().toURL());
-                List<com.nimbusds.jose.util.Base64> list = header.getX509CertChain();
-                System.out.print(list);
-            }*/
-
+            ECPublicKey publicKey = keyProvider.getPublicKeyById(jwt.getKeyId());
             if (publicKey == null) {
                 throw new IllegalStateException("The given Public Key is null.");
             }
-            //pass in publicKey from x509 or the current key (look up)
             boolean valid = crypto.verifySignatureFor(getDescription(), publicKey, contentBytes, JOSEToDER(signatureBytes));
 
             if (!valid) {
