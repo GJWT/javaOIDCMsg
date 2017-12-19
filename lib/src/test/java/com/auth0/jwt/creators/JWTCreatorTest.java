@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
 
 public class JWTCreatorTest {
 
-    private static final String PRIVATE_KEY_FILE_RSA = "src/test/resources/rsa-private-from-Roland.pem";
+    private static final String PRIVATE_KEY_FILE_RSA = "src/test/resources/rsa-private-base16-64.pem";
     private static final String PRIVATE_KEY_FILE_EC_256 = "src/test/resources/ec256-key-private.pem";
 
     @Rule
@@ -93,7 +93,7 @@ public class JWTCreatorTest {
     public void shouldAddKeyIdIfAvailableFromRSAAlgorithms() throws Exception {
         RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
         RSAKeyProvider provider = mock(RSAKeyProvider.class);
-        when(provider.getPrivateKeyId()).thenReturn("my-key-id");
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
         when(provider.getPrivateKey()).thenReturn(privateKey);
 
         String signed = JWTCreator.init()
@@ -102,7 +102,7 @@ public class JWTCreatorTest {
         assertThat(signed, is(notNullValue()));
         String[] parts = signed.split("\\.");
         String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));
+        assertThat(headerJson, JsonMatcher.hasEntry("kid", "8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI"));
     }
 
     @Test
@@ -163,7 +163,7 @@ public class JWTCreatorTest {
     public void shouldNotOverwriteKeyIdIfAddedFromRSAAlgorithms() throws Exception {
         RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
         RSAKeyProvider provider = mock(RSAKeyProvider.class);
-        when(provider.getPrivateKeyId()).thenReturn("my-key-id");
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
         when(provider.getPrivateKey()).thenReturn(privateKey);
 
         String signed = JWTCreator.init()
@@ -173,14 +173,14 @@ public class JWTCreatorTest {
         assertThat(signed, is(notNullValue()));
         String[] parts = signed.split("\\.");
         String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));
+        assertThat(headerJson, JsonMatcher.hasEntry("kid", "8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI"));
     }
 
     @Test
     public void shouldAddKeyIdIfAvailableFromECDSAAlgorithms() throws Exception {
         ECPrivateKey privateKey = (ECPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_EC_256, "EC");
         ECDSAKeyProvider provider = mock(ECDSAKeyProvider.class);
-        when(provider.getPrivateKeyId()).thenReturn("my-key-id");
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
         when(provider.getPrivateKey()).thenReturn(privateKey);
 
         String signed = JWTCreator.init()
@@ -189,14 +189,14 @@ public class JWTCreatorTest {
         assertThat(signed, is(notNullValue()));
         String[] parts = signed.split("\\.");
         String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));
+        assertThat(headerJson, JsonMatcher.hasEntry("kid", "8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI"));
     }
 
     @Test
     public void shouldNotOverwriteKeyIdIfAddedFromECDSAAlgorithms() throws Exception {
         ECPrivateKey privateKey = (ECPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_EC_256, "EC");
         ECDSAKeyProvider provider = mock(ECDSAKeyProvider.class);
-        when(provider.getPrivateKeyId()).thenReturn("my-key-id");
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
         when(provider.getPrivateKey()).thenReturn(privateKey);
 
         String signed = JWTCreator.init()
@@ -206,7 +206,7 @@ public class JWTCreatorTest {
         assertThat(signed, is(notNullValue()));
         String[] parts = signed.split("\\.");
         String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));
+        assertThat(headerJson, JsonMatcher.hasEntry("kid", "8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI"));
     }
 
     @Test
