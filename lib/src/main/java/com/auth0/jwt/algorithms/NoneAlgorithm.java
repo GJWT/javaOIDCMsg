@@ -60,6 +60,11 @@ class NoneAlgorithm extends Algorithm {
     }
 
     @Override
+    public void verifyWithX509(DecodedJWT jwt, EncodeType encodeType, String jwksFile, String pemFile) throws Exception {
+        throw new UnsupportedOperationException("X509 is not supported for None algorithm");
+    }
+
+    @Override
     public byte[] sign(byte[] contentBytes) throws SignatureGenerationException {
         return new byte[0];
     }

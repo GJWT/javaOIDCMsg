@@ -78,6 +78,26 @@ public class JWT {
      * @throws TokenExpiredException          if the token has expired.
      * @throws InvalidClaimException          if a claim contained a different value than the expected one.
      */
+    public DecodedJWT decodeWithX509(String token, String jwksFile, String pemFile) throws Exception {
+        DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base64);
+        VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
+        algorithm.verifyWithX509(jwt, EncodeType.Base64, jwksFile, pemFile);
+        VerificationAndAssertion.verifyClaims(clock, jwt, claims);
+        return jwt;
+    }
+
+    /**
+     * Convert the given token to a DecodedJWT
+     * <p>
+     * Note that this method <b>doesn't verify the token's signature!</b> Use it only if you trust the token or you already verified it.
+     *
+     * @param token with jwt format as string.
+     * @return a decoded JWT.
+     * @throws AlgorithmMismatchException     if the algorithm stated in the token's header it's not equal to the one defined in the {@link JWT}.
+     * @throws SignatureVerificationException if the signature is invalid.
+     * @throws TokenExpiredException          if the token has expired.
+     * @throws InvalidClaimException          if a claim contained a different value than the expected one.
+     */
     public DecodedJWT decode16Bytes(String token) throws Exception {
         DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base16);
         VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
@@ -98,10 +118,50 @@ public class JWT {
      * @throws TokenExpiredException          if the token has expired.
      * @throws InvalidClaimException          if a claim contained a different value than the expected one.
      */
+    public DecodedJWT decode16BytesWithX509(String token, String jwksFile, String pemFile) throws Exception {
+        DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base16);
+        VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
+        algorithm.verifyWithX509(jwt, EncodeType.Base16, jwksFile, pemFile);
+        VerificationAndAssertion.verifyClaims(clock, jwt, claims);
+        return jwt;
+    }
+
+    /**
+     * Convert the given token to a DecodedJWT
+     * <p>
+     * Note that this method <b>doesn't verify the token's signature!</b> Use it only if you trust the token or you already verified it.
+     *
+     * @param token with jwt format as string.
+     * @return a decoded JWT.
+     * @throws AlgorithmMismatchException     if the algorithm stated in the token's header it's not equal to the one defined in the {@link JWT}.
+     * @throws SignatureVerificationException if the signature is invalid.
+     * @throws TokenExpiredException          if the token has expired.
+     * @throws InvalidClaimException          if a claim contained a different value than the expected one.
+     */
     public DecodedJWT decode32Bytes(String token) throws Exception {
         DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base32);
         VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
         algorithm.verify(jwt, EncodeType.Base32);
+        VerificationAndAssertion.verifyClaims(clock, jwt, claims);
+        return jwt;
+    }
+
+    /**
+     * Convert the given token to a DecodedJWT
+     * <p>
+     * Note that this method <b>doesn't verify the token's signature!</b> Use it only if you trust the token or you already verified it.
+     *
+     * @param token with jwt format as string.
+     * @return a decoded JWT.
+     * @throws AlgorithmMismatchException     if the algorithm stated in the token's header it's not equal to the one defined in the {@link JWT}.
+     * @throws SignatureVerificationException if the signature is invalid.
+     * @throws TokenExpiredException          if the token has expired.
+     * @throws InvalidClaimException          if a claim contained a different value than the expected one.
+     */
+    public DecodedJWT decode32BytesWithX509(String token, String jwksFile, String pemFile) throws Exception {
+        DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base32);
+        VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
+        algorithm.verifyWithX509(jwt, EncodeType.Base32, jwksFile, pemFile);
         VerificationAndAssertion.verifyClaims(clock, jwt, claims);
         return jwt;
     }

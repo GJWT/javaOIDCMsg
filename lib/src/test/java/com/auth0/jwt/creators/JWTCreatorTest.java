@@ -119,8 +119,8 @@ public class JWTCreatorTest {
                 .sign(algorithm, EncodeType.Base16);
 
         JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
-        DecodedJWT decoded = jwt.decode16Bytes(signed);
-        algorithm.verify(decoded, EncodeType.Base16);
+        DecodedJWT decoded = jwt.decode16BytesWithX509(signed,"./jwksRSA.json", "./src/main/java/com/auth0/jwt/algorithms/jwks.pem");
+        algorithm.verifyWithX509(decoded, EncodeType.Base16,"./jwksRSA.json", "./src/main/java/com/auth0/jwt/algorithms/jwks.pem");
     }
 
     @Test
@@ -137,8 +137,8 @@ public class JWTCreatorTest {
                 .sign(algorithm, EncodeType.Base32);
 
         JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
-        DecodedJWT decoded = jwt.decode32Bytes(signed);
-        algorithm.verify(decoded, EncodeType.Base32);
+        DecodedJWT decoded = jwt.decode32BytesWithX509(signed, "./jwksRSA.json", "./src/main/java/com/auth0/jwt/algorithms/jwks.pem");
+        algorithm.verifyWithX509(decoded, EncodeType.Base32,"./jwksRSA.json", "./src/main/java/com/auth0/jwt/algorithms/jwks.pem");
     }
 
     @Test
@@ -160,8 +160,8 @@ public class JWTCreatorTest {
         JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("https://agaton-sax.com/")
                 .withNonStandardClaim("foo","bar")
                 .withNonStandardClaim("kit", "kat").build();
-        DecodedJWT decoded = jwt.decode(signed);
-        algorithm.verify(decoded, EncodeType.Base64);
+        DecodedJWT decoded = jwt.decodeWithX509(signed, "./jwksRSA.json", "./src/main/java/com/auth0/jwt/algorithms/jwks.pem");
+        algorithm.verifyWithX509(decoded, EncodeType.Base64, "./jwksRSA.json", "./src/main/java/com/auth0/jwt/algorithms/jwks.pem");
     }
 
 

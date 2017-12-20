@@ -115,6 +115,11 @@ class ECDSAAlgorithm extends Algorithm {
     }
 
     @Override
+    public void verifyWithX509(DecodedJWT jwt, EncodeType encodeType, String jwksFile, String pemFile) throws Exception {
+        throw new UnsupportedOperationException("X509 is not supported for ECDSA");
+    }
+
+    @Override
     public byte[] sign(byte[] contentBytes) throws SignatureGenerationException {
         try {
             ECPrivateKey privateKey = keyProvider.getPrivateKey();

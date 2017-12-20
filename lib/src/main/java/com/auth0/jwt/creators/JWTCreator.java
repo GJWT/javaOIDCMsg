@@ -427,58 +427,30 @@ public final class JWTCreator {
 
     private String signBase32Encoding() throws UnsupportedEncodingException{
         Base32 base32 = new Base32();
-        System.out.println("headerJson: " + headerJson);
-        System.out.println("headerJson bytes: " + Arrays.toString(headerJson.getBytes()));
         String header = URLEncoder.encode(headerJson, "UTF-8");
         String payload = URLEncoder.encode(payloadJson, "UTF-8");
 
         byte[] bHeader = header.getBytes("UTF-8");
         String encodedHeader = base32.encodeAsString(bHeader);
 
-
-        System.out.println("header after base64 encoding: " + URLDecoder.decode(new String(base32.decode(encodedHeader))).getBytes());
-        System.out.println("header after base64 encoding bytes: " + Arrays.toString(URLDecoder.decode(new String(base32.decode(encodedHeader))).getBytes()));
-        System.out.println("header after base64 decoding: " + new String(URLDecoder.decode(new String(base32.decode(encodedHeader))).getBytes()));
-        System.out.println("header after base64 decoding bytes: " + Arrays.toString(URLDecoder.decode(new String(base32.decode(encodedHeader))).getBytes()));
-
-        System.out.println("Are they equal I? " + Arrays.equals(headerJson.getBytes(), URLDecoder.decode(new String(base32.decode(encodedHeader))).getBytes()));
-
         byte[] bPayload = payload.getBytes("UTF-8");
         String encodedPayload = base32.encodeAsString(bPayload);
-        System.out.println("payload after base64 encoding: " + encodedPayload);
-        System.out.println("payload after base64 encoding bytes: " + Arrays.toString(encodedPayload.getBytes()));
 
         String content = String.format("%s.%s", encodedHeader, encodedPayload);
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
-        System.out.println("signature bytes: " + Arrays.toString(signatureBytes));
         String signature = base32.encodeAsString(signatureBytes);
         String signatureFinal = URLEncoder.encode(signature, "UTF-8");
-        System.out.println("signature after base64 encoding bytes: " + Arrays.toString(signature.getBytes()));
-        bytesBeforeBeingDecoded = signatureBytes;
 
         return String.format("%s.%s", content, signatureFinal);
     }
 
     private String defaultSign() throws SignatureGenerationException {
-        System.out.println("headerJson: " + headerJson);
-        System.out.println("headerJson bytes: " + Arrays.toString(headerJson.getBytes()));
         String header = Base64.encodeBase64URLSafeString(headerJson.getBytes(StandardCharsets.UTF_8));
-        System.out.println("header after base64 encoding: " + header);
-        System.out.println("header after base64 encoding bytes: " + Arrays.toString(header.getBytes()));
-        System.out.println("header after base64 decoding: " + new String(Base64.decodeBase64(header)));
-        System.out.println("header after base64 decoding bytes: " + Arrays.toString(Base64.decodeBase64(header)));
-
-        System.out.println("Are they equal I? " + Arrays.equals(headerJson.getBytes(), Base64.decodeBase64(header)));
         String payload = Base64.encodeBase64URLSafeString(payloadJson.getBytes(StandardCharsets.UTF_8));
-        System.out.println("payload after base64 encoding: " + payload);
-        System.out.println("payload after base64 encoding bytes: " + Arrays.toString(payload.getBytes()));
         String content = String.format("%s.%s", header, payload);
 
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
-        System.out.println("signature bytes: " + Arrays.toString(signatureBytes));
         String signature = Base64.encodeBase64URLSafeString(signatureBytes);
-        System.out.println("signature after base64 encoding bytes: " + Arrays.toString(signature.getBytes()));
-        bytesBeforeBeingDecoded = signatureBytes;
         return String.format("%s.%s", content, signature);
     }
 }

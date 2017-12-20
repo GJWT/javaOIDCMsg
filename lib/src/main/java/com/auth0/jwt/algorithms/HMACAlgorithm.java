@@ -100,6 +100,11 @@ class HMACAlgorithm extends Algorithm {
     }
 
     @Override
+    public void verifyWithX509(DecodedJWT jwt, EncodeType encodeType, String jwksFile, String pemFile) throws Exception {
+        throw new UnsupportedOperationException("X509 is not supported for HMAC");
+    }
+
+    @Override
     public byte[] sign(byte[] contentBytes) throws SignatureGenerationException {
         try {
             return crypto.createSignatureFor(getDescription(), secret, contentBytes);
