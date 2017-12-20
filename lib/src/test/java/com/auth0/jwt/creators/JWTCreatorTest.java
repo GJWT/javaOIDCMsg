@@ -150,7 +150,12 @@ public class JWTCreatorTest {
         Algorithm algorithm = Algorithm.RSA256(provider);
 
         String signed =
-                "eyJhbGciOiJSUzI1NiIsImtpZCI6IjhSR29WZFZqRDhmSXR5UjNGRm8waFZOYVpZdFBHd29QNnhLaTllX1Y3YkkifQ.eyJpc3MiOiAiaHR0cHM6Ly9hZ2F0b24tc2F4LmNvbS8iLCAiaWF0IjogMTUxMzYyODc3OSwgImV4cCI6IDE1MTM3MTUxNzksICJraWQiOiAiOFJHb1ZkVmpEOGZJdHlSM0ZGbzBoVk5hWll0UEd3b1A2eEtpOWVfVjdiSSIsICJmb28iOiAiYmFyIiwgImtpdCI6ICJrYXQifQ.OMSHRJRW3J2MHFvPZhRaxxJhHJ5WFBaRzdPb3KpxWsF1Y3Or4BH-2pL8HE1CAoUTTqGYvNSShi2O-NFupGmaY5SRehOma_6XHcL2OrKKwFkG21M57T13_qagG7VUF7n7yhaLXMKWNli9JZ9iwHqLfA__j2X4XqxqPRxr5LxLXz-eynRp1jax2-eqiAMVYdSnH02e_bmnO89nIys6VUPoOAQFJjoPNtUo0urG8vTsiFPHFCgWUljDUFIu-TiRVTu5gJea-cigUJeG7i_4cp0qkWHo7POrS4Dq-gyzUSbkqBNdg-4LAAU40staTA236MPekQkzeTQlHa9418davEvfboYnCYeAhhX9Pnn7YotZSsD6S9HnTh5OjJ5E3O_Y-5MSK-eIYHV79FLQbaG1Xmcuv7WsRyhPadAwmNYLuWBtgaQDVV58ZmZPB9EaBDczqJDymjLkz2NpfLVI1kKFFDdLDC6ZBnKSsksDKvyrCS3JT3nHLR9LTIBN6mPii5xKy9Ysa1AQ1lK9ytcHCbG2iJJMZ57zpcjEevncvfGkB8RALe6GAthrNclA3mosB9b_z1TBPAzUZVh7VZLCsST7RIO1olDKEtZDvG-qGBEdjNS885nxoYe6ASCcEiUZ16Rixo8xw6lBb9l6qUkw3KST29W7_tcSGC3GnWQCN6q_SS-SD90";
+                JWTCreator.init()
+                        .withKeyId("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI")
+                        .withIssuer("https://agaton-sax.com/")
+                        .withNonStandardClaim("foo","bar")
+                        .withNonStandardClaim("kit", "kat")
+                        .sign(algorithm, EncodeType.Base64);
 
         JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("https://agaton-sax.com/")
                 .withNonStandardClaim("foo","bar")
@@ -158,6 +163,7 @@ public class JWTCreatorTest {
         DecodedJWT decoded = jwt.decode(signed);
         algorithm.verify(decoded, EncodeType.Base64);
     }
+
 
     @Test
     public void shouldNotOverwriteKeyIdIfAddedFromRSAAlgorithms() throws Exception {

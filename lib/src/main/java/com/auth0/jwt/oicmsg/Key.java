@@ -1,4 +1,3 @@
-/*
 package com.auth0.jwt.oicmsg;
 
 import com.auth0.jwt.exceptions.oicmsg_exceptions.HeaderError;
@@ -122,7 +121,7 @@ public class Key {
         return hmap;
     }
 
-    public Map<String, String> serialize() {
+    public List<Key> serialize() {
         Map<String, String> hmap = common();
         this.key.
         //TODO
@@ -235,4 +234,3 @@ public class Key {
         return base64ToLong(item);
     }
 }
-*/
