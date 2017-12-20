@@ -19,7 +19,11 @@
 
 package com.auth0.jwt.algorithms;
 
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.creators.EncodeType;
+import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -27,19 +31,27 @@ import com.auth0.jwt.interfaces.RSAKeyProvider;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.util.io.pem.PemReader;
 
+import javax.xml.bind.DatatypeConverter;
+import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
+import java.security.*;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 class RSAAlgorithm extends Algorithm {
 
     private final RSAKeyProvider keyProvider;
     private final CryptoHelper crypto;
+    public static byte[] bytesAfterBeingDecoded;
 
     //Visible for testing
     RSAAlgorithm(CryptoHelper crypto, String id, String algorithm, RSAKeyProvider keyProvider) throws IllegalArgumentException {
@@ -56,7 +68,64 @@ class RSAAlgorithm extends Algorithm {
     }
 
     @Override
+    public void verifyWithX509(DecodedJWT jwt, EncodeType encodeType, String jwksFile, String pemFile) throws Exception {
+        List<byte[]> byteArrayList = decode(jwt, encodeType);
+        byte[] contentBytes = byteArrayList.get(0);
+        byte[] signatureBytes = byteArrayList.get(1);
+        try {
+            PublicKey publicKey;
+            if(jwksFile != null && !jwksFile.isEmpty() && jwksFile.endsWith(".json")) {
+                String kid = jwt.getKeyId();
+                JwkProvider provider = new UrlJwkProvider(new File(jwksFile).toURI().toURL());
+                Jwk jwk = provider.get(kid);
+                String cert = jwk.getCertificateChain().get(0);
+                try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream("./jwks.cert"), "utf-8"))) {
+                    writer.write("-----BEGIN CERTIFICATE-----");
+                    writer.append("\n" + cert + "\n");
+                    writer.append("-----END CERTIFICATE-----");
+                }
+
+                FileReader file = new FileReader(pemFile);
+                PemReader reader = new PemReader(file);
+                X509EncodedKeySpec caKeySpec = new X509EncodedKeySpec(reader.readPemObject().getContent());
+                KeyFactory kf = KeyFactory.getInstance("RSA");
+                publicKey = kf.generatePublic(caKeySpec);
+            } else {
+                throw new IllegalArgumentException("Not a proper jwks file");
+            }
+            if (publicKey == null) {
+                throw new IllegalStateException("The given Public Key is null.");
+            }
+            boolean valid = crypto.verifySignatureFor(getDescription(), publicKey, contentBytes, signatureBytes);
+            if (!valid) {
+                throw new SignatureVerificationException(this);
+            }
+        } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException | IllegalStateException e) {
+            throw new SignatureVerificationException(this, e);
+        }
+    }
+
+    @Override
     public void verify(DecodedJWT jwt, EncodeType encodeType) throws Exception {
+        List<byte[]> byteArrayList = decode(jwt, encodeType);
+        byte[] contentBytes = byteArrayList.get(0);
+        byte[] signatureBytes = byteArrayList.get(1);
+        try {
+            PublicKey publicKey = keyProvider.getPublicKeyById(jwt.getKeyId());
+            if (publicKey == null) {
+                throw new IllegalStateException("The given Public Key is null.");
+            }
+            boolean valid = crypto.verifySignatureFor(getDescription(), publicKey, contentBytes, signatureBytes);
+            if (!valid) {
+                throw new SignatureVerificationException(this);
+            }
+        } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException | IllegalStateException e) {
+            throw new SignatureVerificationException(this, e);
+        }
+    }
+
+    private List<byte[]> decode(DecodedJWT jwt, EncodeType encodeType) throws Exception{
         byte[] contentBytes = String.format("%s.%s", jwt.getHeader(), jwt.getPayload()).getBytes(StandardCharsets.UTF_8);
         byte[] signatureBytes = null;
         String signature = jwt.getSignature();
@@ -76,18 +145,7 @@ class RSAAlgorithm extends Algorithm {
                 break;
         }
 
-        try {
-            RSAPublicKey publicKey = keyProvider.getPublicKeyById(jwt.getKeyId());
-            if (publicKey == null) {
-                throw new IllegalStateException("The given Public Key is null.");
-            }
-            boolean valid = crypto.verifySignatureFor(getDescription(), publicKey, contentBytes, signatureBytes);
-            if (!valid) {
-                throw new SignatureVerificationException(this);
-            }
-        } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException | IllegalStateException e) {
-            throw new SignatureVerificationException(this, e);
-        }
+        return new ArrayList<>(Arrays.asList(contentBytes, signatureBytes));
     }
 
     @Override

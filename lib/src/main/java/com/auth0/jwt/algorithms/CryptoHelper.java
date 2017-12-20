@@ -34,7 +34,9 @@ class CryptoHelper {
         mac.init(new SecretKeySpec(secretBytes, algorithm));
         return mac.doFinal(contentBytes);
     }
-
+//get back public key from x509 DER string
+    //use public key to verify (public key might be in pem format)
+    //pass
     boolean verifySignatureFor(String algorithm, PublicKey publicKey, byte[] contentBytes, byte[] signatureBytes) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         final Signature s = Signature.getInstance(algorithm);
         s.initVerify(publicKey);
