@@ -48,56 +48,56 @@ public class JWTTest {
     @Test
     public void testWithNbf() {
         thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("you shouldn't be calling this method");
+        thrown.expectMessage("this method has not been implemented");
         JWT.require(Algorithm.none()).withNbf(5);
     }
 
     @Test
     public void testCreateVerifierForRisc() {
         thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("you shouldn't be calling this method");
+        thrown.expectMessage("this method has not been implemented");
         JWT.require(Algorithm.none()).createVerifierForRisc(null, null, null, 5, 5, 5);
     }
 
     @Test
     public void testCreateVerifierForScoped() {
         thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("you shouldn't be calling this method");
+        thrown.expectMessage("this method has not been implemented");
         JWT.require(Algorithm.none()).createVerifierForScoped(null, null, null, 5, 5);
     }
 
     @Test
     public void testCreateVerifierForImplicit() {
         thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("you shouldn't be calling this method");
+        thrown.expectMessage("this method has not been implemented");
         JWT.require(Algorithm.none()).createVerifierForImplicit(null, null,  5);
     }
 
     @Test
     public void testCreateVerifierForFB() {
         thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("you shouldn't be calling this method");
+        thrown.expectMessage("this method has not been implemented");
         JWT.require(Algorithm.none()).createVerifierForFb(null, null);
     }
 
     @Test
     public void testCreateVerifierForAccess() {
         thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("you shouldn't be calling this method");
+        thrown.expectMessage("this method has not been implemented");
         JWT.require(Algorithm.none()).createVerifierForAccess(null, null, 5, 5);
     }
 
     @Test
     public void testWithUserId() {
         thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("you shouldn't be calling this method");
+        thrown.expectMessage("this method has not been implemented");
         JWT.require(Algorithm.none()).withUserId(null);
     }
 
     @Test
     public void testWithAppId() {
         thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("you shouldn't be calling this method");
+        thrown.expectMessage("this method has not been implemented");
         JWT.require(Algorithm.none()).withAppId(null);
     }
 

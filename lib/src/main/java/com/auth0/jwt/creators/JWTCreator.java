@@ -39,9 +39,11 @@ import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * The JWTCreator class holds the sign method to generate a complete JWT (with Signature) from a given Header and Payload content.
@@ -448,7 +450,6 @@ public final class JWTCreator {
 
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
         String signature = Base64.encodeBase64URLSafeString(signatureBytes);
-
         return String.format("%s.%s", content, signature);
     }
 }

@@ -538,7 +538,7 @@ public class GoogleJwtCreatorTest {
     @Test
     public void testCreateVerifierForExtended() throws Exception{
         thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("you shouldn't be calling this method");
+        thrown.expectMessage("this method has not been implemented");
         GoogleVerification verification = GoogleJWT.require(Algorithm.HMAC256("secret"));
         verification.createVerifierForExtended(null, null, null, null, null, 1L, 1L, 1L);
     }

@@ -86,7 +86,7 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
 
     @Override
     public Verification createVerifierForExtended(String picture, String email, List<String> issuer, List<String> audience, String name, long nbf, long expLeeway, long iatLeeway) {
-        throw new UnsupportedOperationException("you shouldn't be calling this method");
+        throw new UnsupportedOperationException("this method has not been implemented");
     }
 
     /**

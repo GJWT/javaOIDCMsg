@@ -30,7 +30,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.binary.StringUtils;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -97,6 +97,11 @@ class HMACAlgorithm extends Algorithm {
         } catch (IllegalStateException | InvalidKeyException | NoSuchAlgorithmException e) {
             throw new SignatureVerificationException(this, e);
         }
+    }
+
+    @Override
+    public void verifyWithX509(DecodedJWT jwt, EncodeType encodeType, String jwksFile, String pemFile) throws Exception {
+        throw new UnsupportedOperationException("X509 is not supported for HMAC");
     }
 
     @Override
