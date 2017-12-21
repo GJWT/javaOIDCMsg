@@ -23,6 +23,7 @@ import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.creators.EncodeType;
+import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -63,8 +64,8 @@ class RSAAlgorithm extends Algorithm {
     }
 
     @Override
-    public void verifyWithX509(DecodedJWT jwt, EncodeType encodeType, String jwksFile, String pemFile) throws Exception {
-        List<byte[]> byteArrayList = decode(jwt, encodeType);
+    public void verifyWithX509(DecodedJWT jwt, String jwksFile, String pemFile) throws Exception {
+        List<byte[]> byteArrayList = fetchContentAndSignatureByteArrays(jwt, JWTCreator.Builder.encodeTypeStatic);
         byte[] contentBytes = byteArrayList.get(0);
         byte[] signatureBytes = byteArrayList.get(1);
         try {
@@ -103,7 +104,7 @@ class RSAAlgorithm extends Algorithm {
 
     @Override
     public void verify(DecodedJWT jwt, EncodeType encodeType) throws Exception {
-        List<byte[]> byteArrayList = decode(jwt, encodeType);
+        List<byte[]> byteArrayList = fetchContentAndSignatureByteArrays(jwt, encodeType);
         byte[] contentBytes = byteArrayList.get(0);
         byte[] signatureBytes = byteArrayList.get(1);
         try {
@@ -120,7 +121,7 @@ class RSAAlgorithm extends Algorithm {
         }
     }
 
-    private List<byte[]> decode(DecodedJWT jwt, EncodeType encodeType) throws Exception{
+    private List<byte[]> fetchContentAndSignatureByteArrays(DecodedJWT jwt, EncodeType encodeType) throws Exception{
         byte[] contentBytes = String.format("%s.%s", jwt.getHeader(), jwt.getPayload()).getBytes(StandardCharsets.UTF_8);
         byte[] signatureBytes = null;
         String signature = jwt.getSignature();

@@ -29,21 +29,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.apache.commons.codec.Encoder;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.binary.StringUtils;
 
 import java.io.*;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * The JWTCreator class holds the sign method to generate a complete JWT (with Signature) from a given Header and Payload content.
@@ -87,6 +82,7 @@ public final class JWTCreator {
         private final Map<String, Object> payloadClaims;
         private Map<String, Object> headerClaims;
         private boolean isNoneAlgorithmAllowed;
+        public static EncodeType encodeTypeStatic = null;
 
         Builder() {
             this.payloadClaims = new HashMap<>();
@@ -379,12 +375,15 @@ public final class JWTCreator {
             switch (encodeType) {
                 case Base16:
                     token = jwtCreator.signBase16Encoding();
+                    encodeTypeStatic = EncodeType.Base16;
                     break;
                 case Base32:
                     token = jwtCreator.signBase32Encoding();
+                    encodeTypeStatic = EncodeType.Base32;
                     break;
                 case Base64:
                     token = jwtCreator.defaultSign();
+                    encodeTypeStatic = EncodeType.Base64;
                     break;
             }
 

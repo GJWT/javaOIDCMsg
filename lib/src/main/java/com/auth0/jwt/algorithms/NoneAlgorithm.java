@@ -60,7 +60,7 @@ class NoneAlgorithm extends Algorithm {
     }
 
     @Override
-    public void verifyWithX509(DecodedJWT jwt, EncodeType encodeType, String jwksFile, String pemFile) throws Exception {
+    public void verifyWithX509(DecodedJWT jwt, String jwksFile, String pemFile) throws Exception {
         throw new UnsupportedOperationException("X509 is not supported for None algorithm");
     }
 

@@ -385,7 +385,7 @@ public abstract class Algorithm {
      */
     public abstract void verify(DecodedJWT jwt, EncodeType encodeType) throws Exception;
 
-    public abstract void verifyWithX509(DecodedJWT jwt, EncodeType encodeType, String jwksFile, String pemFile) throws Exception;
+    public abstract void verifyWithX509(DecodedJWT jwt, String jwksFile, String pemFile) throws Exception;
 
     /**
      * Sign the given content using this Algorithm instance.

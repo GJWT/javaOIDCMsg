@@ -81,7 +81,7 @@ public class JWT {
     public DecodedJWT decodeWithX509(String token, String jwksFile, String pemFile) throws Exception {
         DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base64);
         VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
-        algorithm.verifyWithX509(jwt, EncodeType.Base64, jwksFile, pemFile);
+        algorithm.verifyWithX509(jwt, jwksFile, pemFile);
         VerificationAndAssertion.verifyClaims(clock, jwt, claims);
         return jwt;
     }
@@ -121,7 +121,7 @@ public class JWT {
     public DecodedJWT decode16BytesWithX509(String token, String jwksFile, String pemFile) throws Exception {
         DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base16);
         VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
-        algorithm.verifyWithX509(jwt, EncodeType.Base16, jwksFile, pemFile);
+        algorithm.verifyWithX509(jwt, jwksFile, pemFile);
         VerificationAndAssertion.verifyClaims(clock, jwt, claims);
         return jwt;
     }
@@ -161,7 +161,7 @@ public class JWT {
     public DecodedJWT decode32BytesWithX509(String token, String jwksFile, String pemFile) throws Exception {
         DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base32);
         VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
-        algorithm.verifyWithX509(jwt, EncodeType.Base32, jwksFile, pemFile);
+        algorithm.verifyWithX509(jwt, jwksFile, pemFile);
         VerificationAndAssertion.verifyClaims(clock, jwt, claims);
         return jwt;
     }
