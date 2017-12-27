@@ -21,7 +21,7 @@ public class RSAKey extends Key {
     private String dq;
     private String di;
     private String qi;
-    private String key;
+    private RSAKey key;
 
     public RSAKey(String kty, String alg, String use, String kid, String x5c, String x5t, String x5u, Key key, String n,
                   String e, String d, String p, String q, String dp, String dq, String di, String qi, Map<String, String> args) {
@@ -76,12 +76,12 @@ public class RSAKey extends Key {
             }
 
             List<String> list = new ArrayList<>(Arrays.asList(this.n, this.e));
-            if(this.d != null && !this.d.isEmpty()) {
+            if (this.d != null && !this.d.isEmpty()) {
                 list.add(this.d);
             }
-            if(this.p != null && !this.p.isEmpty()) {
+            if (this.p != null && !this.p.isEmpty()) {
                 list.add(this.p);
-                if(this.q != null && !this.q.isEmpty()) {
+                if (this.q != null && !this.q.isEmpty()) {
                     list.add(this.q);
                 }
                 this.key = RSA.construct(tuple(list));  //TODO
@@ -91,14 +91,14 @@ public class RSAKey extends Key {
         } else if (this.x5c != null) {
             Base64.decode((int) this.x5c.getBytes()[0]);
 
-            if(this.x5t != null) {
-                if(Base64.decode()   != )
+            if (this.x5t != null) {
+                if (Base64.decode() !=)
 
             }
 
             this.key =;
             this.split();
-            if(this.x5c.length() > 1) {
+            if (this.x5c.length() > 1) {
 
             }
         } else {
@@ -106,8 +106,8 @@ public class RSAKey extends Key {
         }
     }
 
-    public Map<String,String> serialize(boolean isPrivate) throws SerializationNotPossible {
-        if(this.key == null) {
+    public Map<String, String> serialize(boolean isPrivate) throws SerializationNotPossible {
+        if (this.key == null) {
             throw new SerializationNotPossible();
         }
 
@@ -115,10 +115,10 @@ public class RSAKey extends Key {
 
         publicMembers.addAll(longs);
         List<String> publicLongs = new ArrayList<>(publicMembers);
-        for(String param : publicLongs) {
+        for (String param : publicLongs) {
             try {
                 Object item = this.getClass().getField(param).get(this);
-                if(item != null) {
+                if (item != null) {
                     args.put(param, longToBase64(item));
                 }
             } catch (Exception e1) {
@@ -126,9 +126,9 @@ public class RSAKey extends Key {
             }
         }
 
-        if(isPrivate) {
-            for(String param : longs) {
-                if(!isPrivate && new ArrayList<>(Arrays.asList("d", "p", "q", "dp", "dq", "di",
+        if (isPrivate) {
+            for (String param : longs) {
+                if (!isPrivate && new ArrayList<>(Arrays.asList("d", "p", "q", "dp", "dq", "di",
                         "qi")).contains(param)) {
                     continue;
                 }
@@ -151,34 +151,31 @@ public class RSAKey extends Key {
         this.n = this.key.n;
         this.e = this.key.e;
 
-        try {
-            this.d = this.key.d;
-        } catch (AttributeError e) {
-
-        } finally {
-            Object item = null;
-            for(String param : new ArrayList<>(Arrays.asList("p", "q"))) {
-                try {
-                    item = this.getClass().getField(param).get(this);
-                } catch (Exception e1) {
-                    logger.error("Field " + param + " doesn't exist");
-                } finally {
-                    if(item != null) {
-                        //set attribute (which is in the form of a string) to a value
-                    }
+        this.d = this.key.d;
+        Object item = null;
+        for (String param : new ArrayList<>(Arrays.asList("p", "q"))) {
+            try {
+                item = this.getClass().getField(param).get(this);
+            } catch (Exception e1) {
+                logger.error("Field " + param + " doesn't exist");
+            } finally {
+                if (item != null) {
+                    //set attribute (which is in the form of a string) to a value
                 }
             }
         }
     }
 
-    public RSAKey loadKey(Key key) {
+}
+
+    public RSAKey loadKey(RSAKey key) {
         this.key = key;
         this.split();
         return key;
     }
 
     public Key encryptionKey() {
-        if(this.key == null) {
+        if (this.key == null) {
             deserialize();
         }
 
@@ -191,9 +188,4 @@ public class RSAKey extends Key {
     public Map<String, String> serialize() {
         return serialize(false);
     }
-
-    private void split() {
-
-    }
-
 }

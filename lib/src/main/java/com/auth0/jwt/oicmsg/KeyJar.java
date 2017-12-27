@@ -4,7 +4,6 @@ import com.auth0.jwt.exceptions.oicmsg_exceptions.ImportException;
 import com.auth0.jwt.exceptions.oicmsg_exceptions.TypeError;
 import com.auth0.jwt.impl.JWTParser;
 import com.auth0.jwt.jwts.JWT;
-import com.google.common.base.Strings;
 import org.junit.Assert;
 import org.slf4j.LoggerFactory;
 

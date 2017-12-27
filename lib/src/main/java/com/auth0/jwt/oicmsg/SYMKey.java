@@ -1,9 +1,12 @@
 package com.auth0.jwt.oicmsg;
 
 import com.auth0.jwt.exceptions.oicmsg_exceptions.JWKException;
+import org.apache.commons.codec.Charsets;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class SYMKey extends Key{
@@ -38,7 +41,8 @@ public class SYMKey extends Key{
 
     public Map<String,String> serialize(boolean isPrivate) {
         Map<String,String> args = common();
-        args.put("k", b64e(this.k.getBytes()).asUnicode());
+        String k = Utils.urlSafeEncode(this.k);
+        args.put("k", k);
         return args;
     }
 

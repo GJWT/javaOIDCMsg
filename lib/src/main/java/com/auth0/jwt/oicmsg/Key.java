@@ -2,7 +2,9 @@ package com.auth0.jwt.oicmsg;
 
 import com.auth0.jwt.exceptions.oicmsg_exceptions.HeaderError;
 import com.google.common.primitives.Bytes;
+import com.google.gson.Gson;
 import com.nimbusds.jose.util.Base64;
+import org.bouncycastle.util.encoders.Base64;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +28,7 @@ public class Key {
     private static Map<String, Object> longs = new HashMap<String, Object>();
     protected static Set<String> members = new HashSet<>(Arrays.asList("kty", "alg", "use", "kid", "x5c", "x5t", "x5u"));
     public static Set<String> publicMembers = new HashSet<>(Arrays.asList("kty", "alg", "use", "kid", "x5c", "x5t", "x5u"));
-    protected static Set<String> required = new HashSet<>(Arrays.asList("kty"));
+    protected static List<String> required = new ArrayList<>(Arrays.asList("kty"));
 
     public Key(String kty, String alg, String use, String kid, String x5c, String x5t, String x5u, Key key, Map<String, String> args) {
         this.kty = kty;
@@ -121,7 +123,7 @@ public class Key {
         return hmap;
     }
 
-    public List<Key> serialize() {
+    public Key serialize() {
         Map<String, String> hmap = common();
         this.key.
         //TODO
@@ -164,6 +166,7 @@ public class Key {
             }
 
             if (item instanceof Bytes) {
+
                 //item = item.decode('utf-8') ???
                 //TODO
             }
@@ -219,18 +222,60 @@ public class Key {
         return new ArrayList<>(this.toDict().keySet());
     }
 
-    public byte[] thumbprint(String hashFunction, List<String> members); //TODO
+    public byte[] thumbprint(String hashFunction, List<String> members) {
+        if(members == null || members.isEmpty()) {
+            members = required;
+        }
+
+        Collections.sort(members);
+        Key key = this.serialize();
+        String value = null;
+        Map<String,String> hmap = new HashMap<>();
+        for(String member : members) {
+            try {
+                value = key.getClass().getField(member).toString();
+            } catch (NoSuchFieldException e) {
+                logger.error(e.toString());
+            }
+            hmap.put(member, value);
+        }
+
+        String json = new Gson().toJson(hmap);
+        byte[] byteArr = null;
+        switch (hashFunction) {
+            case "SHA-256":
+                byteArr = sha256_digest(json);
+                break;
+            case "SHA-384":
+                byteArr = sha384_digest(json);
+                break;
+            case "SHA-512":
+                byteArr = sha512_digest(json);
+                break;
+            default:
+                throw new IllegalArgumentException("improper hash function");
+        }
+
+        return byteArr;
+    }
 
     public byte[] thumbprint(String hashFunction) {
         thumbprint(hashFunction, null);
     }
 
     public void addKid() {
-        this.kid = Base64.encode(this.thumbprint("SHA-256")).decodeToString();
+        this.kid = new String(Base64.encode(this.thumbprint("SHA-256")));
     }
 
 
-    protected static void deser(Object item) {
+    //https://stackoverflow.com/questions/5729806/encode-string-to-utf-8 can't encode string to utf-8
+    /*protected static void deser(Object item) {
+        if(item instanceof String) {
+            item.en
+        }
+
+
+
         return base64ToLong(item);
-    }
+    }*/
 }

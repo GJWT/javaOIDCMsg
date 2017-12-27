@@ -130,7 +130,7 @@ public class KeyBundle {
     public void doKeys(List<Key> keys) {
         for (Key keyIndex : keys) {
             final String kty = keyIndex.getKty();
-            List<String> usage = harmonizeUsage(keyIndex.getUse());
+            List<String> usage = harmonizeUsage(Arrays.asList(keyIndex.getUse()));
             keys.remove("use");
             boolean flag = false;
             for (String use : usage) {
