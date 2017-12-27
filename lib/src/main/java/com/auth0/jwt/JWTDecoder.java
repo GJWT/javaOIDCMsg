@@ -19,14 +19,15 @@
 
 package com.auth0.jwt;
 
-import com.auth0.jwt.creators.EncodeType;
-import com.auth0.jwt.creators.JWTCreator;
+import com.auth0.jwt.creators.*;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.impl.JWTParser;
+import com.auth0.jwt.impl.PublicClaims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Header;
 import com.auth0.jwt.interfaces.Payload;
+import com.auth0.jwt.jwts.ExtendedJWT;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -34,9 +35,7 @@ import org.apache.commons.codec.binary.StringUtils;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The JWTDecoder class holds the decode method to parse a given JWT token into it's JWT representation.
@@ -47,6 +46,19 @@ public final class JWTDecoder implements DecodedJWT {
     private final String[] parts;
     private final Header header;
     private final Payload payload;
+
+    private static final String NAME = "name";
+    private static final String EMAIL = "email";
+    private static final String PICTURE = "picture";
+    private static final String ISSUER = "iss";
+    private static final String AUDIENCE = "aud";
+    private static final String SUBJECT = "sub";
+    private static final String ISSUED_AT = "iat";
+    private static final String EXP = "exp";
+    private static final String APP_ID = "appId";
+    private static final String USER_ID = "userId";
+    private static final String FACEBOOK = "facebook";
+    private static final String GOOGLE = "google";
 
     public JWTDecoder(String jwt, EncodeType encodeType) throws Exception {
         parts = TokenUtils.splitToken(jwt);
@@ -160,5 +172,32 @@ public final class JWTDecoder implements DecodedJWT {
     @Override
     public String getToken() {
         return String.format("%s.%s.%s", parts[0], parts[1], parts[2]);
+    }
+
+    public static GoogleOrFbJwtCreator decodeJWT(DecodedJWT jwt) {
+        Map<String, Claim> claims = jwt.getClaims();
+        String issuer = claims.get(ISSUER).asString();
+        GoogleOrFbJwtCreator googleOrFbJwtCreator = null;
+        if(issuer.contains(FACEBOOK)) {
+            googleOrFbJwtCreator = FbJwtCreator.build()
+                    .withExp(claims.get(EXP).asDate())
+                    .withIat(claims.get(ISSUED_AT).asDate())
+                    .withAppId(claims.get(APP_ID).asString())
+                    .withUserId(claims.get(USER_ID).asString());
+        } else if(issuer.contains(GOOGLE)) {
+            googleOrFbJwtCreator = GoogleJwtCreator.build()
+                    .withPicture(claims.get(PICTURE).asString())
+                    .withEmail(claims.get(EMAIL).asString())
+                    .withIssuer(claims.get(ISSUER).asString())
+                    .withSubject(claims.get(SUBJECT).asString())
+                    .withAudience(claims.get(AUDIENCE).asString())
+                    .withExp(claims.get(EXP).asDate())
+                    .withIat(claims.get(ISSUED_AT).asDate())
+                    .withName(claims.get(NAME).asString());
+        } else {
+            throw new IllegalArgumentException("Not from a Facebook or Google issuer");
+        }
+
+        return googleOrFbJwtCreator;
     }
 }

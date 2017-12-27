@@ -137,14 +137,14 @@ public class VerificationAndAssertion {
         }
     }
 
-    private static void assertValidAudienceClaim(List<String> audience, List<String> value) {
-        if (audience == null || !audience.containsAll(value) || audience.size() != value.size()) {
+    private static void assertValidAudienceClaim(List<String> actual, List<String> expected) {
+        if (expected == null || !expected.containsAll(actual)) {
             throw new InvalidClaimException("The Claim 'aud' value doesn't contain the required audience.");
         }
     }
 
-    private static void assertValidIssuerClaim(List<String> issuer, List<String> value) {
-        if (issuer == null || !issuer.containsAll(value) || issuer.size() != value.size()) {
+    private static void assertValidIssuerClaim(List<String> actual, List<String> expected) {
+        if (expected == null || !expected.contains(actual.get(0))) {
             throw new InvalidClaimException("The Claim 'iss' value doesn't match the required one.");
         }
     }

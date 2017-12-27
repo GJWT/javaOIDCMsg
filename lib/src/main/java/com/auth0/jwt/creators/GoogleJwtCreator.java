@@ -32,15 +32,15 @@ import java.util.Set;
 /**
  * The GoogleJwtCreator class holds the sign method to generate a complete Google JWT (with Signature) from a given Header and Payload content.
  */
-public class GoogleJwtCreator {
+public class GoogleJwtCreator extends GoogleOrFbJwtCreator {
 
     protected JWTCreator.Builder jwt;
-    protected HashMap<String, Boolean> addedClaims;
+    protected HashMap<String, Boolean> requiredClaims;
     protected Set<String> publicClaims;
 
     public GoogleJwtCreator() {
         jwt = JWT.create();
-        addedClaims = new HashMap<String, Boolean>() {{
+        requiredClaims = new HashMap<String, Boolean>() {{
             put("Name", false);
             put("Email", false);
             put("Picture", false);
@@ -68,7 +68,7 @@ public class GoogleJwtCreator {
      */
     public GoogleJwtCreator withName(String name) {
         jwt.withNonStandardClaim("name", name);
-        addedClaims.put("Name", true);
+        requiredClaims.put("Name", true);
         return this;
     }
 
@@ -80,7 +80,7 @@ public class GoogleJwtCreator {
      */
     public GoogleJwtCreator withEmail(String email) {
         jwt.withNonStandardClaim("email", email);
-        addedClaims.put("Email", true);
+        requiredClaims.put("Email", true);
         return this;
     }
 
@@ -92,33 +92,31 @@ public class GoogleJwtCreator {
      */
     public GoogleJwtCreator withPicture(String picture) {
         jwt.withNonStandardClaim("picture", picture);
-        addedClaims.put("Picture", true);
+        requiredClaims.put("Picture", true);
         return this;
     }
 
     /**
      * Add a specific Issuer ("issuer") claim to the Payload.
-     * Allows for multiple issuers
      *
      * @param issuer the Issuer value.
      * @return this same Builder instance.
      */
-    public GoogleJwtCreator withIssuer(String... issuer) {
+    public GoogleJwtCreator withIssuer(String issuer) {
         jwt.withIssuer(issuer);
-        addedClaims.put("Issuer", true);
+        requiredClaims.put("Issuer", true);
         return this;
     }
 
     /**
      * Add a specific Subject ("subject") claim to the Payload.
-     * Allows for multiple subjects
      *
      * @param subject the Subject value.
      * @return this same Builder instance.
      */
-    public GoogleJwtCreator withSubject(String... subject) {
+    public GoogleJwtCreator withSubject(String subject) {
         jwt.withSubject(subject);
-        addedClaims.put("Subject", true);
+        requiredClaims.put("Subject", true);
         return this;
     }
 
@@ -142,7 +140,7 @@ public class GoogleJwtCreator {
      */
     public GoogleJwtCreator withIat(Date iat) {
         jwt.withIssuedAt(iat);
-        addedClaims.put("Iat", true);
+        requiredClaims.put("Iat", true);
         return this;
     }
 
@@ -246,7 +244,7 @@ public class GoogleJwtCreator {
     public GoogleJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
         jwt.withArrayClaim(name, items);
         if(publicClaims.contains(name))
-            addedClaims.put(name, true);
+            requiredClaims.put(name, true);
         return this;
     }
 
@@ -321,8 +319,8 @@ public class GoogleJwtCreator {
      * @throws Exception if all the standard claims weren't provided
      */
     private void verifyClaims() throws Exception {
-        for(String claim : addedClaims.keySet())
-            if(!addedClaims.get(claim))
+        for(String claim : requiredClaims.keySet())
+            if(!requiredClaims.get(claim))
                 throw new Exception("Standard claim: " + claim + " has not been set");
     }
 

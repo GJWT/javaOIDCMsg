@@ -90,26 +90,24 @@ public class MainTestSignatures {
         String token = GoogleJwtCreator.build()
                 .withPicture(GoogleJwtCreatorTest.PICTURE)
                 .withEmail(GoogleJwtCreatorTest.EMAIL)
-                .withSubject("subject", "subject2")
+                .withSubject("subject")
                 .withAudience("audience", "audience2")
                 .withExp(exp)
                 .withIat(iat)
                 .withName(GoogleJwtCreatorTest.NAME)
-                .withIssuer("issuer", "issuer2")
+                .withIssuer("issuer")
                 .sign(algorithm);
         GoogleVerification verification = GoogleJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForGoogle(GoogleJwtCreatorTest.PICTURE, GoogleJwtCreatorTest.EMAIL, asList("issuer", "issuer2"), asList("audience", "audience2"),
+        JWT verifier = verification.createVerifierForGoogle(GoogleJwtCreatorTest.PICTURE, GoogleJwtCreatorTest.EMAIL, asList("issuer", "issuer2"), asList("audience", "audience2", "audience3"),
                 GoogleJwtCreatorTest.NAME, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String,Claim> claims = jwt.getClaims();
         assertTrue(claims.get(GoogleJwtCreatorTest.PICTURE).asString().equals(GoogleJwtCreatorTest.PICTURE));
         assertTrue(claims.get(GoogleJwtCreatorTest.EMAIL).asString().equals(GoogleJwtCreatorTest.EMAIL));
-        List<String> issuers = claims.get(PublicClaims.ISSUER).asList(String.class);
-        assertTrue(issuers.get(0).equals("issuer"));
-        assertTrue(issuers.get(1).equals("issuer2"));
-        List<String> subjects = claims.get(PublicClaims.SUBJECT).asList(String.class);
-        assertTrue(subjects.get(0).equals("subject"));
-        assertTrue(subjects.get(1).equals("subject2"));
+        String issuer = claims.get(PublicClaims.ISSUER).asString();
+        assertTrue(issuer.equals("issuer"));
+        String subject = claims.get(PublicClaims.SUBJECT).asString();
+        assertTrue(subject.equals("subject"));
         List<String> audience = claims.get(PublicClaims.AUDIENCE).asList(String.class);
         assertTrue(audience.get(0).equals("audience"));
         assertTrue(audience.get(1).equals("audience2"));
@@ -127,12 +125,12 @@ public class MainTestSignatures {
         String token = GoogleJwtCreator.build()
                 .withPicture(GoogleJwtCreatorTest.PICTURE)
                 .withEmail(GoogleJwtCreatorTest.EMAIL)
-                .withSubject("subject", "subject2")
+                .withSubject("subject")
                 .withAudience("audience", "audience2")
                 .withExp(exp)
                 .withIat(iat)
                 .withName(GoogleJwtCreatorTest.NAME)
-                .withIssuer("issuer", "issuer2")
+                .withIssuer("issuer")
                 .sign(algorithm);
         GoogleVerification verification = GoogleJWT.require(algorithm);
         JWT verifier = verification.createVerifierForGoogle(GoogleJwtCreatorTest.PICTURE, GoogleJwtCreatorTest.EMAIL, asList("issuer", "issuer2"), asList("audience"),
@@ -150,12 +148,12 @@ public class MainTestSignatures {
         String token = GoogleJwtCreator.build()
                 .withPicture(GoogleJwtCreatorTest.PICTURE)
                 .withEmail(GoogleJwtCreatorTest.EMAIL)
-                .withSubject("subject", "subject2")
+                .withSubject("subject")
                 .withAudience("audience", "audience2")
                 .withExp(exp)
                 .withIat(iat)
                 .withName(GoogleJwtCreatorTest.NAME)
-                .withIssuer("issuer", "issuer2")
+                .withIssuer("issuer")
                 .sign(algorithm);
         GoogleVerification verification = GoogleJWT.require(algorithm);
         JWT verifier = verification.createVerifierForGoogle(GoogleJwtCreatorTest.PICTURE, GoogleJwtCreatorTest.EMAIL, asList("issuer", "issuer2"), asList("audience", "audience3"),

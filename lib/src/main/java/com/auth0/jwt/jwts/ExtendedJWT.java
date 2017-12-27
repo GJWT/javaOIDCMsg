@@ -25,7 +25,7 @@ import com.auth0.jwt.interfaces.Verification;
 
 import java.util.List;
 
-public class ExtendedJWT extends GoogleJWT implements GoogleVerification{
+public class ExtendedJWT extends GoogleJWT {
 
     ExtendedJWT(Algorithm algorithm) throws IllegalArgumentException {
         super(algorithm);

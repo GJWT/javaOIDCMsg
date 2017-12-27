@@ -26,7 +26,7 @@ import com.auth0.jwt.interfaces.Verification;
 
 import java.util.List;
 
-public class RiscJWT extends JWT.BaseVerification implements Verification {
+public class RiscJWT extends JWT.BaseVerification {
 
     RiscJWT(Algorithm algorithm) throws IllegalArgumentException {
         super(algorithm);

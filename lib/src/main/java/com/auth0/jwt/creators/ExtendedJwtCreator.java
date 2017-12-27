@@ -103,8 +103,8 @@ public class ExtendedJwtCreator extends GoogleJwtCreator{
      * @throws Exception if all the standard claims weren't provided
      */
     private void verifyClaims() throws Exception {
-        for(String claim : addedClaims.keySet())
-            if(!addedClaims.get(claim))
+        for(String claim : requiredClaims.keySet())
+            if(!requiredClaims.get(claim))
                 throw new Exception("Standard claim: " + claim + " has not been set");
     }
 

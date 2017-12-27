@@ -35,12 +35,12 @@ import java.util.Set;
 public class AccessJwtCreator {
 
     protected JWTCreator.Builder jwt;
-    protected HashMap<String, Boolean> addedClaims;
+    protected HashMap<String, Boolean> requiredClaims;
     protected Set<String> publicClaims;
 
     public AccessJwtCreator() {
         jwt = JWT.create();
-        addedClaims = new HashMap<String, Boolean>() {{
+        requiredClaims = new HashMap<String, Boolean>() {{
             put("Issuer", false);
             put("Subject", false);
             put("Iat", false);
@@ -58,27 +58,25 @@ public class AccessJwtCreator {
 
     /**
      * Add a specific Issuer ("issuer") claim to the Payload.
-     * Allows for multiple issuers
      *
      * @param issuer the Issuer value.
      * @return this same Builder instance.
      */
-    public AccessJwtCreator withIssuer(String... issuer) {
+    public AccessJwtCreator withIssuer(String issuer) {
         jwt.withIssuer(issuer);
-        addedClaims.put("Issuer", true);
+        requiredClaims.put("Issuer", true);
         return this;
     }
 
     /**
      * Add a specific Subject ("subject") claim to the Payload.
-     * Allows for multiple subjects
      *
      * @param subject the Subject value.
      * @return this same Builder instance.
      */
-    public AccessJwtCreator withSubject(String... subject) {
+    public AccessJwtCreator withSubject(String subject) {
         jwt.withSubject(subject);
-        addedClaims.put("Subject", true);
+        requiredClaims.put("Subject", true);
         return this;
     }
 
@@ -102,7 +100,7 @@ public class AccessJwtCreator {
      */
     public AccessJwtCreator withIat(Date iat) {
         jwt.withIssuedAt(iat);
-        addedClaims.put("Iat", true);
+        requiredClaims.put("Iat", true);
         return this;
     }
 
@@ -206,7 +204,7 @@ public class AccessJwtCreator {
     public AccessJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
         jwt.withArrayClaim(name, items);
         if(publicClaims.contains(name))
-            addedClaims.put(name, true);
+            requiredClaims.put(name, true);
         return this;
     }
 
@@ -281,8 +279,8 @@ public class AccessJwtCreator {
      * @throws Exception if all the standard claims weren't provided
      */
     private void verifyClaims() throws Exception {
-        for(String claim : addedClaims.keySet())
-            if(!addedClaims.get(claim))
+        for(String claim : requiredClaims.keySet())
+            if(!requiredClaims.get(claim))
                 throw new Exception("Standard claim: " + claim + " has not been set");
     }
 

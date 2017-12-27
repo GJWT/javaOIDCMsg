@@ -32,15 +32,15 @@ import java.util.Set;
 /**
  * The FbJwtCreator class holds the sign method to generate a complete FB JWT (with Signature) from a given Header and Payload content.
  */
-public class FbJwtCreator {
+public class FbJwtCreator extends GoogleOrFbJwtCreator {
 
     protected JWTCreator.Builder jwt;
-    protected HashMap<String, Boolean> addedClaims;
+    protected HashMap<String, Boolean> requiredClaims;
     protected Set<String> publicClaims;
 
     public FbJwtCreator() {
         jwt = JWT.create();
-        addedClaims = new HashMap<String, Boolean>() {{
+        requiredClaims = new HashMap<String, Boolean>() {{
             put("UserId", false);
             put("AppId", false);
             put("Iat", false);
@@ -59,7 +59,7 @@ public class FbJwtCreator {
      */
     public FbJwtCreator withIat(Date iat) {
         jwt.withIssuedAt(iat);
-        addedClaims.put("Iat", true);
+        requiredClaims.put("Iat", true);
         return this;
     }
 
@@ -82,7 +82,7 @@ public class FbJwtCreator {
      */
     public FbJwtCreator withUserId(String userId) {
         jwt.withNonStandardClaim("userId", userId);
-        addedClaims.put("UserId", true);
+        requiredClaims.put("UserId", true);
         return this;
     }
 
@@ -94,7 +94,7 @@ public class FbJwtCreator {
      */
     public FbJwtCreator withAppId(String appId) {
         jwt.withNonStandardClaim("appId", appId);
-        addedClaims.put("AppId", true);
+        requiredClaims.put("AppId", true);
         return this;
     }
 
@@ -187,7 +187,7 @@ public class FbJwtCreator {
     public FbJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
         jwt.withArrayClaim(name, items);
         if(publicClaims.contains(name))
-            addedClaims.put(name, true);
+            requiredClaims.put(name, true);
         return this;
     }
 
@@ -262,8 +262,8 @@ public class FbJwtCreator {
      * @throws Exception if all the standard claims weren't provided
      */
     private void verifyClaims() throws Exception {
-        for(String claim : addedClaims.keySet())
-            if(!addedClaims.get(claim))
+        for(String claim : requiredClaims.keySet())
+            if(!requiredClaims.get(claim))
                 throw new Exception("Standard claim: " + claim + " has not been set");
     }
 

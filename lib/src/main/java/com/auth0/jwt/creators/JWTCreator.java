@@ -115,24 +115,22 @@ public final class JWTCreator {
 
         /**
          * Add a specific Issuer ("iss") claim to the Payload.
-         * Allows for multiple issuers
          *
          * @param issuer the Issuer value.
          * @return this same Builder instance.
          */
-        public Builder withIssuer(String... issuer) {
+        public Builder withIssuer(String issuer) {
             addClaim(PublicClaims.ISSUER, issuer);
             return this;
         }
 
         /**
          * Add a specific Subject ("sub") claim to the Payload.
-         * Allows for multiple subjects
          *
          * @param subject the Subject value.
          * @return this same Builder instance.
          */
-        public Builder withSubject(String... subject) {
+        public Builder withSubject(String subject) {
             addClaim(PublicClaims.SUBJECT, subject);
             return this;
         }

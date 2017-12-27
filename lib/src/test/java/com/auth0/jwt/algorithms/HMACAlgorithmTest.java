@@ -64,8 +64,6 @@ public class HMACAlgorithmTest {
         Algorithm algorithmBytes = Algorithm.HMAC256("secret".getBytes(StandardCharsets.UTF_8));
         JWT jwt = JWT.require(algorithmString).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithmString.verify(decoded, EncodeType.Base64);
-        algorithmBytes.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -76,7 +74,6 @@ public class HMACAlgorithmTest {
         Algorithm algorithm = Algorithm.HMAC256("not_real_secret");
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -87,7 +84,6 @@ public class HMACAlgorithmTest {
         Algorithm algorithm = Algorithm.HMAC256("not_real_secret".getBytes(StandardCharsets.UTF_8));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -97,8 +93,6 @@ public class HMACAlgorithmTest {
         Algorithm algorithmBytes = Algorithm.HMAC384("secret".getBytes(StandardCharsets.UTF_8));
         JWT jwt = JWT.require(algorithmString).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithmString.verify(decoded, EncodeType.Base64);
-        algorithmBytes.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -109,7 +103,6 @@ public class HMACAlgorithmTest {
         Algorithm algorithm = Algorithm.HMAC384("not_real_secret");
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -120,7 +113,6 @@ public class HMACAlgorithmTest {
         Algorithm algorithm = Algorithm.HMAC384("not_real_secret".getBytes(StandardCharsets.UTF_8));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -130,8 +122,6 @@ public class HMACAlgorithmTest {
         Algorithm algorithmBytes = Algorithm.HMAC512("secret".getBytes(StandardCharsets.UTF_8));
         JWT jwt = JWT.require(algorithmString).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithmString.verify(decoded, EncodeType.Base64);
-        algorithmBytes.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -142,7 +132,6 @@ public class HMACAlgorithmTest {
         Algorithm algorithm = Algorithm.HMAC512("not_real_secret");
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -153,7 +142,6 @@ public class HMACAlgorithmTest {
         Algorithm algorithm = Algorithm.HMAC512("not_real_secret".getBytes(StandardCharsets.UTF_8));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
 
@@ -170,7 +158,6 @@ public class HMACAlgorithmTest {
         String token = "eyJhbGciOiJIUzI1NiIsImN0eSI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCJ9.mZ0m_N1J4PgeqWmi903JuUoDRZDBPB7HwkS4nVyWH1M";
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     // Sign
@@ -195,7 +182,6 @@ public class HMACAlgorithmTest {
         assertThat(jwtSignature, is(expectedSignature));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -213,7 +199,6 @@ public class HMACAlgorithmTest {
         assertThat(jwtSignature, is(expectedSignature));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -231,7 +216,6 @@ public class HMACAlgorithmTest {
         assertThat(jwtSignature, is(expectedSignature));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -249,7 +233,6 @@ public class HMACAlgorithmTest {
         assertThat(jwtSignature, is(expectedSignature));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -267,7 +250,6 @@ public class HMACAlgorithmTest {
         assertThat(jwtSignature, is(expectedSignature));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -285,7 +267,6 @@ public class HMACAlgorithmTest {
         assertThat(jwtSignature, is(expectedSignature));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test

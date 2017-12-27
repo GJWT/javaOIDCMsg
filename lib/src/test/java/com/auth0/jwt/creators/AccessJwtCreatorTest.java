@@ -343,8 +343,8 @@ public class AccessJwtCreatorTest {
     }
 
     private static void verifyClaims(Map<String,Claim> claims, Date exp) {
-        assertTrue(claims.get(PublicClaims.ISSUER).asList(String.class).get(0).equals("issuer"));
-        assertTrue(claims.get(PublicClaims.SUBJECT).asList(String.class).get(0).equals("subject"));
+        assertTrue(claims.get(PublicClaims.ISSUER).asString().equals("issuer"));
+        assertTrue(claims.get(PublicClaims.SUBJECT).asString().equals("subject"));
         assertTrue(claims.get(PublicClaims.AUDIENCE).asString().equals("audience"));
         assertTrue(claims.get(PublicClaims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
     }

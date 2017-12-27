@@ -36,12 +36,12 @@ import java.util.Set;
 public class RiscJwtCreator {
 
     protected JWTCreator.Builder jwt;
-    protected HashMap<String, Boolean> addedClaims;
+    protected HashMap<String, Boolean> requiredClaims;
     protected Set<String> publicClaims;
 
     public RiscJwtCreator() {
         jwt = JWT.create();
-        addedClaims = new HashMap<String, Boolean>() {{
+        requiredClaims = new HashMap<String, Boolean>() {{
             put("Jti", false);
             put("Issuer", false);
             put("Subject", false);
@@ -66,33 +66,31 @@ public class RiscJwtCreator {
      */
     public RiscJwtCreator withJWTId(String jwtId) {
         jwt.withJWTId(jwtId);
-        addedClaims.put("Jti", true);
+        requiredClaims.put("Jti", true);
         return this;
     }
 
     /**
      * Add a specific Issuer ("issuer") claim to the Payload.
-     * Allows for multiple issuers
      *
      * @param issuer the Issuer value.
      * @return this same Builder instance.
      */
-    public RiscJwtCreator withIssuer(String... issuer) {
+    public RiscJwtCreator withIssuer(String issuer) {
         jwt.withIssuer(issuer);
-        addedClaims.put("Issuer", true);
+        requiredClaims.put("Issuer", true);
         return this;
     }
 
     /**
      * Add a specific Subject ("subject") claim to the Payload.
-     * Allows for multiple subjects
      *
      * @param subject the Subject value.
      * @return this same Builder instance.
      */
-    public RiscJwtCreator withSubject(String... subject) {
+    public RiscJwtCreator withSubject(String subject) {
         jwt.withSubject(subject);
-        addedClaims.put("Subject", true);
+        requiredClaims.put("Subject", true);
         return this;
     }
 
@@ -116,7 +114,7 @@ public class RiscJwtCreator {
      */
     public RiscJwtCreator withIat(Date iat) {
         jwt.withIssuedAt(iat);
-        addedClaims.put("Iat", true);
+        requiredClaims.put("Iat", true);
         return this;
     }
 
@@ -231,7 +229,7 @@ public class RiscJwtCreator {
     public RiscJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
         jwt.withArrayClaim(name, items);
         if(publicClaims.contains(name))
-            addedClaims.put(name, true);
+            requiredClaims.put(name, true);
         return this;
     }
 
@@ -306,8 +304,8 @@ public class RiscJwtCreator {
      * @throws Exception if all the standard claims weren't provided
      */
     private void verifyClaims() throws Exception {
-        for(String claim : addedClaims.keySet())
-            if(!addedClaims.get(claim))
+        for(String claim : requiredClaims.keySet())
+            if(!requiredClaims.get(claim))
                 throw new Exception("Standard claim: " + claim + " has not been set");
     }
 

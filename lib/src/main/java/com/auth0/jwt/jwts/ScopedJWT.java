@@ -26,7 +26,7 @@ import com.auth0.jwt.interfaces.Verification;
 
 import java.util.List;
 
-public class ScopedJWT extends JWT.BaseVerification implements Verification{
+public class ScopedJWT extends JWT.BaseVerification {
 
     ScopedJWT(Algorithm algorithm) throws IllegalArgumentException {
         super(algorithm);

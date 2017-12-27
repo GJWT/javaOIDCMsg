@@ -24,7 +24,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.Verification;
 
-public class FbJWT extends JWT.BaseVerification implements Verification{
+public class FbJWT extends JWT.BaseVerification{
 
     FbJWT(Algorithm algorithm) throws IllegalArgumentException {
         super(algorithm);
