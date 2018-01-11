@@ -71,7 +71,7 @@ public interface Payload {
     Date getIssuedAt();
 
     /**
-     * Get the value of the "jti" claim, or null if it's not available.
+     * Get the value of the Claims.JWT_ID claim, or null if it's not available.
      *
      * @return the JWT ID value or null.
      */

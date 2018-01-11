@@ -20,7 +20,7 @@
 package com.auth0.jwt.impl;
 
 
-public interface PublicClaims {
+public interface Claims {
 
     //Header
     String ALGORITHM = "alg";
@@ -36,5 +36,13 @@ public interface PublicClaims {
     String ISSUED_AT = "iat";
     String JWT_ID = "jti";
     String AUDIENCE = "aud";
+
+    //Nonstandard
+    String USER_ID = "userId";
+    String APP_ID = "appId";
+    String NAME = "name";
+    String EMAIL = "email";
+    String PICTURE = "picture";
+    String SCOPE = "scope";
 
 }

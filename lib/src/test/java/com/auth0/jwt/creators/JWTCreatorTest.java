@@ -21,9 +21,10 @@ package com.auth0.jwt.creators;
 
 import com.auth0.jwt.JsonMatcher;
 import com.auth0.jwt.PemUtils;
-import com.auth0.jwt.TokenUtils;
+import com.auth0.jwt.utils.TokenUtils;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
@@ -490,7 +491,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeString() throws Exception {
         String jwt = JWTCreator.init()
-                .withNonStandardClaim("name", "value")
+                .withNonStandardClaim(Claims.NAME, "value")
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -501,7 +502,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeInteger() throws Exception {
         String jwt = JWTCreator.init()
-                .withNonStandardClaim("name", 123)
+                .withNonStandardClaim(Claims.NAME, 123)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -512,7 +513,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeLong() throws Exception {
         String jwt = JWTCreator.init()
-                .withNonStandardClaim("name", Long.MAX_VALUE)
+                .withNonStandardClaim(Claims.NAME, Long.MAX_VALUE)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -523,7 +524,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeDouble() throws Exception {
         String jwt = JWTCreator.init()
-                .withNonStandardClaim("name", 23.45)
+                .withNonStandardClaim(Claims.NAME, 23.45)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -534,7 +535,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeBoolean() throws Exception {
         String jwt = JWTCreator.init()
-                .withNonStandardClaim("name", true)
+                .withNonStandardClaim(Claims.NAME, true)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -546,7 +547,7 @@ public class JWTCreatorTest {
     public void shouldAcceptCustomClaimOfTypeDate() throws Exception {
         Date date = new Date(1478891521000L);
         String jwt = JWTCreator.init()
-                .withNonStandardClaim("name", date)
+                .withNonStandardClaim(Claims.NAME, date)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -557,7 +558,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomArrayClaimOfTypeString() throws Exception {
         String jwt = JWTCreator.init()
-                .withArrayClaim("name", new String[]{"text", "123", "true"})
+                .withArrayClaim(Claims.NAME, new String[]{"text", "123", "true"})
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -568,7 +569,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomArrayClaimOfTypeInteger() throws Exception {
         String jwt = JWTCreator.init()
-                .withArrayClaim("name", new Integer[]{1, 2, 3})
+                .withArrayClaim(Claims.NAME, new Integer[]{1, 2, 3})
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -579,7 +580,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomArrayClaimOfTypeLong() throws Exception {
         String jwt = JWTCreator.init()
-                .withArrayClaim("name", new Long[]{1L, 2L, 3L})
+                .withArrayClaim(Claims.NAME, new Long[]{1L, 2L, 3L})
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));

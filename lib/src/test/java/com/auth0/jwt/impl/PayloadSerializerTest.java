@@ -157,7 +157,7 @@ public class PayloadSerializerTest {
 
     @Test
     public void shouldSerializeStrings() throws Exception {
-        ClaimsHolder holder = holderFor("name", "Auth0 Inc");
+        ClaimsHolder holder = holderFor(Claims.NAME, "Auth0 Inc");
         serializer.serialize(holder, jsonGenerator, serializerProvider);
         jsonGenerator.flush();
 

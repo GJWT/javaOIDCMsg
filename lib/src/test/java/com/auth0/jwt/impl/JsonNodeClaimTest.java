@@ -328,7 +328,7 @@ public class JsonNodeClaimTest {
 
         assertThat(claim, is(notNullValue()));
         Map map = claim.as(Map.class);
-        assertThat(((Map<String, Object>) map.get("key")), hasEntry("name", (Object) "john"));
+        assertThat(((Map<String, Object>) map.get("key")), hasEntry(Claims.NAME, (Object) "john"));
         assertThat(((Map<String, Object>) map.get("key")), hasEntry("id", (Object) 123));
     }
 

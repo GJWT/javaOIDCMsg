@@ -21,7 +21,7 @@ package com.auth0.jwt.creators;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.jwts.JWT;
 
 import java.util.Date;
@@ -36,30 +36,25 @@ public class FbJwtCreator extends GoogleOrFbJwtCreator {
 
     protected JWTCreator.Builder jwt;
     protected HashMap<String, Boolean> requiredClaims;
-    protected Set<String> publicClaims;
 
-    public FbJwtCreator() {
+    private FbJwtCreator() {
         jwt = JWT.create();
         requiredClaims = new HashMap<String, Boolean>() {{
-            put("UserId", false);
-            put("AppId", false);
-            put("Iat", false);
-        }};
-        publicClaims = new HashSet<String>() {{
-            add(PublicClaims.ISSUED_AT);
-            add(PublicClaims.EXPIRES_AT);
+            put(Claims.USER_ID, false);
+            put(Claims.APP_ID, false);
+            put(Claims.ISSUED_AT, false);
         }};
     }
 
     /**
-     * Add a specific Issued At ("iat") claim to the Payload.
+     * Add a specific Issued At (Claims.ISSUED_AT) claim to the Payload.
      *
      * @param iat the Issued At value.
      * @return this same Builder instance.
      */
     public FbJwtCreator withIat(Date iat) {
         jwt.withIssuedAt(iat);
-        requiredClaims.put("Iat", true);
+        requiredClaims.put(Claims.ISSUED_AT, true);
         return this;
     }
 
@@ -75,26 +70,26 @@ public class FbJwtCreator extends GoogleOrFbJwtCreator {
     }
 
     /**
-     * Require a specific userId ("userId") claim.
+     * Require a specific userId (Claims.USER_ID) claim.
      *
      * @param userId the required userId value
      * @return this same Verification instance.
      */
     public FbJwtCreator withUserId(String userId) {
-        jwt.withNonStandardClaim("userId", userId);
-        requiredClaims.put("UserId", true);
+        jwt.withNonStandardClaim(Claims.USER_ID, userId);
+        requiredClaims.put(Claims.USER_ID, true);
         return this;
     }
 
     /**
-     * Require a specific appId ("appId") claim.
+     * Require a specific appId (Claims.APP_ID) claim.
      *
      * @param appId the required appId value
      * @return this same Verification instance.
      */
     public FbJwtCreator withAppId(String appId) {
-        jwt.withNonStandardClaim("appId", appId);
-        requiredClaims.put("AppId", true);
+        jwt.withNonStandardClaim(Claims.APP_ID, appId);
+        requiredClaims.put(Claims.APP_ID, true);
         return this;
     }
 
@@ -107,7 +102,13 @@ public class FbJwtCreator extends GoogleOrFbJwtCreator {
      * @throws IllegalArgumentException if the name is null.
      */
     public FbJwtCreator withNonStandardClaim(String name, String value) {
-        jwt.withNonStandardClaim(name, value);
+        if(name.equalsIgnoreCase(Claims.USER_ID) || name.equalsIgnoreCase("user_id")) {
+            withUserId(value);
+        } else if(name.equalsIgnoreCase(Claims.APP_ID) || name.equalsIgnoreCase("app_id")) {
+            withAppId(value);
+        } else {
+            jwt.withNonStandardClaim(name, value);
+        }
         return this;
     }
 
@@ -172,7 +173,11 @@ public class FbJwtCreator extends GoogleOrFbJwtCreator {
      * @throws IllegalArgumentException if the name is null.
      */
     public FbJwtCreator withNonStandardClaim(String name, Date value) throws IllegalArgumentException {
-        jwt.withNonStandardClaim(name, value);
+        if(name.equalsIgnoreCase(Claims.ISSUED_AT) || name.equalsIgnoreCase("issuedAt") || name.equalsIgnoreCase("issued_at")) {
+            withIat(value);
+        } else {
+            jwt.withNonStandardClaim(name, value);
+        }
         return this;
     }
 
@@ -186,7 +191,7 @@ public class FbJwtCreator extends GoogleOrFbJwtCreator {
      */
     public FbJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
         jwt.withArrayClaim(name, items);
-        if(publicClaims.contains(name))
+        if(requiredClaims.containsKey(name))
             requiredClaims.put(name, true);
         return this;
     }
@@ -213,11 +218,11 @@ public class FbJwtCreator extends GoogleOrFbJwtCreator {
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
     public String sign(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+        if(!jwt.getIsNoneAlgorithmAllowed() && Algorithm.none().equals(algorithm)) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
-        String JWS = jwt.sign(algorithm);
         verifyClaims();
+        String JWS = jwt.sign(algorithm);
         return JWS;
     }
 
@@ -231,11 +236,11 @@ public class FbJwtCreator extends GoogleOrFbJwtCreator {
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
     public String signBase16Encoding(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+        if(!jwt.getIsNoneAlgorithmAllowed() && Algorithm.none().equals(algorithm)) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
-        String JWS = jwt.sign(algorithm, EncodeType.Base16);
         verifyClaims();
+        String JWS = jwt.sign(algorithm, EncodeType.Base16);
         return JWS;
     }
 
@@ -249,11 +254,11 @@ public class FbJwtCreator extends GoogleOrFbJwtCreator {
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
     public String signBase32Encoding(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+        if(!jwt.getIsNoneAlgorithmAllowed() && Algorithm.none().equals(algorithm)) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
-        String JWS = jwt.sign(algorithm, EncodeType.Base32);
         verifyClaims();
+        String JWS = jwt.sign(algorithm, EncodeType.Base32);
         return JWS;
     }
 

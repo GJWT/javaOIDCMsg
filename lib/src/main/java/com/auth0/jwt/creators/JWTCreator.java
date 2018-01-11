@@ -24,7 +24,7 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.impl.ClaimsHolder;
 import com.auth0.jwt.impl.PayloadSerializer;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.impl.Claims;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -109,7 +109,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          */
         public Builder withKeyId(String keyId) {
-            this.headerClaims.put(PublicClaims.KEY_ID, keyId);
+            this.headerClaims.put(Claims.KEY_ID, keyId);
             return this;
         }
 
@@ -120,7 +120,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          */
         public Builder withIssuer(String issuer) {
-            addClaim(PublicClaims.ISSUER, issuer);
+            addClaim(Claims.ISSUER, issuer);
             return this;
         }
 
@@ -131,7 +131,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          */
         public Builder withSubject(String subject) {
-            addClaim(PublicClaims.SUBJECT, subject);
+            addClaim(Claims.SUBJECT, subject);
             return this;
         }
 
@@ -143,7 +143,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          */
         public Builder withAudience(String... audience) {
-            addClaim(PublicClaims.AUDIENCE, audience);
+            addClaim(Claims.AUDIENCE, audience);
             return this;
         }
 
@@ -154,7 +154,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          */
         public Builder withExpiresAt(Date expiresAt) {
-            addClaim(PublicClaims.EXPIRES_AT, expiresAt);
+            addClaim(Claims.EXPIRES_AT, expiresAt);
             return this;
         }
 
@@ -165,29 +165,29 @@ public final class JWTCreator {
          * @return this same Builder instance.
          */
         public Builder withNotBefore(Date notBefore) {
-            addClaim(PublicClaims.NOT_BEFORE, notBefore);
+            addClaim(Claims.NOT_BEFORE, notBefore);
             return this;
         }
 
         /**
-         * Add a specific Issued At ("iat") claim to the Payload.
+         * Add a specific Issued At (Claims.ISSUED_AT) claim to the Payload.
          *
          * @param issuedAt the Issued At value.
          * @return this same Builder instance.
          */
         public Builder withIssuedAt(Date issuedAt) {
-            addClaim(PublicClaims.ISSUED_AT, issuedAt);
+            addClaim(Claims.ISSUED_AT, issuedAt);
             return this;
         }
 
         /**
-         * Add a specific JWT Id ("jti") claim to the Payload.
+         * Add a specific JWT Id (Claims.JWT_ID) claim to the Payload.
          *
          * @param jwtId the Token Id value.
          * @return this same Builder instance.
          */
         public Builder withJWTId(String jwtId) {
-            addClaim(PublicClaims.JWT_ID, jwtId);
+            addClaim(Claims.JWT_ID, jwtId);
             return this;
         }
 
@@ -362,8 +362,8 @@ public final class JWTCreator {
             if(encodeType == null) {
                 throw new IllegalArgumentException("Encodetype cannot be null.");
             }
-            headerClaims.put(PublicClaims.ALGORITHM, algorithm.getName());
-            headerClaims.put(PublicClaims.TYPE, "JWT");
+            headerClaims.put(Claims.ALGORITHM, algorithm.getName());
+            headerClaims.put(Claims.TYPE, "JWT");
             String signingKeyId = algorithm.getSigningKeyId();
             if (signingKeyId != null) {
                 withKeyId(signingKeyId);

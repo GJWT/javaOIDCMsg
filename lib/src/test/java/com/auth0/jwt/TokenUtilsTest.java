@@ -20,6 +20,7 @@
 package com.auth0.jwt;
 
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.utils.TokenUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

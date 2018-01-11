@@ -26,7 +26,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.creators.GoogleJwtCreator;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.GoogleVerification;
@@ -48,9 +48,9 @@ public class GoogleJwtCreatorTest {
     public ExpectedException thrown = ExpectedException.none();
     private static final Date exp = generateRandomExpDateInFuture();
     private static final Date iat = generateRandomIatDateInPast();
-    public static final String PICTURE = "picture";
-    public static final String EMAIL = "email";
-    public static final String NAME = "name";
+    public static final String PICTURE = Claims.PICTURE;
+    public static final String EMAIL = Claims.EMAIL;
+    public static final String NAME = Claims.NAME;
 
 
     @Test
@@ -119,7 +119,7 @@ public class GoogleJwtCreatorTest {
     @Test
     public void testGoogleJwtCreatorWhenCertainRequiredClaimIsntProvided() throws Exception {
         thrown.expect(Exception.class);
-        thrown.expectMessage("Standard claim: Picture has not been set");
+        thrown.expectMessage("Standard claim: picture has not been set");
 
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = GoogleJwtCreator.build()
@@ -547,10 +547,10 @@ public class GoogleJwtCreatorTest {
     protected static void verifyClaims(Map<String,Claim> claims, Date exp) {
         assertTrue(claims.get(PICTURE).asString().equals(PICTURE));
         assertTrue(claims.get(EMAIL).asString().equals(EMAIL));
-        assertTrue(claims.get(PublicClaims.ISSUER).asString().equals("issuer"));
-        assertTrue(claims.get(PublicClaims.SUBJECT).asString().equals("subject"));
-        assertTrue(claims.get(PublicClaims.AUDIENCE).asString().equals("audience"));
-        assertTrue(claims.get(PublicClaims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
+        assertTrue(claims.get(Claims.ISSUER).asString().equals("issuer"));
+        assertTrue(claims.get(Claims.SUBJECT).asString().equals("subject"));
+        assertTrue(claims.get(Claims.AUDIENCE).asString().equals("audience"));
+        assertTrue(claims.get(Claims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
         assertTrue(claims.get(NAME).asString().equals(NAME));
     }
 }

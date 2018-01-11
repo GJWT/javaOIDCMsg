@@ -25,7 +25,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.creators.GoogleJwtCreator;
 import com.auth0.jwt.creators.GoogleJwtCreatorTest;
 import com.auth0.jwt.exceptions.InvalidClaimException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.GoogleVerification;
@@ -104,14 +104,14 @@ public class MainTestSignatures {
         Map<String,Claim> claims = jwt.getClaims();
         assertTrue(claims.get(GoogleJwtCreatorTest.PICTURE).asString().equals(GoogleJwtCreatorTest.PICTURE));
         assertTrue(claims.get(GoogleJwtCreatorTest.EMAIL).asString().equals(GoogleJwtCreatorTest.EMAIL));
-        String issuer = claims.get(PublicClaims.ISSUER).asString();
+        String issuer = claims.get(Claims.ISSUER).asString();
         assertTrue(issuer.equals("issuer"));
-        String subject = claims.get(PublicClaims.SUBJECT).asString();
+        String subject = claims.get(Claims.SUBJECT).asString();
         assertTrue(subject.equals("subject"));
-        List<String> audience = claims.get(PublicClaims.AUDIENCE).asList(String.class);
+        List<String> audience = claims.get(Claims.AUDIENCE).asList(String.class);
         assertTrue(audience.get(0).equals("audience"));
         assertTrue(audience.get(1).equals("audience2"));
-        assertTrue(claims.get(PublicClaims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
+        assertTrue(claims.get(Claims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
         assertTrue(claims.get(GoogleJwtCreatorTest.NAME).asString().equals(GoogleJwtCreatorTest.NAME));
     }
 

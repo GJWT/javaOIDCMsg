@@ -25,7 +25,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.creators.FbJwtCreator;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
@@ -45,8 +45,8 @@ public class FbJwtCreatorTest {
     public ExpectedException thrown = ExpectedException.none();
     private static final Date exp = generateRandomExpDateInFuture();
     private static final Date iat = generateRandomIatDateInPast();
-    private static final String USER_ID = "userId";
-    private static final String APP_ID = "appId";
+    private static final String USER_ID = Claims.USER_ID;
+    private static final String APP_ID = Claims.APP_ID;
 
     @Test
     public void testFbJwtCreatorAllStandardClaimsMustBeRequired() throws Exception {
@@ -131,7 +131,7 @@ public class FbJwtCreatorTest {
     @Test
     public void testFbJwtCreatorUserIdNotProvided() throws Exception {
         thrown.expect(Exception.class);
-        thrown.expectMessage("Standard claim: UserId has not been set");
+        thrown.expectMessage("Standard claim: userId has not been set");
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = FbJwtCreator.build()
                 .withExp(exp)
@@ -351,6 +351,6 @@ public class FbJwtCreatorTest {
     private static void verifyClaims(Map<String,Claim> claims) {
         assertTrue(claims.get(USER_ID).asString().equals(USER_ID));
         assertTrue(claims.get(APP_ID).asString().equals(APP_ID));
-        assertTrue(claims.get(PublicClaims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
+        assertTrue(claims.get(Claims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
     }
 }

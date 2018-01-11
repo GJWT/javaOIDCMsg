@@ -21,6 +21,7 @@ package com.auth0.jwt.jwts;
 
 import com.auth0.jwt.ClockImpl;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.GoogleVerification;
 import com.auth0.jwt.interfaces.Verification;
@@ -49,38 +50,38 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
     }
 
     /**
-     * Require a specific Picture ("picture") claim.
+     * Require a specific Picture (Claims.PICTURE) claim.
      *
      * @param picture the required Picture value
      * @return this same Verification instance.
      */
     @Override
     public GoogleVerification withPicture(String picture) {
-        requireClaim("picture", picture);
+        requireClaim(Claims.PICTURE, picture);
         return this;
     }
 
     /**
-     * Require a specific Email ("email") claim.
+     * Require a specific Email (Claims.EMAIL) claim.
      *
      * @param email the required Email value
      * @return this same Verification instance.
      */
     @Override
     public GoogleVerification withEmail(String email) {
-        requireClaim("email", email);
+        requireClaim(Claims.EMAIL, email);
         return this;
     }
 
     /**
-     * Require a specific Name ("name") claim.
+     * Require a specific Name (Claims.NAME) claim.
      *
      * @param name the required Name value
      * @return this same Verification instance.
      */
     @Override
     public GoogleVerification withName(String name) {
-        requireClaim("name", name);
+        requireClaim(Claims.NAME, name);
         return this;
     }
 

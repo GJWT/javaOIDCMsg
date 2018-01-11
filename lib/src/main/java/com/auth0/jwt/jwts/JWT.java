@@ -25,7 +25,7 @@ import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.JWTDecoder;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.*;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
@@ -174,7 +174,7 @@ public class JWT {
      * @throws IllegalArgumentException if the provided algorithm is null.
      */
     public static Verification require(Algorithm algorithm) {
-        return JWT.init(algorithm);
+        return new JWT.BaseVerification(algorithm);
     }
 
     /**
@@ -187,17 +187,6 @@ public class JWT {
     }
 
     //----------------this is from JWTVerifier--------
-
-    /**
-     * Initialize a Verification instance using the given Algorithm.
-     *
-     * @param algorithm the Algorithm to use on the JWT verification.
-     * @return a JWT.BaseVerification instance to configure.
-     * @throws IllegalArgumentException if the provided algorithm is null.
-     */
-    static Verification init(Algorithm algorithm) throws IllegalArgumentException {
-        return new JWT.BaseVerification(algorithm);
-    }
 
     /**
      * The Verification class holds the Claims required by a JWT to be valid.
@@ -267,7 +256,7 @@ public class JWT {
          */
         @Override
         public Verification withIssuer(String... issuer) {
-            requireClaim(PublicClaims.ISSUER, Arrays.asList(issuer));
+            requireClaim(Claims.ISSUER, Arrays.asList(issuer));
             return this;
         }
 
@@ -280,7 +269,7 @@ public class JWT {
          */
         @Override
         public Verification withSubject(String... subject) {
-            requireClaim(PublicClaims.SUBJECT, Arrays.asList(subject));
+            requireClaim(Claims.SUBJECT, Arrays.asList(subject));
             return this;
         }
 
@@ -293,7 +282,7 @@ public class JWT {
          */
         @Override
         public Verification withAudience(String... audience) {
-            requireClaim(PublicClaims.AUDIENCE, Arrays.asList(audience));
+            requireClaim(Claims.AUDIENCE, Arrays.asList(audience));
             return this;
         }
 
@@ -323,7 +312,7 @@ public class JWT {
         @Override
         public Verification acceptExpiresAt(long leeway) throws IllegalArgumentException {
             VerificationAndAssertion.assertPositive(leeway);
-            requireClaim(PublicClaims.EXPIRES_AT, leeway);
+            requireClaim(Claims.EXPIRES_AT, leeway);
             return this;
         }
 
@@ -338,7 +327,7 @@ public class JWT {
         @Override
         public Verification acceptNotBefore(long leeway) throws IllegalArgumentException {
             VerificationAndAssertion.assertPositive(leeway);
-            requireClaim(PublicClaims.NOT_BEFORE, leeway);
+            requireClaim(Claims.NOT_BEFORE, leeway);
             return this;
         }
 
@@ -353,19 +342,19 @@ public class JWT {
         @Override
         public Verification acceptIssuedAt(long leeway) throws IllegalArgumentException {
             VerificationAndAssertion.assertPositive(leeway);
-            requireClaim(PublicClaims.ISSUED_AT, leeway);
+            requireClaim(Claims.ISSUED_AT, leeway);
             return this;
         }
 
         /**
-         * Require a specific JWT Id ("jti") claim.
+         * Require a specific JWT Id (Claims.JWT_ID) claim.
          *
          * @param jwtId the required Id value
          * @return this same Verification instance.
          */
         @Override
         public Verification withJWTId(String jwtId) {
-            requireClaim(PublicClaims.JWT_ID, jwtId);
+            requireClaim(Claims.JWT_ID, jwtId);
             return this;
         }
 
@@ -512,14 +501,14 @@ public class JWT {
         }
 
         protected void addLeewayToDateClaims() {
-            if (!claims.containsKey(PublicClaims.EXPIRES_AT)) {
-                claims.put(PublicClaims.EXPIRES_AT, defaultLeeway);
+            if (!claims.containsKey(Claims.EXPIRES_AT)) {
+                claims.put(Claims.EXPIRES_AT, defaultLeeway);
             }
-            if (!claims.containsKey(PublicClaims.NOT_BEFORE)) {
-                claims.put(PublicClaims.NOT_BEFORE, defaultLeeway);
+            if (!claims.containsKey(Claims.NOT_BEFORE)) {
+                claims.put(Claims.NOT_BEFORE, defaultLeeway);
             }
-            if (!claims.containsKey(PublicClaims.ISSUED_AT)) {
-                claims.put(PublicClaims.ISSUED_AT, defaultLeeway);
+            if (!claims.containsKey(Claims.ISSUED_AT)) {
+                claims.put(Claims.ISSUED_AT, defaultLeeway);
             }
         }
 

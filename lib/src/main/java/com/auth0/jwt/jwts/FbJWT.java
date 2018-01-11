@@ -21,6 +21,7 @@ package com.auth0.jwt.jwts;
 
 import com.auth0.jwt.ClockImpl;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.Verification;
 
@@ -41,24 +42,24 @@ public class FbJWT extends JWT.BaseVerification{
     }
 
     /**
-     * Require a specific userId ("userId") claim.
+     * Require a specific userId (Claims.USER_ID) claim.
      *
      * @param userId the required userId value
      * @return this same Verification instance.
      */
     public Verification withUserId(String userId) {
-        requireClaim("userId", userId);
+        requireClaim(Claims.USER_ID, userId);
         return this;
     }
 
     /**
-     * Require a specific appId ("appId") claim.
+     * Require a specific appId (Claims.APP_ID) claim.
      *
      * @param appId the required appId value
      * @return this same Verification instance.
      */
     public Verification withAppId(String appId) {
-        requireClaim("appId", appId);
+        requireClaim(Claims.APP_ID, appId);
         return this;
     }
 

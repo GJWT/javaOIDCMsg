@@ -77,7 +77,7 @@ public class HeaderDeserializerTest {
 
 
     @Test
-    public void shouldNotRemoveKnownPublicClaimsFromTree() throws Exception {
+    public void shouldNotRemoveKnownClaimsFromTree() throws Exception {
         String headerJSON = "{\n" +
                 "  \"alg\": \"HS256\",\n" +
                 "  \"typ\": \"jws\",\n" +

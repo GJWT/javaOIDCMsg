@@ -21,6 +21,7 @@ package com.auth0.jwt.jwts;
 
 import com.auth0.jwt.ClockImpl;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.Verification;
 
@@ -46,13 +47,13 @@ public class ScopedJWT extends JWT.BaseVerification {
     }
 
     /**
-     * Require a specific Scope ("scope") claim.
+     * Require a specific Scope (Claims.SCOPE) claim.
      *
      * @param scope the required Scope value
      * @return this same Verification instance.
      */
     public Verification withScope(String scope) {
-        requireClaim("scope", scope);
+        requireClaim(Claims.SCOPE, scope);
         return this;
     }
 

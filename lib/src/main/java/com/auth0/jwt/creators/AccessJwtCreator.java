@@ -21,7 +21,7 @@ package com.auth0.jwt.creators;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.jwts.JWT;
 
 import java.util.Date;
@@ -36,47 +36,37 @@ public class AccessJwtCreator {
 
     protected JWTCreator.Builder jwt;
     protected HashMap<String, Boolean> requiredClaims;
-    protected Set<String> publicClaims;
 
-    public AccessJwtCreator() {
+    private AccessJwtCreator() {
         jwt = JWT.create();
         requiredClaims = new HashMap<String, Boolean>() {{
-            put("Issuer", false);
-            put("Subject", false);
-            put("Iat", false);
-        }};
-        publicClaims = new HashSet<String>() {{
-            add(PublicClaims.ISSUER);
-            add(PublicClaims.SUBJECT);
-            add(PublicClaims.EXPIRES_AT);
-            add(PublicClaims.NOT_BEFORE);
-            add(PublicClaims.ISSUED_AT);
-            add(PublicClaims.JWT_ID);
-            add(PublicClaims.AUDIENCE);
+            put(Claims.ISSUER, false);
+            put(Claims.SUBJECT, false);
+            put(Claims.ISSUED_AT, false);
         }};
     }
 
     /**
-     * Add a specific Issuer ("issuer") claim to the Payload.
+     * Add a specific Issuer (Claims.ISSUER) claim to the Payload.
      *
      * @param issuer the Issuer value.
      * @return this same Builder instance.
      */
     public AccessJwtCreator withIssuer(String issuer) {
         jwt.withIssuer(issuer);
-        requiredClaims.put("Issuer", true);
+        requiredClaims.put(Claims.ISSUER, true);
         return this;
     }
 
     /**
-     * Add a specific Subject ("subject") claim to the Payload.
+     * Add a specific Subject (Claims.SUBJECT) claim to the Payload.
      *
      * @param subject the Subject value.
      * @return this same Builder instance.
      */
     public AccessJwtCreator withSubject(String subject) {
         jwt.withSubject(subject);
-        requiredClaims.put("Subject", true);
+        requiredClaims.put(Claims.SUBJECT, true);
         return this;
     }
 
@@ -93,14 +83,14 @@ public class AccessJwtCreator {
     }
 
     /**
-     * Add a specific Issued At ("iat") claim to the Payload.
+     * Add a specific Issued At (Claims.ISSUED_AT) claim to the Payload.
      *
      * @param iat the Issued At value.
      * @return this same Builder instance.
      */
     public AccessJwtCreator withIat(Date iat) {
         jwt.withIssuedAt(iat);
-        requiredClaims.put("Iat", true);
+        requiredClaims.put(Claims.ISSUED_AT, true);
         return this;
     }
 
@@ -124,7 +114,13 @@ public class AccessJwtCreator {
      * @throws IllegalArgumentException if the name is null.
      */
     public AccessJwtCreator withNonStandardClaim(String name, String value) {
-        jwt.withNonStandardClaim(name, value);
+        if(name.equalsIgnoreCase("subject") || name.equalsIgnoreCase(Claims.SUBJECT)) {
+            withSubject(value);
+        } else if(name.equalsIgnoreCase("issuer") || name.equalsIgnoreCase(Claims.ISSUER)) {
+            withIssuer(value);
+        } else {
+            jwt.withNonStandardClaim(name, value);
+        }
         return this;
     }
 
@@ -189,7 +185,11 @@ public class AccessJwtCreator {
      * @throws IllegalArgumentException if the name is null.
      */
     public AccessJwtCreator withNonStandardClaim(String name, Date value) throws IllegalArgumentException {
-        jwt.withNonStandardClaim(name, value);
+        if(name.equalsIgnoreCase(Claims.ISSUED_AT) || name.equalsIgnoreCase("issuedAt") || name.equalsIgnoreCase("issued_at")) {
+            withIat(value);
+        } else {
+            jwt.withNonStandardClaim(name, value);
+        }
         return this;
     }
 
@@ -203,7 +203,7 @@ public class AccessJwtCreator {
      */
     public AccessJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
         jwt.withArrayClaim(name, items);
-        if(publicClaims.contains(name))
+        if(requiredClaims.containsKey(name))
             requiredClaims.put(name, true);
         return this;
     }
@@ -230,11 +230,11 @@ public class AccessJwtCreator {
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
     public String sign(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+        if(!jwt.getIsNoneAlgorithmAllowed() && Algorithm.none().equals(algorithm)) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
-        String JWS = jwt.sign(algorithm);
         verifyClaims();
+        String JWS = jwt.sign(algorithm);
         return JWS;
     }
 
@@ -248,11 +248,11 @@ public class AccessJwtCreator {
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
     public String signBase16Encoding(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+        if(!jwt.getIsNoneAlgorithmAllowed() && Algorithm.none().equals(algorithm)) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
-        String JWS = jwt.sign(algorithm, EncodeType.Base16);
         verifyClaims();
+        String JWS = jwt.sign(algorithm, EncodeType.Base16);
         return JWS;
     }
 
@@ -266,11 +266,11 @@ public class AccessJwtCreator {
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
     public String signBase32Encoding(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+        if(!jwt.getIsNoneAlgorithmAllowed() && Algorithm.none().equals(algorithm)) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
-        String JWS = jwt.sign(algorithm, EncodeType.Base32);
         verifyClaims();
+        String JWS = jwt.sign(algorithm, EncodeType.Base32);
         return JWS;
     }
 

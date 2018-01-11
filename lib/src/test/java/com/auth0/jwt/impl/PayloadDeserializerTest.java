@@ -91,7 +91,7 @@ public class PayloadDeserializerTest {
     }
 
     @Test
-    public void shouldNotRemoveKnownPublicClaimsFromTree() throws Exception {
+    public void shouldNotRemoveKnownClaimsFromTree() throws Exception {
         String payloadJSON = "{\n" +
                 "  \"iss\": \"auth0\",\n" +
                 "  \"sub\": \"emails\",\n" +
@@ -125,7 +125,7 @@ public class PayloadDeserializerTest {
         assertThat(payload.getClaim("iat").asDouble(), is(10101010D));
         assertThat(payload.getClaim("exp").asDouble(), is(11111111D));
         assertThat(payload.getClaim("nbf").asDouble(), is(10101011D));
-        assertThat(payload.getClaim("jti").asString(), is("idid"));
+        assertThat(payload.getClaim(Claims.JWT_ID).asString(), is("idid"));
     }
 
     @Test

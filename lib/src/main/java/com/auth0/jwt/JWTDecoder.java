@@ -20,21 +20,19 @@
 package com.auth0.jwt;
 
 import com.auth0.jwt.creators.*;
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.impl.JWTParser;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Header;
 import com.auth0.jwt.interfaces.Payload;
-import com.auth0.jwt.jwts.ExtendedJWT;
+import com.auth0.jwt.utils.TokenUtils;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.binary.StringUtils;
 
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -47,16 +45,6 @@ public final class JWTDecoder implements DecodedJWT {
     private final Header header;
     private final Payload payload;
 
-    private static final String NAME = "name";
-    private static final String EMAIL = "email";
-    private static final String PICTURE = "picture";
-    private static final String ISSUER = "iss";
-    private static final String AUDIENCE = "aud";
-    private static final String SUBJECT = "sub";
-    private static final String ISSUED_AT = "iat";
-    private static final String EXP = "exp";
-    private static final String APP_ID = "appId";
-    private static final String USER_ID = "userId";
     private static final String FACEBOOK = "facebook";
     private static final String GOOGLE = "google";
 
@@ -176,24 +164,24 @@ public final class JWTDecoder implements DecodedJWT {
 
     public static GoogleOrFbJwtCreator decodeJWT(DecodedJWT jwt) {
         Map<String, Claim> claims = jwt.getClaims();
-        String issuer = claims.get(ISSUER).asString();
+        String issuer = claims.get(Claims.ISSUER).asString();
         GoogleOrFbJwtCreator googleOrFbJwtCreator = null;
         if(issuer.contains(FACEBOOK)) {
             googleOrFbJwtCreator = FbJwtCreator.build()
-                    .withExp(claims.get(EXP).asDate())
-                    .withIat(claims.get(ISSUED_AT).asDate())
-                    .withAppId(claims.get(APP_ID).asString())
-                    .withUserId(claims.get(USER_ID).asString());
+                    .withExp(claims.get(Claims.EXPIRES_AT).asDate())
+                    .withIat(claims.get(Claims.ISSUED_AT).asDate())
+                    .withAppId(claims.get(Claims.APP_ID).asString())
+                    .withUserId(claims.get(Claims.USER_ID).asString());
         } else if(issuer.contains(GOOGLE)) {
             googleOrFbJwtCreator = GoogleJwtCreator.build()
-                    .withPicture(claims.get(PICTURE).asString())
-                    .withEmail(claims.get(EMAIL).asString())
-                    .withIssuer(claims.get(ISSUER).asString())
-                    .withSubject(claims.get(SUBJECT).asString())
-                    .withAudience(claims.get(AUDIENCE).asString())
-                    .withExp(claims.get(EXP).asDate())
-                    .withIat(claims.get(ISSUED_AT).asDate())
-                    .withName(claims.get(NAME).asString());
+                    .withPicture(claims.get(Claims.PICTURE).asString())
+                    .withEmail(claims.get(Claims.EMAIL).asString())
+                    .withIssuer(claims.get(Claims.ISSUER).asString())
+                    .withSubject(claims.get(Claims.SUBJECT).asString())
+                    .withAudience(claims.get(Claims.AUDIENCE).asString())
+                    .withExp(claims.get(Claims.EXPIRES_AT).asDate())
+                    .withIat(claims.get(Claims.ISSUED_AT).asDate())
+                    .withName(claims.get(Claims.NAME).asString());
         } else {
             throw new IllegalArgumentException("Not from a Facebook or Google issuer");
         }

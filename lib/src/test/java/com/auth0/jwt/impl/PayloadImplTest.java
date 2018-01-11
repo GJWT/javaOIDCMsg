@@ -195,6 +195,6 @@ public class PayloadImplTest {
         Map<String, Claim> claims = payload.getClaims();
         assertThat(claims, is(notNullValue()));
         exception.expect(UnsupportedOperationException.class);
-        claims.put("name", null);
+        claims.put(Claims.NAME, null);
     }
 }
