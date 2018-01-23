@@ -1,5 +1,6 @@
 package oiccli.service;
 
+import com.auth0.jwt.creators.Message;
 import oiccli.client_info.ClientInfo;
 import oiccli.exceptions.ConfigurationError;
 import org.slf4j.Logger;
@@ -54,12 +55,21 @@ public class ProviderInfoDiscovery extends service.ProviderInfoDiscovery {
             if (listOfValues.contains(values)) {
                 setBehavior(clientInfo, key, values);
             } else {
-                String vtype = rr.getCParam().get(key);
+                /*
+                vtyp = regreq.c_param[_pref]
+
+                if isinstance(vtyp[0], list):
+                    cli_info.behaviour[_pref] = []
+                    for val in vals:
+                        if val in _pvals:
+                            cli_info.behaviour[_pref].append(val)
+                 */
                 for (String valueIndex : values) {
                     if (listOfValues.contains(valueIndex)) {
                         Map<String, List<String>> behavior = clientInfo.getBehavior();
-                        behavior.put(key, Arrays.asList(value));
+                        behavior.put(key, Arrays.asList(valueIndex));
                         clientInfo.setBehavior(behavior);
+                        break;
                     }
                 }
             }
@@ -69,43 +79,26 @@ public class ProviderInfoDiscovery extends service.ProviderInfoDiscovery {
             }
         }
 
-        /*
-
-        STARTED WITH JAVA CODE
-
-        set = clientInfo.getClientPrefs().entrySet();
-        iterator = set.iterator();
-        while (iterator.hasNext()) {
-            mapEntry = (Map.Entry) iterator.next();
-            key = (String) mapEntry.getKey();
-            value = (String) mapEntry.getValue();
-
-            if(clientInfo.getBehavior().containsKey(key)) {
-                continue;
-            }
-
-            value = value.g
-
-
-        }
-        ---------------
-        THIS IS THE PYTHON CODE
-
-                for key, val in cli_info.client_prefs.items():
-            if key in cli_info.behaviour:
-                continue
-
-            try:
-                vtyp = regreq.c_param[key]
+        for(String keyIndex : clientInfo.getClientPrefs().keySet()) {
+            if(!clientInfo.getBehavior().containsKey(keyIndex)) {
+                /*
+                                vtyp = regreq.c_param[key]
                 if isinstance(vtyp[0], list):
                     pass
                 elif isinstance(val, list) and not isinstance(val,
                                                               six.string_types):
                     val = val[0]
-            except KeyError:
-                pass
-            if key not in PREFERENCE2PROVIDER:
-                cli_info.behaviour[key] = val*/
+                 */
+
+                if (!Service.PREFERENCE2PROVIDER.containsKey(keyIndex)) {
+                    List<String> behavior = clientInfo.getBehavior().get(keyIndex);
+                    if (behavior == null) {
+                        behavior = new ArrayList<>();
+                    }
+                    behavior.addAll(clientInfo.getClientPrefs().get(keyIndex));
+                }
+            }
+        }
 
         logger.debug("cliInfo behavior " + clientInfo.getBehavior().toString());
 

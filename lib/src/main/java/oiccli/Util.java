@@ -20,12 +20,16 @@ public class Util {
 
     private static final String URL_ENCODED = "application/x-www-form-urlencoded";
     private static final String JSON_ENCODED = "application/json";
+    private static final String JRD_JSON = "application/jrd+json";
     private static final String JWT_ENCODED = "application/jwt";
+    private static final String PLAIN_TEXT = "text/plain";
+    private static final String HTML_TEXT = "text/html";
     private static final String JWT = "jwt";
     private static final String JSON = "json";
     private static final String URLENCODED = "urlencoded";
+    private static final String TEXT = "txt";
     private static final String DEFAULT_POST_CONTENT_TYPE = URL_ENCODED;
-    Map<String, String> pairs = new HashMap<String, String>() {{
+    private static final Map<String, String> pairs = new HashMap<String, String>() {{
         put("port", "portSpecified");
         put("domain", "domainSpecified");
         put("path", "pathSpecified");
@@ -59,22 +63,22 @@ public class Util {
     }};
 
     public static Map<String, Object> getOrPost(String uri, String method, Message cis, Map<String, String> args) throws UnsupportedEncodingException, UnsupportedType {
-        return getOrPost(uri, method, cis, "application/x-www-form-urlencoded", null, args);
+        return getOrPost(uri, method, cis, DEFAULT_POST_CONTENT_TYPE, null, args);
     }
 
     public static Map<String, Object> getOrPost(String uri, String method, Message request, String contentType, String accept, Map<String, String> args) throws UnsupportedEncodingException, UnsupportedType {
         Map<String, Object> response = new HashMap<>();
         String urlEncoded;
         if (method.equals("GET") || method.equals("DELETE")) {
-            urlEncoded = request.toUrlEncoded(request.toString());
+            /*urlEncoded = request.toUrlEncoded(request.toString());
             if (urlEncoded.contains("?")) {
                 response.put("uri", uri + '&' + urlEncoded);
             } else {
                 response.put("uri", uri + '?' + urlEncoded);
-            }
+            }*/
         } else if (method.equals("POST") || method.equals("PUT")) {
             response.put("uri", uri);
-            if (contentType.equals("application/x-www-form-urlencoded")) {
+            if (contentType.equals(URL_ENCODED)) {
                 response.put("body", request.toUrlEncoded(request.toString()));
             } else if (contentType.equals(JSON_ENCODED)) {
                 response.put("body", request.toJSON(request.toHashMap()));
@@ -94,6 +98,7 @@ public class Util {
             } else {
                 args.put("headers", headers);
             }
+            response.put("args", args);
         } else {
             throw new UnsupportedType("Unsupported HTTP method " + method);
         }
@@ -179,13 +184,13 @@ public class Util {
         return valueExpected.startsWith(value);
     }
 
-    public String verifyHeader(FakeResponse response, String bodyType) throws WrongContentType, ValueError {
+    public static String verifyHeader(FakeResponse response, String bodyType) throws WrongContentType, ValueError {
         logger.debug("Response headers: " + response.getHeaders().toString());
         logger.debug("Response txt: " + response.getText().toString());
 
         String contentType = response.getHeaders().getContentType();
         if (!StringUtil.isNotNullAndNotEmpty(contentType)) {
-            if (!StringUtil.isNotNullAndNotEmpty(bodyType)) {
+            if (StringUtil.isNotNullAndNotEmpty(bodyType)) {
                 return bodyType;
             } else {
                 return "txt";
@@ -195,19 +200,17 @@ public class Util {
         logger.debug("Expected body type: " + bodyType);
 
         if (bodyType.equals("")) {
-            if (matchTo(JSON_ENCODED, contentType)) {
+            if (matchTo(JSON_ENCODED, contentType) || matchTo(JRD_JSON, contentType)) {
                 bodyType = JSON;
             } else if (matchTo(JWT_ENCODED, contentType)) {
                 bodyType = JWT;
             } else if (matchTo(URL_ENCODED, contentType)) {
                 bodyType = URLENCODED;
             } else {
-                bodyType = "txt";
+                bodyType = TEXT;
             }
         } else if (bodyType.equals(JSON)) {
-            if (matchTo(JSON_ENCODED, contentType)) {
-                bodyType = JSON;
-            } else if (matchTo(JWT_ENCODED, contentType)) {
+            if (matchTo(JWT_ENCODED, contentType)) {
                 bodyType = JWT;
             } else {
                 throw new WrongContentType(contentType);
@@ -218,8 +221,12 @@ public class Util {
             }
         } else if (bodyType.equals(URLENCODED)) {
             if (!matchTo(DEFAULT_POST_CONTENT_TYPE, contentType) &&
-                    !matchTo("text/plain", contentType)) {
+                    !matchTo(PLAIN_TEXT, contentType)) {
                 throw new WrongContentType(contentType);
+            }
+        } else if(bodyType.equals(TEXT)) {
+            if(!matchTo(PLAIN_TEXT, contentType) && !matchTo(HTML_TEXT, contentType)) {
+                throw new WrongContentType("Content type: " + contentType);
             }
         } else {
             throw new ValueError("Unknown return format: " + bodyType);

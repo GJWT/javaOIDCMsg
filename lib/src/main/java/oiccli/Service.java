@@ -3,9 +3,7 @@ package oiccli;
 import com.auth0.jwt.creators.Message;
 import oiccli.HTTP.Response;
 import oiccli.client_info.ClientInfo;
-import oiccli.exceptions.MissingEndpoint;
-import oiccli.exceptions.OicCliError;
-import oiccli.exceptions.UnsupportedType;
+import oiccli.exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,14 +43,14 @@ public class Service {
     private Message msgType;
     private Message responseCls;
     private ErrorResponse errorResponse;
-    private String endpointName = "";
+    private String endpointName;
     private boolean isSynchronous = true;
-    private String request = "";
-    private String defaultAuthenticationMethod = "";
-    private String httpMethod = "GET";
-    private String bodyType = "urlencoded";
-    private String responseBodyType = "json";
-    private String endpoint = "";
+    private String request;
+    private String defaultAuthenticationMethod;
+    private String httpMethod;
+    private String bodyType;
+    private String responseBodyType;
+    private String endpoint;
     private String httpLib;
     private KeyJar keyJar;
     private String clientAuthenticationMethod;
@@ -73,7 +71,40 @@ public class Service {
         this.preConstruct = new ArrayList<>();
         this.postConstruct = new ArrayList<>();
         this.postParseResponse = new ArrayList<>();
+        this.httpMethod = "GET";
+        this.bodyType = "urlencoded";
+        this.responseBodyType = "json";
+        this.defaultAuthenticationMethod = "";
+        this.request = "";
+        this.endpoint = "";
+        this.endpointName = "";
         this.setUp();
+    }
+
+    public void gatherRequestArgs(ClientInfo clientInfo, Map<String, Object> args) {
+
+    }
+
+    public static Map<String, Map<String, String>> updateHttpArgs(Map<String, String> httpArgs, Map<String, Map<String, String>> info) {
+        Map<String, String> hArgs = info.get("hArgs");
+        if (hArgs == null) {
+            hArgs = new HashMap<>();
+        }
+
+        if (httpArgs == null) {
+            httpArgs = hArgs;
+        } else {
+            httpArgs.update(info.get("hArgs"));
+        }
+
+        final String headers = info.get("kwargs").get("headers");
+        Map<String, String> hMap = new HashMap<String, String>() {{
+            put("headers", headers);
+        }};
+        httpArgs.update(hMap);
+
+        info.put("httpArgs", httpArgs);
+        return info;
     }
 
     public Map<String, Object> parseArgs(ClientInfo clientInfo, Map<String, Object> args) throws NoSuchFieldException, IllegalAccessException {
@@ -126,7 +157,7 @@ public class Service {
             args.remove("state");
         }
 
-        Map<String, Object> argsParam = this.parseArgs(clientInfo, requestArgs);
+        Map<String, Object> argsParam = this.gatherRequestArgs(clientInfo, requestArgs);
         this.msgType(argsParam);
 
         return this.doPostConstruct(clientInfo, requestArgs, returnedArgs.get(1));
@@ -135,36 +166,33 @@ public class Service {
     public String getEndpoint(Map<String, String> args) throws MissingEndpoint {
         String uri = args.get("endpoint");
 
-        if (uri == null) {
-            uri = this.endpoint;
-        }
-
-        if (uri == null || uri.isEmpty()) {
-            throw new MissingEndpoint("No endpoint specified");
+        if (uri != null) {
+            args.remove("endpoint");
+        } else {
+            if (StringUtil.isNotNullAndNotEmpty(this.endpoint)) {
+                uri = this.endpoint;
+            } else {
+                throw new MissingEndpoint("No endpoint specified");
+            }
         }
 
         return uri;
     }
 
-    public Map<String, Object> uriAndBody(Message cis, String method, Map<String, String> requestArgs, Map<String, String> args) throws UnsupportedEncodingException, UnsupportedType {
-        Map<String, Object> response = null;
-        try {
-            String uri = this.getEndpoint(requestArgs);
-            response = Util.getOrPost(uri, method, cis, args);
-            response.put("cis", cis);
-            Map<String, Object> hMap = new HashMap<>();
-            hMap.put("headers", response.get("headers"));
-            response.put("h_args", hMap);
-        } catch (MissingEndpoint missingEndpoint) {
-            missingEndpoint.printStackTrace();
-        }
+    public Map<String, Object> uriAndBody(Message cis, String method, Map<String, String> args) throws UnsupportedEncodingException, UnsupportedType, MissingEndpoint {
+        String uri = this.getEndpoint(args);
+        Map<String, Object> response = Util.getOrPost(uri, method, cis, args);
+        response.put("cis", cis);
+        Map<String, Object> hMap = new HashMap<>();
+        hMap.put("headers", response.get("headers"));
+        response.put("hArgs", hMap);
 
         return response;
     }
 
     public Map<String, String> initAuthenticationMethod(Message cis, ClientInfo clientInfo, String authenticationMethod,
-                                                        Map<String, Object> requestArgs, Map<String, String> args) {
-        return initAuthenticationMethod(cis, clientInfo, authenticationMethod, requestArgs, null, args);
+                                                        Map<String, Object> httpArgs, Map<String, String> args) {
+        return initAuthenticationMethod(cis, clientInfo, authenticationMethod, httpArgs, null, args);
     }
 
     public Map<String, String> initAuthenticationMethod(Message cis, ClientInfo clientInfo, String authenticationMethod,
@@ -173,11 +201,7 @@ public class Service {
             httpArgs = new HashMap<>();
         }
 
-        if (requestArgs == null) {
-            requestArgs = new HashMap<>();
-        }
-
-        if (authenticationMethod != null) {
+        if (StringUtil.isNotNullAndNotEmpty(authenticationMethod)) {
             //return this.client_authn_method[authn_method]().construct(
             //      cis, cli_info, request_args, http_args, **kwargs);
         } else {
@@ -185,8 +209,8 @@ public class Service {
         }
     }
 
-    public ClientInfo requestInfo(ClientInfo clientInfo, String method, Map<String, Object> requestArgs,
-                                  String bodyType, String authenticationMethod, boolean lax, Map<String, String> args) throws NoSuchFieldException, IllegalAccessException {
+    public Map<String, Object> requestInfo(ClientInfo clientInfo, String method, Map<String, Object> requestArgs,
+                                           String bodyType, String authenticationMethod, boolean lax, Map<String, String> args) throws NoSuchFieldException, IllegalAccessException, MissingEndpoint, UnsupportedEncodingException, UnsupportedType {
         if (method == null) {
             method = this.httpMethod;
         }
@@ -210,7 +234,7 @@ public class Service {
 
         cis.setLax(lax);
         Map<String, String> hArg = new HashMap<>();
-        if (authenticationMethod != null) {
+        if (StringUtil.isNotNullAndNotEmpty(authenticationMethod)) {
             hArg = this.initAuthenticationMethod(cis, clientInfo, authenticationMethod, requestArgs, args);
         }
 
@@ -226,10 +250,10 @@ public class Service {
             args.put("contentType", "application/json");
         }
 
-        return this.uriAndBody(cis, method, requestArgs, args);
+        return this.uriAndBody(cis, method, args);
     }
 
-    public ClientInfo updateHttpArgs(Map<String, String> httpArgs, ClientInfo info) {
+    public Map<String, Object> updateHttpArgs(Map<String, String> httpArgs, Map<String, Object> info) {
         Map<String, String> hArgs = info.get("hArgs");
         if (hArgs == null) {
             hArgs = new HashMap<>();
@@ -245,19 +269,19 @@ public class Service {
         return info;
     }
 
-    public ClientInfo doRequestInit(ClientInfo clientInfo, String bodyType, String method, String authenticationMethod,
-                                    Map<String, Object> requestArgs, Map<String, String> httpArgs, Map<String, String> args) throws NoSuchFieldException, IllegalAccessException {
-        if (method == null || method.isEmpty()) {
+    public Map<String, Object> doRequestInit(ClientInfo clientInfo, String bodyType, String method, String authenticationMethod,
+                                             Map<String, Object> requestArgs, Map<String, String> httpArgs, Map<String, String> args) throws NoSuchFieldException, IllegalAccessException, MissingEndpoint, UnsupportedEncodingException, UnsupportedType {
+        if (!StringUtil.isNotNullAndNotEmpty(method)) {
             method = this.httpMethod;
         }
-        if (authenticationMethod == null || authenticationMethod.isEmpty()) {
+        if (!StringUtil.isNotNullAndNotEmpty(authenticationMethod)) {
             authenticationMethod = this.defaultAuthenticationMethod;
         }
-        if (bodyType == null || bodyType.isEmpty()) {
+        if (!StringUtil.isNotNullAndNotEmpty(bodyType)) {
             bodyType = this.bodyType;
         }
 
-        ClientInfo info = this.requestInfo(clientInfo, method, requestArgs, bodyType, authenticationMethod, false, args);
+        Map<String, Object> info = this.requestInfo(clientInfo, method, requestArgs, bodyType, authenticationMethod, false, args);
 
         return this.updateHttpArgs(httpArgs, info);
     }
@@ -271,12 +295,10 @@ public class Service {
         }
 
         if (StringUtil.isNotNullAndNotEmpty(query)) {
-            info = query;
+            return query;
         } else {
-            info = fragment;
+            return fragment;
         }
-
-        return info;
     }
 
     public Message parseResponse(String info, ClientInfo clientInfo, String sFormat, String state,
@@ -351,21 +373,21 @@ public class Service {
             bodyTypeResult = bodyType;
         }
 
-        ErrorResponse errorResponse = this.errorResponse.deserialize(response.getText(), bodyType);
+        ErrorResponse errorResponse = this.errorResponse.deserialize(response.getText(), bodyTypeResult);
         errorResponse.verify();
 
         return errorResponse;
     }
 
-    public String getValueType(Response response, String bodyType) {
+    public String getValueType(FakeResponse response, String bodyType) throws WrongContentType, ValueError {
         if (StringUtil.isNotNullAndNotEmpty(bodyType)) {
-            return this.verifyHeader(response, bodyType);
+            return Util.verifyHeader(response, bodyType);
         } else {
             return "urlencoded";
         }
     }
 
-    public ErrorResponse parseRequestResponse(Response response, ClientInfo clientInfo, String responseBodyType,
+    public ErrorResponse parseRequestResponse(ErrorResponse response, ClientInfo clientInfo, String responseBodyType,
                                               String state, Map<String, Object> args) {
         int statusCode = response.getStatusCode();
         if (successfulCodes.contains(statusCode)) {
@@ -388,8 +410,8 @@ public class Service {
         }
     }
 
-    public ErrorResponse serviceRequest(String url, String method, String body, String responseBodyType, Map<String, String> httpArgs,
-                                        ClientInfo clientInfo, Map<String, Object> args) {
+    public static ErrorResponse serviceRequest(String url, String method, String body, String responseBodyType, Map<String, String> httpArgs,
+                                               ClientInfo clientInfo, Map<String, Object> args) {
         if (httpArgs == null) {
             httpArgs = new HashMap<>();
         }
@@ -404,6 +426,18 @@ public class Service {
             responseBodyType = this.responseBodyType;
         }
 
-        return this.parseRequestResponse(response, clientInfo, responseBodyType, "", args);
+        return parseRequestResponse(response, clientInfo, responseBodyType, "", args);
+    }
+
+    public static ErrorResponse serviceRequest(String url, Map<String, Object> args) {
+        return serviceRequest(url, "GET", null, "", null, null, args);
+    }
+
+    public static ErrorResponse serviceRequest(String url, String method, ClientInfo clientInfo, Map<String, Object> args) {
+        return serviceRequest(url, "GET", null, "", null, null, args);
+    }
+
+    public static ErrorResponse serviceRequest(String url, String method, ClientInfo clientInfo) {
+        return serviceRequest(url, "GET", null, "", null, null, null);
     }
 }

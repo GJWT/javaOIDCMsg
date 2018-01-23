@@ -1,6 +1,8 @@
 package oiccli.service;
 
+import oiccli.AuthorizationResponse;
 import oiccli.StringUtil;
+import oiccli.client_info.ClientInfo;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -27,10 +29,15 @@ public class Authorization extends service.Authorization {
         self.post_construct = [self.oic_post_construct]*/
     }
 
-    public List<Map<String, String>> oicPreConstruct(CliInfo cliInfo, Map<String, String> requestArgs, Map<String, String> args) {
+    public List<Map<String, ?>> oicPreConstruct(ClientInfo clientInfo, Map<String, Object> requestArgs, Map<String, String> args) {
         if (requestArgs != null) {
-            String responseType = requestArgs.get("responseType");
-            if (responseType.contains("token") || responseType.contains("id_token")) {
+            String responseType = (String) requestArgs.get("responseType");
+            if(responseType == null) {
+                requestArgs.put("responseType", clientInfo.getBehavior().get("responseTypes").get(0));
+
+            }
+
+            if (responseType.contains("token") || responseType.contains("idToken")) {
                 if (!requestArgs.containsKey("nonce")) {
                     requestArgs.put("nonce", StringUtil.generateRandomString(32));
                 }
@@ -56,15 +63,19 @@ public class Authorization extends service.Authorization {
             args.remove("requestMethod");
         }
 
-        String responseMode = cliInfo.getBehavior("responseMode");
-        if (responseMode.equals("formPost")) {
+        List<String> responseMode = clientInfo.getBehavior().get("responseMode");
+        if (responseMode.contains("formPost")) {
             requestArgs.put("responseMode", responseMode);
+        }
+
+        if(!requestArgs.containsKey("state")) {
+            requestArgs.put("state", clientInfo.getStateDb().createState(clientInfo.getIssuer(), requestArgs));
         }
 
         return Arrays.asList(requestArgs, postArgs);
     }
 
-    public Map<String, String> oicPostConstruct(CliInfo cliInfo, Map<String, String> req, Map<String, String> args) {
+    public Map<String, String> oicPostConstruct(ClientInfo clientInfo, Map<String, String> req, Map<String, String> args) {
         String requestParam = args.get("requestParam");
         args.remove("requestParam");
 
@@ -74,7 +85,7 @@ public class Authorization extends service.Authorization {
         }
 
         if (algorithm == null) {
-            algorithm = cliInfo.getBehavior("requestObjectSigningAlg");
+            algorithm = clientInfo.getBehavior().get("requestObjectSigningAlg");
             if (algorithm == null) {
                 algorithm = "RS256";
             }
@@ -86,9 +97,9 @@ public class Authorization extends service.Authorization {
             String kty = StringUtil.alg2keytype(algorithm);
             String kid = args.get("sigKid");
             if (kid == null) {
-                kid = cliInfo.getKid("sig").get(kty, null);
+                kid = clientInfo.getKid().get("sig").get(kty);
             }
-            args.put("keys", cliInfo.getKeyJar().getSigningKey(kty, kid));
+            args.put("keys", clientInfo.getKeyJar().getSigningKey(kty, kid));
         }
 
         /*
@@ -102,7 +113,7 @@ public class Authorization extends service.Authorization {
             req.put("request", _req);
         } else {
             //_webname = cli_info.registration_response['request_uris'][0]
-            String fileName = cliInfo.fileNameFromWebName(webname);
+            String fileName = clientInfo.filenameFromWebname(webName);
             //except KeyError:
             //filename, _webname = construct_request_uri(**kwargs)
             BufferedWriter writer = null;

@@ -2,6 +2,7 @@ package oiccli.webfinger;
 
 import oiccli.exceptions.ValueError;
 import org.junit.Assert;
+import sun.awt.image.ImageWatched;
 
 import java.util.*;
 

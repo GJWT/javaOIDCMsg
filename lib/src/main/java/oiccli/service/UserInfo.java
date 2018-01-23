@@ -3,6 +3,8 @@ package oiccli.service;
 import com.auth0.jwt.creators.Message;
 import oiccli.client_info.ClientInfo;
 import oiccli.exceptions.MissingParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -12,9 +14,10 @@ public class UserInfo extends Service {
     private UserInfoErrorResponse userInfoErrorResponse;
     private static String endpointName = "userInfoEndpoint";
     private static boolean isSynchronous = true;
-    private String request = "userInfo";
-    private String defaultAuthenticationMethod = "bearerHeader";
-    private String httpMethod = "POST";
+    private static String request = "userInfo";
+    private static String defaultAuthenticationMethod = "bearerHeader";
+    private static String httpMethod = "GET";
+    private final static Logger logger = LoggerFactory.getLogger(UserInfo.class);
 
     public UserInfo(String httpLib, KeyJar keyJar, String clientAuthenticationMethod) {
         super(httpLib, keyJar, clientAuthenticationMethod);
@@ -37,11 +40,10 @@ public class UserInfo extends Service {
         return Arrays.asList(requestArgs, new HashMap<String, String>());
     }
 
-    /*
-        def oic_post_parse_response(self, resp, client_info, **kwargs):
-        resp = self.unpack_aggregated_claims(resp, client_info)
-        return self.fetch_distributed_claims(resp, client_info)
-     */
+    public Map<String, Map<String, String>> oicPostParseResponse(Map<String, Map<String, String>> userInfo, ClientInfo clientInfo) {
+        Map<String, Map<String, String>> unpacked = this.unpackAggregatedClaims(userInfo, clientInfo);
+        return this.fetchDistributedClaims(unpacked, clientInfo, null);
+    }
 
     public Map<String, Map<String, String>> unpackAggregatedClaims(Map<String, Map<String, String>> userInfo, ClientInfo clientInfo) {
         Map<String, String> csrc = userInfo.get("claimSources");
@@ -55,7 +57,7 @@ public class UserInfo extends Service {
             key = (String) mapEntry.getKey();
             value = (Map<String, String>) mapEntry.getValue();
             if (value.containsKey("JWT")) {
-                Map<String, Object> aggregatedClaims = new Message().fromJWT(value.get("JWT"), clientInfo.getKeyJar());
+                Map<String, Map<String, String>> aggregatedClaims = new Message().fromJWT(value.get("JWT"), clientInfo.getKeyJar());
                 Map<String, String> cName = userInfo.get("claimNames");
                 set = cName.entrySet();
                 iterator = set.iterator();
@@ -64,10 +66,13 @@ public class UserInfo extends Service {
                     mapEntryInner = (Map.Entry) iterator.next();
                     keyInner = (String) mapEntryInner.getKey();
                     valueInner = (Map<String, String>) mapEntryInner.getValue();
-                    /*if(valueInner)
+                    if (valueInner.equals(value)) {
+                        claims.add(keyInner);
+                    }
+                }
 
-
-                     */
+                for (String claim : claims) {
+                    userInfo.put(claim, aggregatedClaims.get(claim));
                 }
             }
         }
@@ -75,7 +80,7 @@ public class UserInfo extends Service {
         return userInfo;
     }
 
-    public Map<String, Map<String, String>> fetchDistributedClaims(Map<String, Map<String, String>> userInfo, ClientInfo clientInfo, Object callBack) {
+    public Map<String, Map<String, String>> fetchDistributedClaims(Map<String, Map<String, String>> userInfo, ClientInfo clientInfo, Method callBack) {
         Map<String, String> csrc = userInfo.get("claimSources");
         Set set = csrc.entrySet();
         Iterator iterator = set.iterator();
@@ -86,41 +91,42 @@ public class UserInfo extends Service {
             mapEntry = (Map.Entry) iterator.next();
             key = (String) mapEntry.getKey();
             value = (Map<String, String>) mapEntry.getValue();
+            ErrorResponse errorResponse;
             if (value.containsKey("endpoint")) {
                 if (value.containsKey("accessToken")) {
-                    /*
-                            _uinfo = self.service_request(
-                            spec["endpoint"], method='GET',
-                            token=spec["access_token"], client_info=cli_info)
-                     */
+                    //TODO:callback is a method; figure out how to pass a method as a param to a function
+                    errorResponse = oiccli.Service.serviceRequest(value.get("endpoint"), "GET", value.get("accessToken"), clientInfo);
                 } else {
                     if (callBack != null) {
-                        /*_uinfo = self.service_request(
-                                spec["endpoint"],
-                                method='GET',
-                                token=callback(spec['endpoint']),
-                                client_info=cli_info)*/
+                        errorResponse = oiccli.Service.serviceRequest(value.get("endpoint"), "GET", callBack(value.get("endpoint")), clientInfo);
                     } else {
-                        /*
-                                _uinfo = self.service_request(
-                                spec["endpoint"],
-                                method='GET',
-                                client_info=cli_info)
-                         */
+                        errorResponse = oiccli.Service.serviceRequest(value.get("endpoint"), "GET", clientInfo);
                     }
                 }
 
-                /*
-                claims = [value for value, src in
-                              userinfo["_claim_names"].items() if src == csrc]
-                 */
+                List<String> claims = new ArrayList<>();
+                Set<String> keys = userInfo.get("claimNames").keySet();
+                String valueIndex;
+                for (String keyIndex : keys) {
+                    valueIndex = userInfo.get("claimNames").get(keyIndex);
+                    if (valueIndex.equals(key)) {
+                        claims.add(valueIndex);
+                    }
+                }
 
+                if (new HashSet<>(claims).equals(new HashSet<>(errorResponse.getKeys()))) {
+                    logger.warn("Claims from claim source doesn't match what's in the userinfo");
+                }
 
+                for (String errorResponseKey : errorResponse.keySet()) {
+                    userInfo.put(errorResponseKey, errorResponse.get(errorResponseKey));
+                }
             }
         }
+        return userInfo;
     }
 
-    public static Map<String, String> setIdToken(ClientInfo cliInfo, Map<String, String> requestArgs, Map<String, String> args) {
+    public static Map<String, String> setIdToken(ClientInfo cliInfo, Map<String, String> requestArgs, Map<String, String> args) throws MissingParameter {
         if (requestArgs == null) {
             requestArgs = new HashMap<>();
         }
@@ -132,16 +138,12 @@ public class UserInfo extends Service {
 
         if (!requestArgs.containsKey(property)) {
             String idToken;
-            try {
-                String state = getState(requestArgs, args);
-                idToken = cliInfo.getStateDb().getIdToken(state);
-                if (idToken == null) {
-                    throw new MissingParameter("No valid id token available");
-                }
-                requestArgs.put(property, idToken);
-            } catch (MissingParameter missingParameter) {
-                missingParameter.printStackTrace();
+            String state = getState(requestArgs, args);
+            idToken = cliInfo.getStateDb().getIdToken(state);
+            if (idToken == null) {
+                throw new MissingParameter("No valid id token available");
             }
+            requestArgs.put(property, idToken);
         }
 
         return requestArgs;

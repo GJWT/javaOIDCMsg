@@ -1,6 +1,7 @@
 package oiccli.client_auth;
 
 import oiccli.StringUtil;
+import oiccli.client_info.ClientInfo;
 import oiccli.exceptions.AuthenticationFailure;
 
 import java.util.Arrays;
@@ -10,11 +11,12 @@ import oiccli.exceptions.NoMatchingKey;
 import org.junit.Assert;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
 import java.util.Map;
 
 public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
 
-    private static final Map<String, String> DEF_SIGN_ALG = new HashMap<>() {{
+    private static final Map<String, String> DEF_SIGN_ALG = new HashMap<String, String>() {{
         put("id_token", "RS256");
         put("userinfo", "RS256");
         put("request_object", "RS256");
@@ -27,9 +29,9 @@ public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
         String algorithm = args.get("algorithm");
         if (algorithm == null) {
             algorithm = DEF_SIGN_ALG.get(entity);
-        }
-        if (algorithm != null) {
-            throw new AuthenticationFailure("Missing algorithm specification");
+            if (algorithm == null) {
+                throw new AuthenticationFailure("Missing algorithm specification");
+            }
         }
 
         return algorithm;
@@ -39,13 +41,13 @@ public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
         return chooseAlgorithm(null, args);
     }
 
-    public Key getSigningKey(String algorithm, CliInfo cliInfo) {
-        return cli_info.keyjar.get_signing_key(
-                StringUtil.alg2keytype(algorithm), alg = algorithm);
+    public Key getSigningKey(String algorithm, ClientInfo clientInfo) {
+        return clientInfo.getKeyJar().getSigningKey(
+                StringUtil.alg2keytype(algorithm), algorithm);
     }
 
-    public Key getKeyByKid(String kid, String algorithm, CliInfo cliInfo) throws NoMatchingKey {
-        Key key = cli_info.keyjar.get_key_by_kid(kid);
+    public Key getKeyByKid(String kid, String algorithm, ClientInfo clientInfo) throws NoMatchingKey {
+        Key key = clientInfo.getKeyJar().getKeyByKid(kid);
         String ktype;
         if (key != null) {
             ktype = StringUtil.alg2keytype(algorithm);
@@ -60,10 +62,10 @@ public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
         }
     }
 
-    public Map<String, String> construct(Map<String, String> cis, CliInfo cliInfo, Map<String, String> requestArgs,
+    public Map<String, String> construct(Map<String, String> cis, ClientInfo clientInfo, Map<String, String> requestArgs,
                                          Map<String, String> httpArgs, Map<String, String> args) throws AuthenticationFailure, NoMatchingKey {
         String algorithm = null;
-        String audience = null;
+        List<String> audience = null;
         if (args.containsKey("clientAssertion")) {
             cis.put("clientAssertion", args.get("clientAssertion"));
             if (args.containsKey("clientAssertionType")) {
@@ -77,10 +79,10 @@ public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
             }
         } else {
             if (args.get("authenticationEndpoint").equals("token") || args.get("authenticationEndpoint").equals("refresh")) {
-                algorithm = cliInfo.registrationInfo("tokenEndpointAuthSigningAlg");
-                audience = cliInfo.providerInfo("tokenEndpoint");
+                algorithm = clientInfo.registrationInfo("tokenEndpointAuthSigningAlg");
+                audience = clientInfo.getProviderInfo().get("tokenEndpoint");
             } else {
-                audience = cliInfo.providerInfo("issuer");
+                audience = clientInfo.getProviderInfo().get("issuer");
             }
         }
 
@@ -91,24 +93,24 @@ public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
         String ktype = StringUtil.alg2keytype(algorithm);
         List<Key> signingKey = null;
         if (args.containsKey("kid")) {
-            signingKey = (List<Key>) Arrays.asList(this.getKeyByKid(args.get("kid"), algorithm, cliInfo));
-        } else if (cliInfo.kid("sig").contains(ktype)) {
-            Key key = this.getKeyByKid(args.get("sig")["ktype"], algorithm, cliInfo);
+            signingKey = Arrays.asList(this.getKeyByKid(args.get("kid"), algorithm, clientInfo));
+        } else if (clientInfo.getKid().get("sig").containsKey(ktype)) {
+            Key key = this.getKeyByKid(clientInfo.getKid().get("sig").get("ktype"), algorithm, clientInfo);
             if (key != null) {
-                signingKey = (List<Key>) Arrays.asList(key);
+                signingKey = Arrays.asList(key);
             } else {
-                signingKey = this.getSigningKey(algorithm, cliInfo);
+                signingKey = Arrays.asList(this.getSigningKey(algorithm, clientInfo));
             }
         }
 
         Map<String, String> hMap = new HashMap<>();
         hMap.put("lifetime", args.get("lifetime"));
 
-        cis.put("clientAssertion", assertionJWT(cliInfo.getClientId(), signingKey, audience, algorithm, args));
+        cis.put("clientAssertion", BearerBody.assertionJWT(clientInfo.getClientId(), signingKey, audience, algorithm, 600));
         cis.put("clientAssertionType", JWT_BEARER);
         cis.remove("clientSecret");
 
-        if (cis.cParam["clientId"][VREQUIRED]) {
+        if (cis.get("clientId").get(1)) {
             cis.remove("clientId");
         }
 

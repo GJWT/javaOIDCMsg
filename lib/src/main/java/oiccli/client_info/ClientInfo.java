@@ -2,7 +2,9 @@ package oiccli.client_info;
 
 import com.google.common.collect.ImmutableMap;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
+import oiccli.State;
 import oiccli.StringUtil;
+import oiccli.exceptions.ExpiredToken;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,7 @@ public class ClientInfo {
                     "alg", "requestObjectEncryptionAlg",
                     "enc", "requestObjectEncryptionEnc");
     private static final Map<String, Map<String, String>> attributeMap =
-            ImmutableMap.of("userinfo", userInfoMap, "id_token", idTokenMap, "request", requestMap);
+            ImmutableMap.of("userinfo", userInfoMap, "idToken", idTokenMap, "request", requestMap);
     private static final Map<String, String> defSignAlg =
             ImmutableMap.of("idToken", "RS256",
                     "userInfo", "RS256",
@@ -33,9 +35,8 @@ public class ClientInfo {
                     "clientSecretJwt", "HS256",
                     "privateKeyJwt", "RS256");
 
-
     private KeyJar keyJar;
-    private Database stateDb;
+    private State stateDb;
     private List<String> events;
     private boolean shouldBeStrictOnPreferences;
     private Map<String, List<String>> providerInfo;
@@ -43,7 +44,7 @@ public class ClientInfo {
     private String registrationExpires;
     private String registrationAccessToken;
     private Map<String, Map<String, String>> kid;
-    private Map<String, String> config;
+    private Map<String, Map<String, Object>> config;
     private Map<String, String> allow;
     private Map<String, List<String>> behavior;
     private Map<String, List<String>> clientPrefs;
@@ -92,9 +93,9 @@ public class ClientInfo {
                 this.getClass().getField(attribute).set(attribute, "");
             }
 
-            if (attribute.equals("clientId")) {
+            /*if (attribute.equals("clientId")) {
                 this.stateDb.setClientId(config.get(attribute));
-            }
+            }*/
         }
 
         attributes = new ArrayList<>(Arrays.asList("allow", "clientPrefs", "behavior", "providerInfo"));
@@ -123,6 +124,38 @@ public class ClientInfo {
             this.redirectUris = redirectUris;
         } else {
             this.redirectUris = null;
+        }
+
+        this.importKeys(config.get("keys"));
+
+        if(config.containsKey("keydefs")) {
+            this.keyJar = buildKeyJar(config.get("keydefs"), this.keyJar)[1];
+        }
+    }
+
+    public void importKeys(Map<String,Map<String,List<String>>> keySpec) {
+        for(String key : keySpec.keySet()) {
+            if(key.equals("file")) {
+                Map<String,List<String>> hMap = keySpec.get(key);
+                for(String hMapKey : hMap.keySet()) {
+                    if(hMapKey.equals("rsa")) {
+                        Key key;
+                        KeyBundle keyBundle;
+                        for(String file : hMap.get(hMapKey)) {
+                            key = new RSAKey(importPrivateRsaKeyFromFile(file), "sig");
+                            keyBundle = new KeyBundle();
+                            keyBundle.append(key);
+                            this.keyJar.addKb("", keyBundle);
+                        }
+                    }
+                }
+            } else if(key.equals("url")) {
+                KeyBundle keyBundle;
+                for(String issuer : keySpec.keySet()) {
+                    keyBundle = new KeyBundle(keySpec.get(issuer));
+                    this.keyJar.addKb(keyBundle);
+                }
+            }
         }
     }
 
@@ -162,9 +195,13 @@ public class ClientInfo {
         return cSecret;
     }
 
+    public Map<String, Map<String, String>> getKid() { return kid; }
+
     public void setClientSecret(String cSecret) {
         this.cSecret = cSecret;
     }
+
+    public State getState() { return stateDb; }
 
     public void setCSecret(String secret) {
         if (secret == null) {
@@ -187,6 +224,7 @@ public class ClientInfo {
 
     public void setClientId(String clientId) {
         this.cId = clientId;
+        this.stateDb.setClientId(clientId);
     }
 
     public void setRegistrationResponse(Map<String, String> registrationResponse) {
@@ -213,11 +251,11 @@ public class ClientInfo {
         return keyJar;
     }
 
-    public Database getStateDb() {
+    public State getStateDb() {
         return stateDb;
     }
 
-    public void setStateDb(Database stateDb) {
+    public void setStateDb(State stateDb) {
         this.stateDb = stateDb;
     }
 
@@ -239,9 +277,11 @@ public class ClientInfo {
 
     public Map<String, String> signEncAlgs(SignEncAlgs type) {
         Map<String, String> response = new HashMap<>();
+        String value;
         for (String key : attributeMap.get(type).keySet()) {
-            if (attributeMap.get(key) != null && this.registrationResponse.get(attributeMap.get(key)) != null) {
-                response.put(key, this.registrationResponse.get(attributeMap.get(key)));
+            value = this.registrationResponse.get(attributeMap.get(key));
+            if (attributeMap.get(key) != null && value != null) {
+                response.put(key, value);
             } else {
                 if (key.equals("sign")) {
                     response.put(key, defSignAlg.get(type));
@@ -253,10 +293,7 @@ public class ClientInfo {
     }
 
     public boolean verifyAlgSupport(String algorithm, VerifyAlgSupportUsage usage, VerifyAlgSupportType type) {
-        //  THIS RELATES TO CLIINFO - ask Roland how to implement it
-        // supported = self.provider_info[
-        //"{}_{}_values_supported".format(usage, typ)]
-
+        List<String> supported = this.providerInfo.get(usage + "" + type + "valuesSupported");
         return supported.contains(algorithm);
     }
 
@@ -273,19 +310,16 @@ public class ClientInfo {
         return this.baseUrl + requestsDir + "/" + m.hexDigest();
     }
 
-    public static List<Object> addCodeChallenge(ClientInfo clientInfo) {
-        String codeChallengeFromMap = clientInfo.config.get("codeChallenge");
-        int cvLength;
-        if (codeChallengeFromMap != null) {
-            cvLength = codeChallengeFromMap.length();
-        } else {
+    public static List<Object> addCodeChallenge(ClientInfo clientInfo, String state) {
+        Integer cvLength = (Integer) clientInfo.config.get("codeChallenge").get("length");
+        if(cvLength == null) {
             cvLength = 64;
         }
 
         String codeVerifier = StringUtil.generateRandomString(cvLength);
         codeVerifier = Base64.encode(codeVerifier.getBytes());
 
-        String method = clientInfo.config['code_challenge']['method'];
+        String method = (String) clientInfo.config.get("codeChallenge").get("method");
         if (method == null) {
             method = "S256";
         }
@@ -299,6 +333,8 @@ public class ClientInfo {
             'PKCE Transformation method:{}'.format(_method))
          */
 
+        clientInfo.getStateDb().addInfo(state, null);
+
         Map<String, String> hMap = new HashMap<>();
         hMap.put("codeChallenge", codeChallenge);
         hMap.put("codeChallengeMethod", method);
@@ -308,5 +344,9 @@ public class ClientInfo {
 
     public void setRegistrationExpires(String registrationExpires) {
         this.registrationExpires = registrationExpires;
+    }
+
+    public static Object getCodeVerifier(ClientInfo clientInfo, String state) throws ExpiredToken {
+        return clientInfo.getStateDb().getTokenInfo("state"+state).get("codeVerifier");
     }
 }

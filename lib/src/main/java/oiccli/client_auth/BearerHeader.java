@@ -1,11 +1,13 @@
 package oiccli.client_auth;
 
+import oiccli.client_info.ClientInfo;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class BearerHeader {
 
-    public Map<String, Map<String, String>> construct(Map<String, String> cis, CliInfo cliInfo, Map<String, String> requestArgs, Map<String, Map<String, String>> httpArgs,
+    public Map<String, Map<String, String>> construct(Map<String, String> cis, ClientInfo clientInfo, Map<String, String> requestArgs, Map<String, Map<String, String>> httpArgs,
                                                       Map<String, String> args) {
         String accessToken;
         if (cis != null) {
@@ -20,8 +22,7 @@ public class BearerHeader {
                 if (accessToken != null) {
                     accessToken = args.get("accessToken");
                     if (accessToken == null) {
-                        //_acc_token = cli_info.state_db.get_token_info(
-                        // **kwargs)['access_token']
+                        accessToken = clientInfo.getStateDb().getTokenInfo(args).get("accessToken");
                     }
                 }
             }
@@ -47,17 +48,5 @@ public class BearerHeader {
         }
 
         return httpArgs;
-    }
-
-    public static String bearerAuth(Map<String, String> req, String authentication) {
-        if (req.containsKey("accessToken")) {
-            return req.get("accessToken");
-        } else {
-            if (authentication.startsWith("Bearer ")) {
-                return authentication.substring(7);
-            } else {
-                throw new IllegalArgumentException("Authentication " + authentication + " is invalid");
-            }
-        }
     }
 }

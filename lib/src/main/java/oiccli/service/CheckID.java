@@ -2,6 +2,7 @@ package oiccli.service;
 
 import com.auth0.jwt.creators.Message;
 import oiccli.client_info.ClientInfo;
+import oiccli.exceptions.MissingParameter;
 import oiccli.service.Service;
 import oiccli.service.UserInfo;
 
@@ -23,7 +24,7 @@ public class CheckID extends Service {
         //self.pre_construct = [self.oic_pre_construct]
     }
 
-    public List<Map<String, String>> oicPreConstruct(ClientInfo clientInfo, Map<String, String> requestArgs, Map<String, String> args) {
+    public List<Map<String, String>> oicPreConstruct(ClientInfo clientInfo, Map<String, String> requestArgs, Map<String, String> args) throws MissingParameter {
         requestArgs = UserInfo.setIdToken(clientInfo, requestArgs, args);
         return Arrays.asList(requestArgs, new HashMap<String, String>());
     }

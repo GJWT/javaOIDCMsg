@@ -3,9 +3,13 @@ package oiccli.webfinger;
 import com.google.common.base.Strings;
 import com.sun.deploy.net.HttpResponse;
 import oiccli.HTTP.Response;
+import oiccli.StringUtil;
 import oiccli.Tuple;
 import oiccli.client_info.ClientInfo;
+import oiccli.exceptions.MessageException;
+import oiccli.exceptions.OicMsgError;
 import oiccli.exceptions.WebFingerError;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +37,10 @@ public class WebFinger {
 
     public String query(String resource, List<String> rel) throws URISyntaxException, WebFingerError {
         resource = new URINormalizer().normalize(resource);
-        List<Tuple> queryParamsTuple = new ArrayList<>();
-        queryParamsTuple.add(new Tuple("resource", resource));
+        List<Tuple> queryParamsTuple = new ArrayList<>(Arrays.asList(new Tuple("resource", resource)));
 
         if(rel == null) {
-            if(this.defaultRelt != null) {
+            if(StringUtil.isNotNullAndNotEmpty(this.defaultRelt)) {
                 queryParamsTuple.add(new Tuple("rel", this.defaultRelt));
             }
         } else {
@@ -102,6 +105,8 @@ public class WebFinger {
         return headersAndBody;
     }
 
+    /*
+    TODO: I don't see this in Roland's code anymore; might want to remove
     public String discoveryQuery(String resource) throws URISyntaxException, WebFingerError {
         logger.debug("Looking for OIDC OP for '" + resource + "'");
         String url = this.query(resource, Arrays.asList(OIC_ISSUER));
@@ -134,9 +139,9 @@ public class WebFinger {
         } else {
             throw new WebFingerError("Status code is: " + statusCode);
         }
-    }
+    }*/
 
-    public String response(String subject, String base, Map<String,Object> args) throws NoSuchFieldException, IllegalAccessException {
+    /*public String response(String subject, String base, Map<String,Object> args) throws NoSuchFieldException, IllegalAccessException {
         this.jrd = new JRD();
         this.jrd.setSubject(subject);
         Base.link.put("rel", OIC_ISSUER);
@@ -146,5 +151,49 @@ public class WebFinger {
             this.jrd.getClass().getField(key).set(key, args.get(key));
         }
         return json.dumps(this.jrd.export());
+    }*/
+
+
+    public static Object linkDeser(Object val, String sFormat) {
+        if(val instanceof Map) {
+            return val;
+        } else if(sFormat.equals("dict") || sFormat.equals("json")) {
+            if(!(val instanceof String)) {
+                val = json.dumps(val);
+                sFormat = "json";
+            }
+        }
+
+        return link().deserialize(val, sFormat);
+    }
+
+    public static Object messageSer(Object inst, String sFormat, int lev) throws MessageException, OicMsgError {
+        Object res;
+        if(sFormat.equals("urlencoded") || sFormat.equals("json")) {
+            if(inst instanceof Map) {
+                if(sFormat.equals("json")) {
+                    res = json.dumps(inst);
+                } else {
+                    res = Base64.encodeBase64URLSafe()
+                }
+            }
+            //elif isinstance(inst, LINK):
+            //res = inst.serialize(sformat, lev)
+            else {
+                res = inst;
+            }
+        } else if(sFormat.equals("dict")) {
+            if(inst instanceof Map) {
+                res = inst.serialize(sFormat, lev);
+            } else if(inst instanceof String) {
+                res = inst;
+            } else {
+                throw new MessageException("Wrong type: " + inst.getClass());
+            }
+        } else {
+            throw new OicMsgError("Unknown sFormat" + inst);
+        }
+
+        return res;
     }
 }

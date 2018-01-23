@@ -1,8 +1,10 @@
 package oiccli.client_auth;
 
 import oiccli.StringUtil;
+import oiccli.client_info.ClientInfo;
 import oiccli.exceptions.AuthenticationFailure;
 
+import java.security.Key;
 import java.util.Map;
 
 public class PrivateKeyJwt extends JWSAuthenticationMethod {
@@ -15,7 +17,7 @@ public class PrivateKeyJwt extends JWSAuthenticationMethod {
         return chooseAlgorithm("private_key_jwt", args);
     }
 
-    public Key getSigningKey(String algorithm, CliInfo cliInfo) {
-        return cliInfo.keyjar.getSigningKey(StringUtil.alg2keytype(algorithm), "", algorithm);
+    public Key getSigningKey(String algorithm, ClientInfo clientInfo) {
+        return clientInfo.getKeyJar().getSigningKey(StringUtil.alg2keytype(algorithm), "", algorithm);
     }
 }

@@ -1,7 +1,10 @@
 package oiccli;
 
 import oiccli.exceptions.ExpiredToken;
+import oiccli.exceptions.UnknownState;
+import sun.swing.plaf.synth.DefaultSynthStyle;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +26,10 @@ public class State {
             this.db = db;
         }
         this.lifetime = lifetime;
+    }
+
+    public State(String clientId, Database db, String dbName) {
+        this(clientId, db, dbName, 600);
     }
 
     public String createState(final String receiver, Object request) {
@@ -133,25 +140,55 @@ public class State {
         return _tinfo;
     }
 
-    public Map<String, Object> getRequestArgs(String state, ABCMeta request, int now) throws ExpiredToken {
+    public Map<String, Object> getTokenInfo(String state) throws ExpiredToken {
+        return getTokenInfo(state, 0);
+    }
+
+    public Map<String, Object> getResponseArgs(String state, ABCMeta request, int now) throws ExpiredToken {
         Map<String, String> info = state.getState(state);
-        Map<String, Object> requestArgs = new HashMap<>();
+        Map<String, Object> responseArgs = new HashMap<>();
         for (String claim : request.c_param) {
             if (claim.equals("accessToken")) {
                 Map<String, Object> tInfo = this.getTokenInfo(state, now);
                 if (tInfo == null) {
                     continue;
                 }
-                requestArgs.put(claim, tInfo.get("accessToken"));
+                responseArgs.put(claim, tInfo.get("accessToken"));
             } else {
-                requestArgs.put(claim, info.get(claim));
+                responseArgs.put(claim, info.get(claim));
             }
         }
 
-        return requestArgs;
+        return responseArgs;
+    }
+
+    public DefaultSynthStyle.StateInfo addResponse(AuthorizationResponse authorizationResponse, String state) throws UnknownState {
+        if(!StringUtil.isNotNullAndNotEmpty(state)) {
+            state = authorizationResponse.getState();
+        }
+
+        DefaultSynthStyle.StateInfo stateInfo = this.getState(state);
+        if(stateInfo == null) {
+            throw new UnknownState(state);
+        }
+
+        stateInfo.setCode(authorizationResponse.getCode());
+        this.updateTokenInfo(stateInfo, authorizationResponse);
+
+        for(String claim : Arrays.asList("idToken", "refreshToken")) {
+            stateInfo.setClaim(authorizationResponse.getClaim());
+        }
+
+        this.setState(stateInfo);
+
+        return stateInfo;
     }
 
     public String getIdToken(String state) {
         return this.get(state).get("idToken");
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 }
