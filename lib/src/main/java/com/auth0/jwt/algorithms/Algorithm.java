@@ -27,7 +27,12 @@ import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
 
 import java.io.UnsupportedEncodingException;
-import java.security.interfaces.*;
+import java.security.interfaces.ECKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
 /**
  * The Algorithm class represents an algorithm to be used in the Signing or Verification process of a Token.
@@ -396,12 +401,15 @@ public abstract class Algorithm {
 
     @Override
     public boolean equals(Object algorithmParam) {
-        if(this == algorithmParam)
+        if (this == algorithmParam) {
             return true;
-        if(algorithmParam == null)
+        }
+        if (algorithmParam == null) {
             return false;
-        if(getClass() != algorithmParam.getClass())
+        }
+        if (getClass() != algorithmParam.getClass()) {
             return false;
+        }
 
         Algorithm algorithm = (Algorithm) algorithmParam;
         return this.description.equals(algorithm.description) && this.name.equals(algorithm.name);

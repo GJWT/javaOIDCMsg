@@ -30,7 +30,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 class PayloadDeserializer extends StdDeserializer<Payload> {
 
@@ -72,7 +76,9 @@ class PayloadDeserializer extends StdDeserializer<Payload> {
 
         ObjectMapper mapper = new ObjectMapper();
         List<String> list = new ArrayList<>(node.size());
-        for (int i = 0; i < node.size(); i++) {
+        for (int i = 0;
+             i < node.size();
+             i++) {
             try {
                 list.add(mapper.treeToValue(node.get(i), String.class));
             } catch (JsonProcessingException e) {

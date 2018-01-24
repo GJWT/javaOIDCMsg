@@ -27,7 +27,7 @@ import java.util.Date;
 /**
  * The ExtendedJwtCreator class holds the sign method to generate a complete Extended JWT (with Signature) from a given Header and Payload content.
  */
-public class ExtendedJwtCreator extends GoogleJwtCreator{
+public class ExtendedJwtCreator extends GoogleJwtCreator {
 
     public ExtendedJwtCreator() {
         super();
@@ -53,8 +53,9 @@ public class ExtendedJwtCreator extends GoogleJwtCreator{
      * @throws IllegalArgumentException if the provided algorithm is null.
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
+    @Override
     public String sign(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+        if (!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
         String JWS = jwt.sign(algorithm);
@@ -71,8 +72,9 @@ public class ExtendedJwtCreator extends GoogleJwtCreator{
      * @throws IllegalArgumentException if the provided algorithm is null.
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
+    @Override
     public String signBase16Encoding(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+        if (!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
         String JWS = jwt.sign(algorithm, EncodeType.Base16);
@@ -89,8 +91,9 @@ public class ExtendedJwtCreator extends GoogleJwtCreator{
      * @throws IllegalArgumentException if the provided algorithm is null.
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
+    @Override
     public String signBase32Encoding(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+        if (!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
         String JWS = jwt.sign(algorithm, EncodeType.Base32);
@@ -100,12 +103,15 @@ public class ExtendedJwtCreator extends GoogleJwtCreator{
 
     /**
      * Verifies that all the standard claims were provided
+     *
      * @throws Exception if all the standard claims weren't provided
      */
     private void verifyClaims() throws Exception {
-        for(String claim : addedClaims.keySet())
-            if(!addedClaims.get(claim))
+        for (String claim : addedClaims.keySet()) {
+            if (!addedClaims.get(claim)) {
                 throw new Exception("Standard claim: " + claim + " has not been set");
+            }
+        }
     }
 
     public static ExtendedJwtCreator build() {

@@ -25,15 +25,16 @@ import com.auth0.jwt.interfaces.Verification;
 
 import java.util.List;
 
-public class ExtendedJWT extends GoogleJWT implements GoogleVerification{
+public class ExtendedJWT extends GoogleJWT implements GoogleVerification {
 
     ExtendedJWT(Algorithm algorithm) throws IllegalArgumentException {
         super(algorithm);
     }
 
 
+    @Override
     public Verification createVerifierForExtended(String picture, String email, List<String> issuer,
-                                                List<String> audience, String name, long nbf, long expLeeway, long iatLeeway) {
+                                                  List<String> audience, String name, long nbf, long expLeeway, long iatLeeway) {
         Verification verification = createVerifierForGoogle(picture, email, issuer, audience, name, expLeeway, iatLeeway);
         return verification.withNbf(nbf);
     }

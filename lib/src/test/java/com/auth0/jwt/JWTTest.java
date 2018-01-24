@@ -20,25 +20,12 @@
 package com.auth0.jwt;
 
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.Clock;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.jwts.JWT;
-import org.apache.commons.codec.binary.Base64;
-import org.hamcrest.collection.IsCollectionWithSize;
-import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.nio.charset.StandardCharsets;
-import java.security.interfaces.ECKey;
-import java.security.interfaces.RSAKey;
 import java.util.Date;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class JWTTest {
 
@@ -70,7 +57,7 @@ public class JWTTest {
     public void testCreateVerifierForImplicit() {
         thrown.expect(UnsupportedOperationException.class);
         thrown.expectMessage("you shouldn't be calling this method");
-        JWT.require(Algorithm.none()).createVerifierForImplicit(null, null,  5);
+        JWT.require(Algorithm.none()).createVerifierForImplicit(null, null, 5);
     }
 
     @Test

@@ -27,7 +27,6 @@ import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.binary.StringUtils;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

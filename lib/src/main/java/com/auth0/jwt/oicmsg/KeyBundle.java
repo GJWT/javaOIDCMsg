@@ -1,6 +1,11 @@
 package com.auth0.jwt.oicmsg;
 
-import com.auth0.jwt.exceptions.oicmsg_exceptions.*;
+import com.auth0.jwt.exceptions.oicmsg_exceptions.ImportException;
+import com.auth0.jwt.exceptions.oicmsg_exceptions.JWKException;
+import com.auth0.jwt.exceptions.oicmsg_exceptions.TypeError;
+import com.auth0.jwt.exceptions.oicmsg_exceptions.UnknownKeyType;
+import com.auth0.jwt.exceptions.oicmsg_exceptions.UpdateFailed;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import org.apache.http.Header;
@@ -15,14 +20,19 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.auth0.jwt.oicmsg.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.security.KeyException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class KeyBundle {
 
@@ -38,8 +48,9 @@ public class KeyBundle {
                     "ver", "sig",
                     "sig", "sig"
             );
-    private List<Key> keys;
-    private Map<String, List<Key>> impJwks;
+    private static final Set<String> fileTypes = new HashSet<String>(Arrays.asList("rsa", "der", "jwks"));
+    private java.util.List<Key> keys;
+    private Map<String, List<com.auth0.jwt.oicmsg.Key>> impJwks;
     private String source;
     private long cacheTime;
     private boolean verifySSL;
@@ -49,6 +60,9 @@ public class KeyBundle {
     private boolean remote;
     private long timeOut;
     private String eTag;
+    private static final String JWKS = "jwks";
+    private static final String JWK = "jwk";
+    private static final String DER = "der";
     private long lastUpdated;
 
     public KeyBundle(List<Key> keys, String source, long cacheTime, boolean verifySSL,
@@ -69,15 +83,15 @@ public class KeyBundle {
             this.source = null;
             //doKeys(this.keys); why is this here?
         } else {
-            if (source.startsWith("file://")) {
+            if ("file://".startsWith(source)) {
                 this.source = source.substring(7);
-            } else if (source.startsWith("http://") || source.startsWith("https://")) {
+            } else if ("http://".startsWith(source) || "https://".startsWith(source)) {
                 this.source = source;
                 this.remote = true;
-            } else if (source.isEmpty()) {
+            } else if (!Strings.isNullOrEmpty(source)) {
                 this.source = null;
             } else {
-                if (new HashSet<String>(Arrays.asList("rsa", "der", "jwks")).contains(fileFormat.toLowerCase())) {
+                if (fileTypes.contains(fileFormat.toLowerCase())) {
                     File file = new File(source);
                     if (file.exists() && file.isFile()) {
                         this.source = source;
@@ -90,7 +104,7 @@ public class KeyBundle {
             }
 
             if (!this.remote) {
-                if (this.fileFormat.equals("jwks") || this.fileFormat.equals("jwk")) {
+                if (this.JWKS.equals(fileFormat) || this.JWK.equals(fileFormat)) {
                     try {
                         this.doLocalJwk(this.source);
                     } catch (UpdateFailed updateFailed) {
@@ -143,7 +157,7 @@ public class KeyBundle {
                 Key key;
                 for (String typeIndex : types) {
                     try {
-                        switch(typeIndex) {
+                        switch (typeIndex) {
                             case "RSA":
                                 key = new RSAKey("use");
                                 break;
@@ -156,15 +170,11 @@ public class KeyBundle {
                             default:
                                 throw new IllegalArgumentException("Encryption type: " + typeIndex + " isn't supported");
                         }
-                    } catch (JWKException exception) {
-                        logger.warn("While loading keys: " + exception);
-                        isSuccess = false;
-                    }
-
-                    if (isSuccess) {
                         this.keys.add(key);
                         flag = true;
                         break;
+                    } catch (JWKException exception) {
+                        logger.warn("While loading keys: " + exception);
                     }
                 }
             }
@@ -195,8 +205,9 @@ public class KeyBundle {
             JSONArray keys = (JSONArray) jsonObject.get("keys");
             Iterator<String> iterator = keys.iterator();
             List<Key> keysList = new ArrayList<Key>();
+            Gson gson = new Gson();
             while (iterator.hasNext()) {
-                keysList.add(new Gson().fromJson(iterator.next(), Key.class));
+                keysList.add(gson.fromJson(iterator.next(), Key.class));
             }
             doKeys(keysList);
         } catch (Exception e) {
@@ -353,9 +364,9 @@ public class KeyBundle {
             long now = System.currentTimeMillis();
             for (Key key : keys) {
                 if (!keys.contains(key)) {
-                    key.setInactiveSince();
-                } else {
-                    key.setInactiveSince(now);
+                    if (key.getInactiveSince() == Long.MIN_VALUE) {
+                        key.setInactiveSince(now);
+                    }
                 }
                 this.keys.add(key);
             }
@@ -407,6 +418,7 @@ public class KeyBundle {
         }
     }
 
+    @Override
     public String toString() {
         return this.jwks();
     }
@@ -500,9 +512,9 @@ public class KeyBundle {
         usage = harmonizeUsage(usage);
         KeyBundle keyBundle;
         type = type.toLowerCase();
-        if (type.equals("jwks")) {
-            keyBundle = new KeyBundle(filename, "jwks", usage);
-        } else if (type.equals("der")) {
+        if (JWKS.equals(type)) {
+            keyBundle = new KeyBundle(filename, JWKS, usage);
+        } else if (DER.equals(type)) {
             keyBundle = new KeyBundle(filename, "der", usage);
         } else {
             throw new UnknownKeyType("Unsupported key type");

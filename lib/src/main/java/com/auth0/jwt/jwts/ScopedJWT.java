@@ -26,7 +26,7 @@ import com.auth0.jwt.interfaces.Verification;
 
 import java.util.List;
 
-public class ScopedJWT extends JWT.BaseVerification implements Verification{
+public class ScopedJWT extends JWT.BaseVerification implements Verification {
 
     ScopedJWT(Algorithm algorithm) throws IllegalArgumentException {
         super(algorithm);
@@ -34,11 +34,13 @@ public class ScopedJWT extends JWT.BaseVerification implements Verification{
 
     /**
      * Create Verification object for verification purposes
-     * @issuer scope
+     *
      * @param issuer
      * @param audience
      * @return
+     * @issuer scope
      */
+    @Override
     public Verification createVerifierForScoped(String scope, List<String> issuer,
                                                 List<String> audience, long expLeeway, long iatLeeway) {
         return withScope(scope).withIssuer(issuer.toArray(new String[issuer.size()])).withAudience(audience.toArray(new String[audience.size()]))
@@ -95,6 +97,7 @@ public class ScopedJWT extends JWT.BaseVerification implements Verification{
      * @param clock the instance that will handle the current time.
      * @return a new JWT instance with a custom Clock.
      */
+    @Override
     public JWT build(Clock clock) {
         addLeewayToDateClaims();
         return new JWT(algorithm, claims, clock);

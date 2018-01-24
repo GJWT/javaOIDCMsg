@@ -6,7 +6,12 @@ import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class RSAKey extends Key {
 
@@ -39,7 +44,7 @@ public class RSAKey extends Key {
         this.di = di;
         this.qi = qi;
 
-        boolean hasPublicKeyParts = this.n.length() > 0 && this.n.length() == this.e.length();
+        boolean hasPublicKeyParts = !this.n.isEmpty() && this.n.length() == this.e.length();
         boolean hasX509CertChain = this.getX5c().length() > 0;
 
         if (this.getKey() == null && (hasPublicKeyParts || hasX509CertChain)) {
@@ -185,6 +190,7 @@ public class RSAKey extends Key {
     private String longToBase64(Object item) {
     }
 
+    @Override
     public Map<String, String> serialize() {
         return serialize(false);
     }

@@ -27,7 +27,7 @@ import com.auth0.jwt.interfaces.Verification;
 
 import java.util.List;
 
-public class GoogleJWT extends JWT.BaseVerification implements GoogleVerification{
+public class GoogleJWT extends JWT.BaseVerification implements GoogleVerification {
 
     GoogleJWT(Algorithm algorithm) throws IllegalArgumentException {
         super(algorithm);
@@ -35,6 +35,7 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
 
     /**
      * Create Verification object for verification purposes
+     *
      * @param picture
      * @param email
      * @param issuer
@@ -42,6 +43,7 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
      * @param name
      * @return
      */
+    @Override
     public Verification createVerifierForGoogle(String picture, String email, List<String> issuer,
                                                 List<String> audience, String name, long expLeeway, long iatLeeway) {
         return withPicture(picture).withName(name).withEmail(email).withIssuer(issuer.toArray(new String[issuer.size()])).withAudience(audience.toArray(new String[audience.size()]))
@@ -128,6 +130,7 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
      * @param clock the instance that will handle the current time.
      * @return a new JWT instance with a custom Clock.
      */
+    @Override
     public JWT build(Clock clock) {
         addLeewayToDateClaims();
         return new JWT(algorithm, claims, clock);

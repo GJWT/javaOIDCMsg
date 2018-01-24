@@ -19,11 +19,16 @@
 
 package com.auth0.jwt.creators;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.auth0.jwt.JsonMatcher;
 import com.auth0.jwt.PemUtils;
 import com.auth0.jwt.TokenUtils;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
 import org.apache.commons.codec.binary.Base64;
@@ -37,12 +42,6 @@ import java.security.interfaces.RSAPrivateKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class JWTCreatorTest {
 

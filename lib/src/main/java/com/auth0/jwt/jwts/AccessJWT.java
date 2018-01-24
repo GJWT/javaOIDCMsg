@@ -34,12 +34,14 @@ public class AccessJWT extends JWT.BaseVerification implements Verification {
 
     /**
      * Create Verification object for verification purposes
+     *
      * @param issuer
      * @param audience
      * @param expLeeway
      * @param iatLeeway
      * @return
      */
+    @Override
     public Verification createVerifierForAccess(List<String> issuer,
                                                 List<String> audience, long expLeeway, long iatLeeway) {
         return withIssuer(issuer.toArray(new String[issuer.size()])).withAudience(audience.toArray(new String[audience.size()]))
@@ -85,6 +87,7 @@ public class AccessJWT extends JWT.BaseVerification implements Verification {
      * @param clock the instance that will handle the current time.
      * @return a new JWT instance with a custom Clock.
      */
+    @Override
     public JWT build(Clock clock) {
         addLeewayToDateClaims();
         return new JWT(algorithm, claims, clock);

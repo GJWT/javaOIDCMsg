@@ -7,9 +7,14 @@ import org.slf4j.LoggerFactory;
 
 import java.security.spec.EllipticCurve;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class ECKey extends Key{
+public class ECKey extends Key {
 
     private String crv;
     private Object x;
@@ -24,7 +29,7 @@ public class ECKey extends Key{
     protected static Set<String> required = new HashSet<>(Arrays.asList("crv", "key", "x", "y"));
 
     public ECKey(String kty, String alg, String use, String kid, Key key, String crv, Object x, Object y, Object d,
-                 Object curve, Map<String,String> args) {
+                 Object curve, Map<String, String> args) {
         super(kty, alg, use, kid, "", "", "", key, args);
         this.crv = crv;
         this.x = x;
@@ -32,14 +37,14 @@ public class ECKey extends Key{
         this.d = d;
         this.curve = curve;
 
-        if(this.crv != null && this.curve == null) {
+        if (this.crv != null && this.curve == null) {
             try {
                 this.verify();
             } catch (HeaderError headerError) {
                 headerError.printStackTrace();
             }
             this.deserialize();
-        } else if(this.getKey() != null && (this.crv == null && this.curve == null)) {
+        } else if (this.getKey() != null && (this.crv == null && this.curve == null)) {
             this.loadKey(key);
         }
     }
@@ -50,10 +55,10 @@ public class ECKey extends Key{
 
     public void deserialize() {
         try {
-            if(!(this.x instanceof Number)) {
+            if (!(this.x instanceof Number)) {
                 this.x = deser(this.x);
             }
-            if(!(this.y instanceof Number)) {
+            if (!(this.y instanceof Number)) {
                 this.y = deser(this.y);
             }
         } catch (ParseException e) {
@@ -61,25 +66,25 @@ public class ECKey extends Key{
         }
 
         this.curve = byName(this.crv);
-        if(this.d != null) {
-            if(this.d instanceof String) {
+        if (this.d != null) {
+            if (this.d instanceof String) {
                 this.d = deser(this.d);
             }
         }
     }
 
     private EllipticCurve byName(String name) {
-        if(name.equals("P-256")) {
+        if (name.equals("P-256")) {
             return EllipticCurve();
-        } else if(name.equals("P-384")) {
+        } else if (name.equals("P-384")) {
             return EllipticCurve();
-        } else if(name.equals("P-521")) {
+        } else if (name.equals("P-521")) {
             return EllipticCurve();
         }
     }
 
     public List<Object> getKey(boolean isPrivate) {
-        if(isPrivate) {
+        if (isPrivate) {
             return new ArrayList<>(Arrays.asList(this.d));
         } else {
             return new ArrayList<>(Arrays.asList(this.x, this.y));
@@ -87,7 +92,7 @@ public class ECKey extends Key{
     }
 
     public Object serialize(boolean isPrivate) throws SerializationNotPossible {
-        if(this.crv == null && this.curve == null) {
+        if (this.crv == null && this.curve == null) {
             throw new SerializationNotPossible();
         }
 
@@ -96,7 +101,7 @@ public class ECKey extends Key{
         args.put("x", longToBase64(this.x));
         args.put("y", longToBase64(this.y));
 
-        if(isPrivate && this.d != null) {
+        if (isPrivate && this.d != null) {
             args.put("d", longToBase64(this.d));
         }
 

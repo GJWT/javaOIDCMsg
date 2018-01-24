@@ -3,14 +3,19 @@ package com.auth0.jwt.oicmsg;
 import com.auth0.jwt.exceptions.oicmsg_exceptions.HeaderError;
 import com.google.common.primitives.Bytes;
 import com.google.gson.Gson;
-import com.nimbusds.jose.util.Base64;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Key {
 
@@ -144,6 +149,7 @@ public class Key {
         return args;
     }
 
+    @Override
     public String toString() {
         return this.toDict().toString();
     }
@@ -176,8 +182,8 @@ public class Key {
             } catch (Exception e) {
                 return false;
             } finally {
-                for(String sign : new ArrayList<>(Arrays.asList("+", "/", "="))) {
-                    if(((String) item).contains(sign)) {
+                for (String sign : new ArrayList<>(Arrays.asList("+", "/", "="))) {
+                    if (((String) item).contains(sign)) {
                         return false;
                     }
                 }
@@ -199,6 +205,7 @@ public class Key {
 
     }
 
+    @Override
     public boolean equals(Object other) {
         try {
             Assert.assertTrue(other instanceof Key);
@@ -223,15 +230,15 @@ public class Key {
     }
 
     public byte[] thumbprint(String hashFunction, List<String> members) {
-        if(members == null || members.isEmpty()) {
+        if (members == null || members.isEmpty()) {
             members = required;
         }
 
         Collections.sort(members);
         Key key = this.serialize();
         String value = null;
-        Map<String,String> hmap = new HashMap<>();
-        for(String member : members) {
+        Map<String, String> hmap = new HashMap<>();
+        for (String member : members) {
             try {
                 value = key.getClass().getField(member).toString();
             } catch (NoSuchFieldException e) {

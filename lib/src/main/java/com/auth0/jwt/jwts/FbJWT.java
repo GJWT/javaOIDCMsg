@@ -24,7 +24,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.Verification;
 
-public class FbJWT extends JWT.BaseVerification implements Verification{
+public class FbJWT extends JWT.BaseVerification implements Verification {
 
     FbJWT(Algorithm algorithm) throws IllegalArgumentException {
         super(algorithm);
@@ -32,10 +32,12 @@ public class FbJWT extends JWT.BaseVerification implements Verification{
 
     /**
      * Create Verification object for verification purposes
+     *
      * @param userId
      * @param appId
      * @return
      */
+    @Override
     public Verification createVerifierForFb(String userId, String appId) {
         return withUserId(userId).withAppId(appId);
     }
@@ -46,6 +48,7 @@ public class FbJWT extends JWT.BaseVerification implements Verification{
      * @param userId the required userId value
      * @return this same Verification instance.
      */
+    @Override
     public Verification withUserId(String userId) {
         requireClaim("userId", userId);
         return this;
@@ -57,6 +60,7 @@ public class FbJWT extends JWT.BaseVerification implements Verification{
      * @param appId the required appId value
      * @return this same Verification instance.
      */
+    @Override
     public Verification withAppId(String appId) {
         requireClaim("appId", appId);
         return this;
@@ -101,6 +105,7 @@ public class FbJWT extends JWT.BaseVerification implements Verification{
      * @param clock the instance that will handle the current time.
      * @return a new JWT instance with a custom Clock.
      */
+    @Override
     public JWT build(Clock clock) {
         addLeewayToDateClaims();
         return new JWT(algorithm, claims, clock);

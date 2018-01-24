@@ -19,6 +19,8 @@
 
 package com.auth0.jwt;
 
+import static com.auth0.jwt.PemUtils.readPublicKeyFromFile;
+
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.jwts.JWT;
@@ -33,9 +35,11 @@ import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
-
-import static com.auth0.jwt.PemUtils.readPublicKeyFromFile;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 //@Ignore("Skipping concurrency tests")
 public class ConcurrentVerifyTest {
