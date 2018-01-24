@@ -41,7 +41,7 @@ public class TimeUtil {
     }
 
     public static int randBetween(int start, int end) {
-        return start + (int)Math.round(Math.random() * (end - start));
+        return start + (int) Math.round(Math.random() * (end - start));
     }
 
 }

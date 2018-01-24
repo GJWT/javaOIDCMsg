@@ -205,8 +205,9 @@ public class AccessJwtCreator {
      */
     public AccessJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
         jwt.withArrayClaim(name, items);
-        if(publicClaims.contains(name))
+        if (publicClaims.contains(name)) {
             addedClaims.put(name, true);
+        }
         return this;
     }
 
@@ -232,7 +233,7 @@ public class AccessJwtCreator {
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
     public String sign(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+        if (!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
         String JWS = jwt.sign(algorithm);
@@ -250,7 +251,7 @@ public class AccessJwtCreator {
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
     public String signBase16Encoding(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+        if (!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
         String JWS = jwt.sign(algorithm, EncodeType.Base16);
@@ -268,7 +269,7 @@ public class AccessJwtCreator {
      * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
      */
     public String signBase32Encoding(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
+        if (!jwt.getIsNoneAlgorithmAllowed() && algorithm.equals(Algorithm.none())) {
             throw new IllegalAccessException("None algorithm isn't allowed");
         }
         String JWS = jwt.sign(algorithm, EncodeType.Base32);
@@ -278,12 +279,15 @@ public class AccessJwtCreator {
 
     /**
      * Verifies that all the standard claims were provided
+     *
      * @throws Exception if all the standard claims weren't provided
      */
     private void verifyClaims() throws Exception {
-        for(String claim : addedClaims.keySet())
-            if(!addedClaims.get(claim))
+        for (String claim : addedClaims.keySet()) {
+            if (!addedClaims.get(claim)) {
                 throw new Exception("Standard claim: " + claim + " has not been set");
+            }
+        }
     }
 
     public static AccessJwtCreator build() {

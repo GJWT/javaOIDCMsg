@@ -21,6 +21,9 @@ package com.auth0.jwt.creators;
 
 import static com.auth0.jwt.TimeUtil.generateRandomExpDateInFuture;
 import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertTrue;
+
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
@@ -30,14 +33,13 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
 import com.auth0.jwt.jwts.JWT;
 import com.auth0.jwt.jwts.RiscJWT;
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
 
 public class RiscJwtCreatorTest {
 
@@ -404,7 +406,7 @@ public class RiscJwtCreatorTest {
         verifyClaims(claims, exp);
     }
 
-    private static void verifyClaims(Map<String,Claim> claims, Date exp) {
+    private static void verifyClaims(Map<String, Claim> claims, Date exp) {
         assertTrue(claims.get(PublicClaims.ISSUER).asList(String.class).get(0).equals("issuer"));
         assertTrue(claims.get(PublicClaims.SUBJECT).asList(String.class).get(0).equals("subject"));
         assertTrue(claims.get(PublicClaims.AUDIENCE).asString().equals("audience"));

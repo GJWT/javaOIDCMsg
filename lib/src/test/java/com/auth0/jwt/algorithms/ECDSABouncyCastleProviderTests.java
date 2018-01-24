@@ -19,6 +19,24 @@
 
 package com.auth0.jwt.algorithms;
 
+import static com.auth0.jwt.PemUtils.readPrivateKeyFromFile;
+import static com.auth0.jwt.PemUtils.readPublicKeyFromFile;
+import static com.auth0.jwt.algorithms.ECDSAAlgorithmTest.assertValidDERSignature;
+import static com.auth0.jwt.algorithms.ECDSAAlgorithmTest.assertValidJOSESignature;
+import static com.auth0.jwt.algorithms.ECDSAAlgorithmTest.createDERSignature;
+import static com.auth0.jwt.algorithms.ECDSAAlgorithmTest.createJOSESignature;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.auth0.jwt.creators.EncodeType;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
@@ -35,22 +53,17 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.SignatureException;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-
-import static com.auth0.jwt.PemUtils.readPrivateKeyFromFile;
-import static com.auth0.jwt.PemUtils.readPublicKeyFromFile;
-import static com.auth0.jwt.algorithms.ECDSAAlgorithmTest.*;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class ECDSABouncyCastleProviderTests {
 
@@ -975,7 +988,9 @@ public class ECDSABouncyCastleProviderTests {
         ECDSAAlgorithm algorithm256 = (ECDSAAlgorithm) Algorithm.ECDSA256((ECPublicKey) readPublicKeyFromFile(PUBLIC_KEY_FILE_256, "EC"), (ECPrivateKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE_256, "EC"));
         String content256 = "eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJhdXRoMCJ9";
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0;
+             i < 10;
+             i++) {
             byte[] signature = algorithm256.sign(content256.getBytes());
             String signature256 = Base64.encodeBase64URLSafeString((signature));
 
@@ -991,7 +1006,9 @@ public class ECDSABouncyCastleProviderTests {
         ECDSAAlgorithm algorithm384 = (ECDSAAlgorithm) Algorithm.ECDSA384((ECPublicKey) readPublicKeyFromFile(PUBLIC_KEY_FILE_384, "EC"), (ECPrivateKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE_384, "EC"));
         String content384 = "eyJhbGciOiJFUzM4NCJ9.eyJpc3MiOiJhdXRoMCJ9";
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0;
+             i < 10;
+             i++) {
             byte[] signature = algorithm384.sign(content384.getBytes());
             String signature384 = Base64.encodeBase64URLSafeString((signature));
 
@@ -1007,7 +1024,9 @@ public class ECDSABouncyCastleProviderTests {
         ECDSAAlgorithm algorithm512 = (ECDSAAlgorithm) Algorithm.ECDSA512((ECPublicKey) readPublicKeyFromFile(PUBLIC_KEY_FILE_512, "EC"), (ECPrivateKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE_512, "EC"));
         String content512 = "eyJhbGciOiJFUzUxMiJ9.eyJpc3MiOiJhdXRoMCJ9";
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0;
+             i < 10;
+             i++) {
             byte[] signature = algorithm512.sign(content512.getBytes());
             String signature512 = Base64.encodeBase64URLSafeString((signature));
 

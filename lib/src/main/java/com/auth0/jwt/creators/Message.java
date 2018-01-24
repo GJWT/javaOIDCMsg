@@ -40,12 +40,13 @@ public class Message {
         return URLDecoder.decode(urlEncoded, "UTF-8");
     }
 
-    public String toJSON(HashMap<String,Object> hashMap) {
+    public String toJSON(HashMap<String, Object> hashMap) {
         return new Gson().toJson(hashMap);
     }
 
-    public HashMap<String,Object> fromJSON(String json) throws IOException {
-        return new ObjectMapper().readValue(json, new TypeReference<Map<String, Object>>(){});
+    public HashMap<String, Object> fromJSON(String json) throws IOException {
+        return new ObjectMapper().readValue(json, new TypeReference<Map<String, Object>>() {
+        });
     }
 
 }

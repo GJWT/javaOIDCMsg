@@ -19,6 +19,15 @@
 
 package com.auth0.jwt;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertTrue;
+
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.Claim;
@@ -28,7 +37,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.hamcrest.collection.IsCollectionWithSize;
 import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Assert;
-import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -36,9 +44,6 @@ import org.junit.rules.ExpectedException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
 public class JWTDecoderTest {
 
@@ -340,7 +345,7 @@ public class JWTDecoderTest {
         JWT jwt = JWT.require(Algorithm.HMAC256("secret")).build();
         DecodedJWT decodedJWT = jwt.decode(token);
         assertThat(decodedJWT, is(notNullValue()));
-        Map<String,Claim> claims = decodedJWT.getClaims();
+        Map<String, Claim> claims = decodedJWT.getClaims();
         assertThat(claims, is(notNullValue()));
         assertThat(claims, is(instanceOf(Map.class)));
         assertThat(claims.get("exp"), is(notNullValue()));
@@ -355,7 +360,7 @@ public class JWTDecoderTest {
 
     //Helper Methods
 
-    private DecodedJWT customJWT(String jsonHeader, String jsonPayload, String signature) throws Exception{
+    private DecodedJWT customJWT(String jsonHeader, String jsonPayload, String signature) throws Exception {
         String header = Base64.encodeBase64URLSafeString(jsonHeader.getBytes(StandardCharsets.UTF_8));
         String body = Base64.encodeBase64URLSafeString(jsonPayload.getBytes(StandardCharsets.UTF_8));
         JWT jwt = JWT.require(Algorithm.HMAC256("secret")).build();

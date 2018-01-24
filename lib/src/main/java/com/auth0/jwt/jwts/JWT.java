@@ -20,18 +20,26 @@
 package com.auth0.jwt.jwts;
 
 import com.auth0.jwt.ClockImpl;
-import com.auth0.jwt.creators.EncodeType;
-import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.JWTDecoder;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.*;
+import com.auth0.jwt.creators.EncodeType;
+import com.auth0.jwt.creators.JWTCreator;
+import com.auth0.jwt.exceptions.AlgorithmMismatchException;
+import com.auth0.jwt.exceptions.InvalidClaimException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.impl.PublicClaims;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
 import com.auth0.jwt.verification.VerificationAndAssertion;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
 public class JWT {

@@ -112,7 +112,9 @@ public class JsonMatcher extends TypeSafeDiagnosingMatcher<String> {
     private String arrayToString(Object[] array) {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
-        for (int i = 0; i < array.length; i++) {
+        for (int i = 0;
+             i < array.length;
+             i++) {
             Object o = array[i];
             sb.append(objectToString(o));
             if (i + 1 < array.length) {

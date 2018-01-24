@@ -29,14 +29,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.apache.commons.codec.Encoder;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.binary.StringUtils;
 
-import java.io.*;
-import java.net.URLDecoder;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -346,14 +343,14 @@ public final class JWTCreator {
          * @throws IllegalArgumentException if the provided algorithm is null.
          * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
          */
-        public String sign(Algorithm algorithm) throws Exception{
+        public String sign(Algorithm algorithm) throws Exception {
             return sign(algorithm, EncodeType.Base64);
         }
 
         /**
          * Creates a new JWT and signs it with the given algorithm
          *
-         * @param algorithm used to sign the JWT
+         * @param algorithm  used to sign the JWT
          * @param encodeType specifies which base encoding is required
          * @return a new JWT token
          * @throws IllegalArgumentException if the provided algorithm is null.
@@ -363,7 +360,7 @@ public final class JWTCreator {
             if (algorithm == null) {
                 throw new IllegalArgumentException("The Algorithm cannot be null.");
             }
-            if(encodeType == null) {
+            if (encodeType == null) {
                 throw new IllegalArgumentException("Encodetype cannot be null.");
             }
             headerClaims.put(PublicClaims.ALGORITHM, algorithm.getName());
@@ -422,7 +419,7 @@ public final class JWTCreator {
         return String.format("%s.%s", content, signatureFinal);
     }
 
-    private String signBase32Encoding() throws UnsupportedEncodingException{
+    private String signBase32Encoding() throws UnsupportedEncodingException {
         Base32 base32 = new Base32();
         String header = URLEncoder.encode(headerJson, "UTF-8");
         String payload = URLEncoder.encode(payloadJson, "UTF-8");

@@ -34,6 +34,7 @@ public class RiscJWT extends JWT.BaseVerification implements Verification {
 
     /**
      * Create Verification object for verification purposes
+     *
      * @param jti
      * @param issuer
      * @param audience
@@ -41,19 +42,20 @@ public class RiscJWT extends JWT.BaseVerification implements Verification {
      * @param expLeeway
      * @return
      */
+    @Override
     public Verification createVerifierForRisc(String jti, List<String> issuer,
                                               List<String> audience, long iatLeeway, long expLeeway, long nbf) {
         Verification verification = withJWTId(jti).withIssuer(issuer.toArray(new String[issuer.size()])).acceptIssuedAt(iatLeeway);
 
-        if(audience != null && !audience.isEmpty()) {
+        if (audience != null && !audience.isEmpty()) {
             verification.withAudience(audience.toArray(new String[audience.size()]));
         }
 
-        if(nbf >= 0) {
+        if (nbf >= 0) {
             verification.acceptNotBefore(iatLeeway);
         }
 
-        if(expLeeway >= 0) {
+        if (expLeeway >= 0) {
             verification.acceptExpiresAt(expLeeway);
         }
 
@@ -99,6 +101,7 @@ public class RiscJWT extends JWT.BaseVerification implements Verification {
      * @param clock the instance that will handle the current time.
      * @return a new JWT instance with a custom Clock.
      */
+    @Override
     public JWT build(Clock clock) {
         addLeewayToDateClaims();
         return new JWT(algorithm, claims, clock);

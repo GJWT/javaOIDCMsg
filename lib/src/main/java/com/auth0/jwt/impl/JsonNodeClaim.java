@@ -87,7 +87,9 @@ class JsonNodeClaim implements Claim {
         }
 
         T[] arr = (T[]) Array.newInstance(tClazz, data.size());
-        for (int i = 0; i < data.size(); i++) {
+        for (int i = 0;
+             i < data.size();
+             i++) {
             try {
                 arr[i] = getObjectMapper().treeToValue(data.get(i), tClazz);
             } catch (JsonProcessingException e) {
@@ -104,7 +106,9 @@ class JsonNodeClaim implements Claim {
         }
 
         List<T> list = new ArrayList<>();
-        for (int i = 0; i < data.size(); i++) {
+        for (int i = 0;
+             i < data.size();
+             i++) {
             try {
                 list.add(getObjectMapper().treeToValue(data.get(i), tClazz));
             } catch (JsonProcessingException e) {

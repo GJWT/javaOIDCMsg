@@ -20,8 +20,6 @@
 package com.auth0.jwt;
 
 import com.auth0.jwt.creators.EncodeType;
-import com.auth0.jwt.creators.JWTCreator;
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.impl.JWTParser;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -33,7 +31,6 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.binary.StringUtils;
 
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
