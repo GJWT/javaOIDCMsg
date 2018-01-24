@@ -1,5 +1,6 @@
 package oiccli.webfinger;
 
+import com.google.common.base.Strings;
 import oiccli.StringUtil;
 import oiccli.Tuple;
 import oiccli.exceptions.MessageException;
@@ -40,7 +41,7 @@ public class WebFinger {
         List<Tuple> queryParamsTuple = new ArrayList<>(Arrays.asList(new Tuple("resource", resource)));
 
         if (rel == null) {
-            if (StringUtil.isNotNullAndNotEmpty(this.defaultRelt)) {
+            if (!Strings.isNullOrEmpty(this.defaultRelt)) {
                 queryParamsTuple.add(new Tuple("rel", this.defaultRelt));
             }
         } else {

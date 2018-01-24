@@ -25,8 +25,4 @@ public class StringUtil {
             return null;
         }
     }
-
-    public static boolean isNotNullAndNotEmpty(String s) {
-        return s != null && !s.isEmpty();
-    }
 }

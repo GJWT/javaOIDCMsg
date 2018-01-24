@@ -15,10 +15,6 @@ public class AuthorizationResponse {
     private String tokenType;
     private String idToken;
 
-    public AuthorizationResponse() {
-
-    }
-
     public boolean verify(Map<String, String> args) throws MissingRequiredAttribute {
         //super(AuthorizationResponse, self).verify(**kwargs)
 

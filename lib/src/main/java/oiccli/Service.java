@@ -1,6 +1,7 @@
 package oiccli;
 
 import com.auth0.jwt.creators.Message;
+import com.google.common.base.Strings;
 import javax.xml.ws.http.HTTPException;
 import oiccli.HTTP.Response;
 import oiccli.client_info.ClientInfo;
@@ -177,7 +178,7 @@ public class Service {
         if (uri != null) {
             args.remove("endpoint");
         } else {
-            if (StringUtil.isNotNullAndNotEmpty(this.endpoint)) {
+            if (!Strings.isNullOrEmpty(endpoint)) {
                 uri = this.endpoint;
             } else {
                 throw new MissingEndpoint("No endpoint specified");
@@ -209,7 +210,7 @@ public class Service {
             httpArgs = new HashMap<>();
         }
 
-        if (StringUtil.isNotNullAndNotEmpty(authenticationMethod)) {
+        if (!Strings.isNullOrEmpty(authenticationMethod)) {
             //return this.client_authn_method[authn_method]().construct(
             //      cis, cli_info, request_args, http_args, **kwargs);
         } else {
@@ -242,7 +243,7 @@ public class Service {
 
         cis.setLax(lax);
         Map<String, String> hArg = new HashMap<>();
-        if (StringUtil.isNotNullAndNotEmpty(authenticationMethod)) {
+        if (!Strings.isNullOrEmpty(authenticationMethod)) {
             hArg = this.initAuthenticationMethod(cis, clientInfo, authenticationMethod, requestArgs, args);
         }
 
@@ -279,13 +280,13 @@ public class Service {
 
     public Map<String, Object> doRequestInit(ClientInfo clientInfo, String bodyType, String method, String authenticationMethod,
                                              Map<String, Object> requestArgs, Map<String, String> httpArgs, Map<String, String> args) throws NoSuchFieldException, IllegalAccessException, MissingEndpoint, UnsupportedEncodingException, UnsupportedType {
-        if (!StringUtil.isNotNullAndNotEmpty(method)) {
+        if (Strings.isNullOrEmpty(method)) {
             method = this.httpMethod;
         }
-        if (!StringUtil.isNotNullAndNotEmpty(authenticationMethod)) {
+        if (Strings.isNullOrEmpty(authenticationMethod)) {
             authenticationMethod = this.defaultAuthenticationMethod;
         }
-        if (!StringUtil.isNotNullAndNotEmpty(bodyType)) {
+        if (Strings.isNullOrEmpty(bodyType)) {
             bodyType = this.bodyType;
         }
 
@@ -302,7 +303,7 @@ public class Service {
             fragment = uri.getFragment();
         }
 
-        if (StringUtil.isNotNullAndNotEmpty(query)) {
+        if (!Strings.isNullOrEmpty(query)) {
             return query;
         } else {
             return fragment;
@@ -388,7 +389,7 @@ public class Service {
     }
 
     public String getValueType(FakeResponse response, String bodyType) throws WrongContentType, ValueError {
-        if (StringUtil.isNotNullAndNotEmpty(bodyType)) {
+        if (!Strings.isNullOrEmpty(bodyType)) {
             return Util.verifyHeader(response, bodyType);
         } else {
             return "urlencoded";

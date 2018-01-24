@@ -1,6 +1,7 @@
 package oiccli;
 
 import com.auth0.jwt.creators.Message;
+import com.google.common.base.Strings;
 import oiccli.exceptions.UnsupportedType;
 import oiccli.exceptions.ValueError;
 import oiccli.exceptions.WrongContentType;
@@ -130,14 +131,14 @@ public class Util {
                     failedAttribute = attribute;
                     if (attributes.containsKey(attribute)) {
                         morselValue = morsel.get(attribute);
-                        if (StringUtil.isNotNullAndNotEmpty(morselValue)) {
+                        if (!Strings.isNullOrEmpty(morselValue)) {
                             if (attribute.equals("expires")) {
                                 attributesCopy.put(attribute, dateToTime(morselValue));
                             } else {
                                 attributesCopy.put(attribute, morselValue);
                             }
                         } else if (attribute.equals("maxAge")) {
-                            if (StringUtil.isNotNullAndNotEmpty(morselValue)) {
+                            if (!Strings.isNullOrEmpty(morselValue)) {
                                 attributesCopy.put("expires", dateToTime(morselValue));
                             }
                         }
@@ -154,7 +155,7 @@ public class Util {
                 }
             }
 
-            if (attributesCopy.get("domain") instanceof String && StringUtil.isNotNullAndNotEmpty((String) attributesCopy.get("domain")) && ((String) attributesCopy.get("domain")).startsWith(".")) {
+            if (attributesCopy.get("domain") instanceof String && !Strings.isNullOrEmpty((String) attributesCopy.get("domain")) && ((String) attributesCopy.get("domain")).startsWith(".")) {
                 attributesCopy.put("domainInitialDot", true);
             }
 
@@ -189,8 +190,8 @@ public class Util {
         logger.debug("Response txt: " + response.getText().toString());
 
         String contentType = response.getHeaders().getContentType();
-        if (!StringUtil.isNotNullAndNotEmpty(contentType)) {
-            if (StringUtil.isNotNullAndNotEmpty(bodyType)) {
+        if (Strings.isNullOrEmpty(contentType)) {
+            if (!Strings.isNullOrEmpty(bodyType)) {
                 return bodyType;
             } else {
                 return "txt";

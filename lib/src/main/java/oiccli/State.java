@@ -1,5 +1,6 @@
 package oiccli;
 
+import com.google.common.base.Strings;
 import oiccli.exceptions.ExpiredToken;
 import oiccli.exceptions.UnknownState;
 import sun.swing.plaf.synth.DefaultSynthStyle;
@@ -17,7 +18,7 @@ public class State {
     public State(String clientId, Database db, String dbName, int lifetime) {
         this.clientId = clientId;
         if (db == null) {
-            if (StringUtil.isNotNullAndNotEmpty(dbName)) {
+            if (!Strings.isNullOrEmpty(dbName)) {
                 this.db = shelve.open(dbName, true);
             } else {
                 this.db = new Database();
@@ -163,7 +164,7 @@ public class State {
     }
 
     public DefaultSynthStyle.StateInfo addResponse(AuthorizationResponse authorizationResponse, String state) throws UnknownState {
-        if (!StringUtil.isNotNullAndNotEmpty(state)) {
+        if (Strings.isNullOrEmpty(state)) {
             state = authorizationResponse.getState();
         }
 

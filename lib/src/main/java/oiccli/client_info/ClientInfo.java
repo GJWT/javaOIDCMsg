@@ -1,5 +1,6 @@
 package oiccli.client_info;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 import oiccli.State;
@@ -112,7 +113,7 @@ public class ClientInfo {
             }
         }
 
-        if (StringUtil.isNotNullAndNotEmpty(requestsDir)) {
+        if (!Strings.isNullOrEmpty(requestsDir)) {
             File file = new File(requestsDir);
             if (!file.isDirectory()) {
                 try {

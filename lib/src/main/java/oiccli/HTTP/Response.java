@@ -1,6 +1,7 @@
 package oiccli.HTTP;
 
 import com.auth0.jwt.creators.Message;
+import com.google.common.base.Strings;
 import oiccli.StringUtil;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class Response {
     }
 
     private List<String> getResponse(String message, Map<String, String> args) {
-        if (StringUtil.isNotNullAndNotEmpty(message)) {
+        if (!Strings.isNullOrEmpty(message)) {
             if (message.contains("<script>")) {
                 message = message.replace("<script>", "&lt;script&gt;").replace(
                         "</script>", "&lt;/script&gt;");
@@ -52,7 +53,7 @@ public class Response {
 
         if (this.template != null) {
             for (Map<String, String> hMap : headers) {
-                if (hMap.containsKey("Content-type") && hMap.get("Content-type").equals("application/json")) {
+                if ("application/json".equals(hMap.get("Content-type"))) {
                     return Arrays.asList(message);
                 } else {
                     //return [str(self.template % message).encode("utf-8")]
@@ -102,7 +103,6 @@ public class Response {
                 if (((String) pair.getKey()).equals("Content-type")) {
                     cTypes.add((String) pair.getValue());
                 }
-                it.remove();
             }
         }
     }
