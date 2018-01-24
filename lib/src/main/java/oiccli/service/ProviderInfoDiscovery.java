@@ -6,7 +6,12 @@ import oiccli.exceptions.ConfigurationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ProviderInfoDiscovery extends service.ProviderInfoDiscovery {
     private Message message;
@@ -79,8 +84,8 @@ public class ProviderInfoDiscovery extends service.ProviderInfoDiscovery {
             }
         }
 
-        for(String keyIndex : clientInfo.getClientPrefs().keySet()) {
-            if(!clientInfo.getBehavior().containsKey(keyIndex)) {
+        for (String keyIndex : clientInfo.getClientPrefs().keySet()) {
+            if (!clientInfo.getBehavior().containsKey(keyIndex)) {
                 /*
                                 vtyp = regreq.c_param[key]
                 if isinstance(vtyp[0], list):

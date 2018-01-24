@@ -13,10 +13,12 @@ public class PrivateKeyJwt extends JWSAuthenticationMethod {
         return JWSAuthenticationMethod.chooseAlgorithm(entity, args);
     }
 
+    @Override
     public String chooseAlgorithm(Map<String, String> args) throws AuthenticationFailure {
         return chooseAlgorithm("private_key_jwt", args);
     }
 
+    @Override
     public Key getSigningKey(String algorithm, ClientInfo clientInfo) {
         return clientInfo.getKeyJar().getSigningKey(StringUtil.alg2keytype(algorithm), "", algorithm);
     }

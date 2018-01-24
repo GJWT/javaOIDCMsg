@@ -1,7 +1,5 @@
 package oiccli.client_auth;
 
-import com.sun.security.ntlm.Client;
-
 import java.util.Map;
 
 public class ClientSecretPost extends ClientSecretBasic {

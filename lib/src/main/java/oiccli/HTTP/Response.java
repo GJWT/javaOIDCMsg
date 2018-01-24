@@ -3,7 +3,12 @@ package oiccli.HTTP;
 import com.auth0.jwt.creators.Message;
 import oiccli.StringUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class Response {
 

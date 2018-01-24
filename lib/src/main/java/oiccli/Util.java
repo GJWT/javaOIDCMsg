@@ -224,8 +224,8 @@ public class Util {
                     !matchTo(PLAIN_TEXT, contentType)) {
                 throw new WrongContentType(contentType);
             }
-        } else if(bodyType.equals(TEXT)) {
-            if(!matchTo(PLAIN_TEXT, contentType) && !matchTo(HTML_TEXT, contentType)) {
+        } else if (bodyType.equals(TEXT)) {
+            if (!matchTo(PLAIN_TEXT, contentType) && !matchTo(HTML_TEXT, contentType)) {
                 throw new WrongContentType("Content type: " + contentType);
             }
         } else {

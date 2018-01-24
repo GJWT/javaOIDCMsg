@@ -13,6 +13,7 @@ public class ClientSecretJwt extends JWSAuthenticationMethod {
         return JWSAuthenticationMethod.chooseAlgorithm(entity, args);
     }
 
+    @Override
     public Key getSigningKey(String algorithm, ClientInfo clientInfo) {
         return clientInfo.getKeyJar().getSigningKey(StringUtil.alg2keytype(algorithm), algorithm);
     }

@@ -3,14 +3,11 @@ package oiccli.client_auth;
 import oiccli.StringUtil;
 import oiccli.client_info.ClientInfo;
 import oiccli.exceptions.AuthenticationFailure;
+import oiccli.exceptions.NoMatchingKey;
+import org.junit.Assert;
 
 import java.util.Arrays;
 import java.util.HashMap;
-
-import oiccli.exceptions.NoMatchingKey;
-import org.junit.Assert;
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 import java.util.Map;
 

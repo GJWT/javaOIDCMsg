@@ -1,12 +1,9 @@
 package oiccli.client_auth;
 
 import com.auth0.jwt.jwts.JWT;
-
 import oiccli.StringUtil;
 import oiccli.client_info.ClientInfo;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.text.CharacterPredicates;
-import org.apache.commons.text.RandomStringGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +30,7 @@ public class ClientSecretBasic extends ClientAuthenticationMethod {
             httpArgs = new HashMap<>();
         }
 
-        if(!httpArgs.containsKey("headers")) {
+        if (!httpArgs.containsKey("headers")) {
             httpArgs.put("headers", new HashMap<String, String>());
         }
 

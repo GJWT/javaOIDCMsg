@@ -1,18 +1,26 @@
 package oiccli;
 
 import com.auth0.jwt.creators.Message;
+import javax.xml.ws.http.HTTPException;
 import oiccli.HTTP.Response;
 import oiccli.client_info.ClientInfo;
-import oiccli.exceptions.*;
+import oiccli.exceptions.MissingEndpoint;
+import oiccli.exceptions.OicCliError;
+import oiccli.exceptions.UnsupportedType;
+import oiccli.exceptions.ValueError;
+import oiccli.exceptions.WrongContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.ws.http.HTTPException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Service {
 

@@ -5,13 +5,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JRD extends Base{
-    private static final Map<String,Object> cParam = new HashMap<String,Object>() {{
-        put("expires", new HashMap<String,Object>() {{ put("type", String.class); put("required", false); }});
-        put("subject", new HashMap<String,Object>() {{ put("type", String.class); put("required", false); }});
-        put("aliases", new HashMap<String,Object>() {{ put("type", Arrays.asList(String.class, List.class)); put("required", false); }});
-        put("properties", new HashMap<String,Object>() {{ put("type", Map.class); put("required", false); }});
-        put("links", new HashMap<String,Object>() {{ put("type", Arrays.asList(List.class, Map.class)); put("required", false); }});
+public class JRD extends Base {
+    private static final Map<String, Object> cParam = new HashMap<String, Object>() {{
+        put("expires", new HashMap<String, Object>() {{
+            put("type", String.class);
+            put("required", false);
+        }});
+        put("subject", new HashMap<String, Object>() {{
+            put("type", String.class);
+            put("required", false);
+        }});
+        put("aliases", new HashMap<String, Object>() {{
+            put("type", Arrays.asList(String.class, List.class));
+            put("required", false);
+        }});
+        put("properties", new HashMap<String, Object>() {{
+            put("type", Map.class);
+            put("required", false);
+        }});
+        put("links", new HashMap<String, Object>() {{
+            put("type", Arrays.asList(List.class, Map.class));
+            put("required", false);
+        }});
     }};
     private int expDays;
     private int expSeconds;
@@ -25,7 +40,7 @@ public class JRD extends Base{
     }
 
     public JRD() {
-        this(null,0,0,0,0,0);
+        this(null, 0, 0, 0, 0, 0);
     }
 
     public void expiresIn(int days, int seconds, int minutes, int hours, int weeks) {
@@ -42,7 +57,7 @@ public class JRD extends Base{
         return result;
     }
 
-    public Map<String,Object> getcParam() {
+    public Map<String, Object> getcParam() {
         return cParam;
     }
 }

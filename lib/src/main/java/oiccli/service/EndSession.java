@@ -18,11 +18,11 @@ public class EndSession extends Service {
     private static String request = "endSession";
 
     public EndSession(String httpLib, KeyJar keyJar, String clientAuthenticationMethod) {
-        super(httpLib,keyJar,clientAuthenticationMethod);
+        super(httpLib, keyJar, clientAuthenticationMethod);
         //self.pre_construct = [self.oic_pre_construct]
     }
 
-    public List<Map<String,String>> oicPreConstruct(ClientInfo clientInfo, Map<String,String> requestArgs, Map<String,String> args) throws MissingParameter {
+    public List<Map<String, String>> oicPreConstruct(ClientInfo clientInfo, Map<String, String> requestArgs, Map<String, String> args) throws MissingParameter {
         requestArgs = UserInfo.setIdToken(clientInfo, requestArgs, args);
         return Arrays.asList(requestArgs, new HashMap<String, String>());
     }

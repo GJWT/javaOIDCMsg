@@ -3,8 +3,6 @@ package oiccli.service;
 import com.auth0.jwt.creators.Message;
 import oiccli.client_info.ClientInfo;
 import oiccli.exceptions.MissingParameter;
-import oiccli.service.Service;
-import oiccli.service.UserInfo;
 
 import java.util.Arrays;
 import java.util.HashMap;

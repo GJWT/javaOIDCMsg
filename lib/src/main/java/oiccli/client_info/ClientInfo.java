@@ -10,7 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ClientInfo {
 
@@ -128,20 +132,20 @@ public class ClientInfo {
 
         this.importKeys(config.get("keys"));
 
-        if(config.containsKey("keydefs")) {
+        if (config.containsKey("keydefs")) {
             this.keyJar = buildKeyJar(config.get("keydefs"), this.keyJar)[1];
         }
     }
 
-    public void importKeys(Map<String,Map<String,List<String>>> keySpec) {
-        for(String key : keySpec.keySet()) {
-            if(key.equals("file")) {
-                Map<String,List<String>> hMap = keySpec.get(key);
-                for(String hMapKey : hMap.keySet()) {
-                    if(hMapKey.equals("rsa")) {
+    public void importKeys(Map<String, Map<String, List<String>>> keySpec) {
+        for (String key : keySpec.keySet()) {
+            if (key.equals("file")) {
+                Map<String, List<String>> hMap = keySpec.get(key);
+                for (String hMapKey : hMap.keySet()) {
+                    if (hMapKey.equals("rsa")) {
                         Key key;
                         KeyBundle keyBundle;
-                        for(String file : hMap.get(hMapKey)) {
+                        for (String file : hMap.get(hMapKey)) {
                             key = new RSAKey(importPrivateRsaKeyFromFile(file), "sig");
                             keyBundle = new KeyBundle();
                             keyBundle.append(key);
@@ -149,9 +153,9 @@ public class ClientInfo {
                         }
                     }
                 }
-            } else if(key.equals("url")) {
+            } else if (key.equals("url")) {
                 KeyBundle keyBundle;
-                for(String issuer : keySpec.keySet()) {
+                for (String issuer : keySpec.keySet()) {
                     keyBundle = new KeyBundle(keySpec.get(issuer));
                     this.keyJar.addKb(keyBundle);
                 }
@@ -195,13 +199,17 @@ public class ClientInfo {
         return cSecret;
     }
 
-    public Map<String, Map<String, String>> getKid() { return kid; }
+    public Map<String, Map<String, String>> getKid() {
+        return kid;
+    }
 
     public void setClientSecret(String cSecret) {
         this.cSecret = cSecret;
     }
 
-    public State getState() { return stateDb; }
+    public State getState() {
+        return stateDb;
+    }
 
     public void setCSecret(String secret) {
         if (secret == null) {
@@ -312,7 +320,7 @@ public class ClientInfo {
 
     public static List<Object> addCodeChallenge(ClientInfo clientInfo, String state) {
         Integer cvLength = (Integer) clientInfo.config.get("codeChallenge").get("length");
-        if(cvLength == null) {
+        if (cvLength == null) {
             cvLength = 64;
         }
 
@@ -347,6 +355,6 @@ public class ClientInfo {
     }
 
     public static Object getCodeVerifier(ClientInfo clientInfo, String state) throws ExpiredToken {
-        return clientInfo.getStateDb().getTokenInfo("state"+state).get("codeVerifier");
+        return clientInfo.getStateDb().getTokenInfo("state" + state).get("codeVerifier");
     }
 }

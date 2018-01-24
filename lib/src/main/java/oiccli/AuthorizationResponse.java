@@ -19,20 +19,20 @@ public class AuthorizationResponse {
 
     }
 
-    public boolean verify(Map<String,String> args) throws MissingRequiredAttribute {
+    public boolean verify(Map<String, String> args) throws MissingRequiredAttribute {
         //super(AuthorizationResponse, self).verify(**kwargs)
 
-        if(this.contains("aud")) {
-            if(args.containsKey("clientId")) {
-                if(!this.getAudience().contains(args.get("clientId"))) {
+        if (this.contains("aud")) {
+            if (args.containsKey("clientId")) {
+                if (!this.getAudience().contains(args.get("clientId"))) {
                     return false;
                 }
             }
         }
 
-        if(this.contains("idToken")) {
-            Map<String,String> argsTemp = new HashMap<>();
-            for(String arg : Arrays.asList("key", "keyjar", "algs", "sender")) {
+        if (this.contains("idToken")) {
+            Map<String, String> argsTemp = new HashMap<>();
+            for (String arg : Arrays.asList("key", "keyjar", "algs", "sender")) {
                 argsTemp.put(arg, args.get(arg));
             }
 
@@ -44,25 +44,25 @@ public class AuthorizationResponse {
             _alg = idt.jws_header["alg"]
              */
 
-            String hFunction = "HS" + algorithm.substring(0,algorithm.length()-3);
-            if(this.getAccessToken() != null) {
-                if(this.idt.getAtHash() == null) {
+            String hFunction = "HS" + algorithm.substring(0, algorithm.length() - 3);
+            if (this.getAccessToken() != null) {
+                if (this.idt.getAtHash() == null) {
                     throw new MissingRequiredAttribute("Missing at_hash property" +
                             idToken.toString());
                 }
 
-                if(idt.getAtHash() != jws.leftHash(this.getAccessToken(), hFunction)) {
+                if (idt.getAtHash() != jws.leftHash(this.getAccessToken(), hFunction)) {
                     throw new AtHashError(
                             "Failed to verify access_token hash " + idt.toString());
                 }
             }
 
-            if(this.getCode() != null) {
-                if(this.idt.getCHash() == null) {
+            if (this.getCode() != null) {
+                if (this.idt.getCHash() == null) {
                     throw new MissingRequiredAttribute("Missing cHash property" +
                             idToken.toString());
                 }
-                if(idt.getCHash() != jws.leftHash(this.getCode(), hFunction)) {
+                if (idt.getCHash() != jws.leftHash(this.getCode(), hFunction)) {
                     throw new CHashError("Failed to verify code hash " + idt.toString());
                 }
             }

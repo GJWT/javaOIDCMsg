@@ -32,7 +32,7 @@ public class Authorization extends service.Authorization {
     public List<Map<String, ?>> oicPreConstruct(ClientInfo clientInfo, Map<String, Object> requestArgs, Map<String, String> args) {
         if (requestArgs != null) {
             String responseType = (String) requestArgs.get("responseType");
-            if(responseType == null) {
+            if (responseType == null) {
                 requestArgs.put("responseType", clientInfo.getBehavior().get("responseTypes").get(0));
 
             }
@@ -68,7 +68,7 @@ public class Authorization extends service.Authorization {
             requestArgs.put("responseMode", responseMode);
         }
 
-        if(!requestArgs.containsKey("state")) {
+        if (!requestArgs.containsKey("state")) {
             requestArgs.put("state", clientInfo.getStateDb().createState(clientInfo.getIssuer(), requestArgs));
         }
 

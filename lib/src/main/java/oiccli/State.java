@@ -163,19 +163,19 @@ public class State {
     }
 
     public DefaultSynthStyle.StateInfo addResponse(AuthorizationResponse authorizationResponse, String state) throws UnknownState {
-        if(!StringUtil.isNotNullAndNotEmpty(state)) {
+        if (!StringUtil.isNotNullAndNotEmpty(state)) {
             state = authorizationResponse.getState();
         }
 
         DefaultSynthStyle.StateInfo stateInfo = this.getState(state);
-        if(stateInfo == null) {
+        if (stateInfo == null) {
             throw new UnknownState(state);
         }
 
         stateInfo.setCode(authorizationResponse.getCode());
         this.updateTokenInfo(stateInfo, authorizationResponse);
 
-        for(String claim : Arrays.asList("idToken", "refreshToken")) {
+        for (String claim : Arrays.asList("idToken", "refreshToken")) {
             stateInfo.setClaim(authorizationResponse.getClaim());
         }
 
