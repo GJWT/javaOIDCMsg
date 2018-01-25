@@ -19,14 +19,13 @@
 
 package com.auth0.jwt;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeDiagnosingMatcher;
-
 import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 public class JsonMatcher extends TypeSafeDiagnosingMatcher<String> {
 

@@ -2,17 +2,15 @@ package com.auth0.jwt.oicmsg;
 
 import com.auth0.jwt.exceptions.oicmsg_exceptions.HeaderError;
 import com.auth0.jwt.exceptions.oicmsg_exceptions.SerializationNotPossible;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.security.spec.EllipticCurve;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ECKey extends Key {
 

@@ -4,11 +4,6 @@ import com.auth0.jwt.exceptions.oicmsg_exceptions.HeaderError;
 import com.google.common.base.Strings;
 import com.google.common.primitives.Bytes;
 import com.google.gson.Gson;
-import org.bouncycastle.util.encoders.Base64;
-import org.junit.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,6 +12,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bouncycastle.util.encoders.Base64;
+import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Key {
 
@@ -179,7 +178,7 @@ public class Key {
             } catch (Exception e) {
                 return false;
             }
-            for (String sign : signs){
+            for (String sign : signs) {
                 if (((String) item).contains(sign)) {
                     return false;
                 }

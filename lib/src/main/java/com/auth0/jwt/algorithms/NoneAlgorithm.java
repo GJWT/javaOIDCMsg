@@ -23,11 +23,10 @@ import com.auth0.jwt.creators.EncodeType;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import java.net.URLDecoder;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-
-import java.net.URLDecoder;
 
 class NoneAlgorithm extends Algorithm {
 

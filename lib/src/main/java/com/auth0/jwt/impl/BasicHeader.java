@@ -24,7 +24,6 @@ import static com.auth0.jwt.impl.JsonNodeClaim.extractClaim;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.Header;
 import com.fasterxml.jackson.databind.JsonNode;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

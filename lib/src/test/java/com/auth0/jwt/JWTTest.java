@@ -21,11 +21,10 @@ package com.auth0.jwt;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.jwts.JWT;
+import java.util.Date;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.util.Date;
 
 public class JWTTest {
 

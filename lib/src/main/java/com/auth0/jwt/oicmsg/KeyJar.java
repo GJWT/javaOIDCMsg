@@ -5,9 +5,6 @@ import com.auth0.jwt.exceptions.oicmsg_exceptions.TypeError;
 import com.auth0.jwt.impl.JWTParser;
 import com.auth0.jwt.jwts.JWT;
 import com.google.common.base.Strings;
-import org.junit.Assert;
-import org.slf4j.LoggerFactory;
-
 import java.security.KeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +12,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Assert;
+import org.slf4j.LoggerFactory;
 
 public class KeyJar {
 

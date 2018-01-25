@@ -24,7 +24,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.GoogleVerification;
 import com.auth0.jwt.interfaces.Verification;
-
 import java.util.List;
 
 public class GoogleJWT extends JWT.BaseVerification implements GoogleVerification {

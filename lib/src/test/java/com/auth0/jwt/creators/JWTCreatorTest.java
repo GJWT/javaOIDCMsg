@@ -32,17 +32,16 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
 import com.auth0.jwt.interfaces.constants.Constants;
-import org.apache.commons.codec.binary.Base64;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import java.nio.charset.StandardCharsets;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.codec.binary.Base64;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class JWTCreatorTest {
 

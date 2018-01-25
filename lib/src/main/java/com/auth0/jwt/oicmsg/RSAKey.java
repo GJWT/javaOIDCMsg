@@ -3,16 +3,15 @@ package com.auth0.jwt.oicmsg;
 import com.auth0.jwt.exceptions.oicmsg_exceptions.DeserializationNotPossible;
 import com.auth0.jwt.exceptions.oicmsg_exceptions.SerializationNotPossible;
 import com.google.common.base.Strings;
-import org.bouncycastle.util.encoders.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bouncycastle.util.encoders.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RSAKey extends Key {
 

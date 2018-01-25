@@ -28,12 +28,11 @@ import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
+import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.auth0.jwt.verification.VerificationAndAssertion;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;

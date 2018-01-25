@@ -28,19 +28,18 @@ import static java.util.Arrays.asList;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.interfaces.constants.Constants;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.GoogleVerification;
+import com.auth0.jwt.interfaces.constants.Constants;
 import com.auth0.jwt.jwts.ExtendedJWT;
 import com.auth0.jwt.jwts.JWT;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class ExtendedJwtCreatorTest {
 

@@ -19,9 +19,6 @@
 
 package com.auth0.jwt.algorithms;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -29,6 +26,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 class CryptoHelper {
 

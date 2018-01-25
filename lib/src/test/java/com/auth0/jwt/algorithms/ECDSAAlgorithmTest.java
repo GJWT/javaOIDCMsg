@@ -39,14 +39,6 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.jwts.JWT;
-import org.apache.commons.codec.binary.Base64;
-import org.hamcrest.Matchers;
-import org.hamcrest.collection.IsIn;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -58,6 +50,13 @@ import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.util.Arrays;
+import org.apache.commons.codec.binary.Base64;
+import org.hamcrest.Matchers;
+import org.hamcrest.collection.IsIn;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 @SuppressWarnings("deprecation")
 public class ECDSAAlgorithmTest {

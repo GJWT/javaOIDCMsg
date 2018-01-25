@@ -28,13 +28,12 @@ import static org.hamcrest.Matchers.nullValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import java.util.HashMap;
+import java.util.Map;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class BasicHeaderTest {
 

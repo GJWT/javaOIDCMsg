@@ -33,13 +33,12 @@ import com.auth0.jwt.interfaces.Verification;
 import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.auth0.jwt.jwts.FbJWT;
 import com.auth0.jwt.jwts.JWT;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class FbJwtCreatorTest {
 

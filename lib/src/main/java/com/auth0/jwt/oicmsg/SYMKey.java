@@ -1,14 +1,13 @@
 package com.auth0.jwt.oicmsg;
 
 import com.auth0.jwt.exceptions.oicmsg_exceptions.JWKException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SYMKey extends Key {
 

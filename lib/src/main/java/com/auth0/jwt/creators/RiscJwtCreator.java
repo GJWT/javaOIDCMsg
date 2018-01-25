@@ -24,7 +24,6 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.interfaces.constants.Constants;
 import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.auth0.jwt.jwts.JWT;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;

@@ -34,6 +34,9 @@ import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.constants.Constants;
 import com.auth0.jwt.jwts.JWT;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.hamcrest.collection.IsCollectionWithSize;
 import org.hamcrest.core.IsCollectionContaining;
@@ -41,10 +44,6 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.Map;
 
 public class JWTDecoderTest {
 

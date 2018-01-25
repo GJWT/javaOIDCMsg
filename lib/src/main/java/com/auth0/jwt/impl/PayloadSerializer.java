@@ -23,7 +23,6 @@ import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;

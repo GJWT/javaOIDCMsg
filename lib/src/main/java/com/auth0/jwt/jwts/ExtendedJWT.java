@@ -22,7 +22,6 @@ package com.auth0.jwt.jwts;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.GoogleVerification;
 import com.auth0.jwt.interfaces.Verification;
-
 import java.util.List;
 
 public class ExtendedJWT extends GoogleJWT implements GoogleVerification {

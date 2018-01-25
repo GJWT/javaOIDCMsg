@@ -25,15 +25,14 @@ import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Header;
 import com.auth0.jwt.interfaces.Payload;
-import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.binary.StringUtils;
-
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.binary.StringUtils;
 
 /**
  * The JWTDecoder class holds the decode method to parse a given JWT token into it's JWT representation.

@@ -40,14 +40,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
 
 public class HeaderDeserializerTest {
 

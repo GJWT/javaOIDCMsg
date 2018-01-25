@@ -25,7 +25,6 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
-
 import java.io.UnsupportedEncodingException;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;

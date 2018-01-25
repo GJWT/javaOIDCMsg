@@ -23,7 +23,6 @@ import com.auth0.jwt.ClockImpl;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.Verification;
-
 import java.util.List;
 
 public class ImplicitJWT extends JWT.BaseVerification implements Verification {
