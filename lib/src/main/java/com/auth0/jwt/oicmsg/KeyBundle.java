@@ -1,7 +1,6 @@
 package com.auth0.jwt.oicmsg;
 
 import com.auth0.jwt.exceptions.oicmsg_exceptions.ImportException;
-import com.auth0.jwt.exceptions.oicmsg_exceptions.JWKException;
 import com.auth0.jwt.exceptions.oicmsg_exceptions.TypeError;
 import com.auth0.jwt.exceptions.oicmsg_exceptions.UnknownKeyType;
 import com.auth0.jwt.exceptions.oicmsg_exceptions.UpdateFailed;
@@ -38,7 +37,7 @@ public class KeyBundle {
 
     final private static Logger logger = LoggerFactory.getLogger(KeyBundle.class);
     private static final Map<String, Key> K2C =
-            ImmutableMap.of("RSA", new RSAKey(),
+            ImmutableMap.of(RSA_KEY, new RSAKey(),
                     "EC", new ECKey(),
                     "oct", new SYMKey()
             );
@@ -48,7 +47,7 @@ public class KeyBundle {
                     "ver", "sig",
                     "sig", "sig"
             );
-    private static final Set<String> fileTypes = new HashSet<String>(Arrays.asList("rsa", "der", "jwks"));
+    private static final Set<String> fileTypes = new HashSet<String>(Arrays.asList("rsa", DER, JWKS));
     private java.util.List<Key> keys;
     private Map<String, List<com.auth0.jwt.oicmsg.Key>> impJwks;
     private String source;
@@ -63,6 +62,9 @@ public class KeyBundle {
     private static final String JWKS = "jwks";
     private static final String JWK = "jwk";
     private static final String DER = "der";
+    private static final String EC_KEY = "EC";
+    private static final String RSA_KEY = "RSA";
+    private static final String SYM_KEY = "SYMKey";
     private long lastUpdated;
 
     public KeyBundle(List<Key> keys, String source, long cacheTime, boolean verifySSL,
@@ -110,35 +112,31 @@ public class KeyBundle {
                     } catch (UpdateFailed updateFailed) {
                         logger.error("Local key updated from " + this.source + " failed.");
                     }
-                } else if (this.fileFormat.equals("der")) {
+                } else if (this.fileFormat.equals(DER)) {
                     doLocalDer(this.source, this.keyType, this.keyUsage);
                 }
             }
         }
     }
 
-    public String getSource() {
-        return source;
-    }
-
     public KeyBundle() throws ImportException {
-        this(null, "", 300, true, "jwk", "RSA", null);
+        this(null, "", 300, true, JWK, RSA_KEY, null);
     }
 
     public KeyBundle(List<Key> keyList, String keyType) throws ImportException {
-        this(keyList, "", 300, true, "jwk", keyType, null);
+        this(keyList, "", 300, true, JWK, keyType, null);
     }
 
     public KeyBundle(List<Key> keyList, String keyType, List<String> usage) throws ImportException {
-        this(keyList, "", 300, true, "jwk", keyType, usage);
+        this(keyList, "", 300, true, JWK, keyType, usage);
     }
 
     public KeyBundle(String source, boolean verifySSL) throws ImportException {
-        this(null, source, 300, verifySSL, "jwk", "RSA", null);
+        this(null, source, 300, verifySSL, JWK, RSA_KEY, null);
     }
 
     public KeyBundle(String source, String fileFormat, List<String> usage) throws ImportException {
-        this(null, source, 300, true, fileFormat, "RSA", usage);
+        this(null, source, 300, true, fileFormat, RSA_KEY, usage);
     }
 
     public void doKeys(List<Key> keys) {
@@ -148,35 +146,17 @@ public class KeyBundle {
             keys.remove("use");
             boolean flag = false;
             for (String use : usage) {
-                List<String> types = new ArrayList<String>() {{
-                    add(kty);
-                    add(kty.toLowerCase());
-                    add(kty.toUpperCase());
-                }};
-                boolean isSuccess = true;
-                Key key;
-                for (String typeIndex : types) {
-                    try {
-                        switch (typeIndex) {
-                            case "RSA":
-                                key = new RSAKey("use");
-                                break;
-                            case "EC":
-                                key = new ECKey("use");
-                                break;
-                            case "SYMKey":
-                                key = new SYMKey("use");
-                                break;
-                            default:
-                                throw new IllegalArgumentException("Encryption type: " + typeIndex + " isn't supported");
-                        }
-                        this.keys.add(key);
-                        flag = true;
-                        break;
-                    } catch (JWKException exception) {
-                        logger.warn("While loading keys: " + exception);
-                    }
+                if (RSA_KEY.equalsIgnoreCase(kty)) {
+                    key = new RSAKey(use);
+                } else if (EC_KEY.equalsIgnoreCase(kty)) {
+                    key = new ECKey(use);
+                } else if (SYM_KEY.equalsIgnoreCase(kty)) {
+                    key = new SYMKey(use);
+                } else {
+                    throw new IllegalArgumentException("Encryption type: " + typeIndex + " isn't supported");
                 }
+                this.keys.add(key);
+                flag = true;
             }
 
             if (!flag) {
@@ -221,7 +201,7 @@ public class KeyBundle {
     public void doLocalDer(String fileName, String keyType, List<String> keyUsage) throws NotImplementedException {
         RSAKey rsaKey = rsaLoad(fileName);
 
-        if (!keyType.equalsIgnoreCase("rsa")) {
+        if (!keyType.equalsIgnoreCase(RSA_KEY)) {
             throw new NotImplementedException();
         }
 
@@ -324,12 +304,8 @@ public class KeyBundle {
 
         boolean result = false;
         if (!this.keys.isEmpty()) {
-            if (this.remote) {
-                if (System.currentTimeMillis() > this.timeOut) {
-                    if (update()) {
-                        result = true;
-                    }
-                }
+            if (this.remote && System.currentTimeMillis() > this.timeOut && update()) {
+                result = true;
             }
         } else if (this.remote) {
             if (update()) {
@@ -347,9 +323,9 @@ public class KeyBundle {
             this.keys = new ArrayList<Key>();
             try {
                 if (!this.remote) {
-                    if (this.fileFormat.equals("jwks")) {
+                    if (this.fileFormat.equals(JWKS)) {
                         this.doLocalJwk(this.source);
-                    } else if (this.fileFormat.equals("der")) {
+                    } else if (this.fileFormat.equals(DER)) {
                         doLocalDer(source, keyType, keyUsage);
                     }
                 } else {
@@ -361,11 +337,10 @@ public class KeyBundle {
                 return false;
             }
 
-            long now = System.currentTimeMillis();
             for (Key key : keys) {
                 if (!keys.contains(key)) {
                     if (key.getInactiveSince() == Long.MIN_VALUE) {
-                        key.setInactiveSince(now);
+                        key.setInactiveSince();
                     }
                 }
                 this.keys.add(key);
@@ -395,6 +370,10 @@ public class KeyBundle {
     public List<Key> getKeys() {
         this.upToDate();
         return this.keys;
+    }
+
+    public String getSource() {
+        return source;
     }
 
     public List<Key> getActiveKeys() {
@@ -485,7 +464,7 @@ public class KeyBundle {
 
     public void markAsInactive(String kid) {
         Key key = getKeyWithKid(kid);
-        key.setInactiveSince(System.currentTimeMillis());
+        key.setInactiveSince();
     }
 
     public void removeOutdated(float after, int when) throws TypeError {
@@ -515,7 +494,7 @@ public class KeyBundle {
         if (JWKS.equals(type)) {
             keyBundle = new KeyBundle(filename, JWKS, usage);
         } else if (DER.equals(type)) {
-            keyBundle = new KeyBundle(filename, "der", usage);
+            keyBundle = new KeyBundle(filename, DER, usage);
         } else {
             throw new UnknownKeyType("Unsupported key type");
         }

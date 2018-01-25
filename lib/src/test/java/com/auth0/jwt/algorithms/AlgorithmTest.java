@@ -234,7 +234,7 @@ public class AlgorithmTest {
 
     @Test
     public void shouldCreateHMAC256AlgorithmWithBytes() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret".getBytes(StandardCharsets.UTF_8));
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET.getBytes(StandardCharsets.UTF_8));
 
         assertThat(algorithm, is(notNullValue()));
         assertThat(algorithm, is(instanceOf(HMACAlgorithm.class)));
@@ -244,7 +244,7 @@ public class AlgorithmTest {
 
     @Test
     public void shouldCreateHMAC384AlgorithmWithBytes() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC384("secret".getBytes(StandardCharsets.UTF_8));
+        Algorithm algorithm = Algorithm.HMAC384(Constants.SECRET.getBytes(StandardCharsets.UTF_8));
 
         assertThat(algorithm, is(notNullValue()));
         assertThat(algorithm, is(instanceOf(HMACAlgorithm.class)));
@@ -254,7 +254,7 @@ public class AlgorithmTest {
 
     @Test
     public void shouldCreateHMAC512AlgorithmWithBytes() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC512("secret".getBytes(StandardCharsets.UTF_8));
+        Algorithm algorithm = Algorithm.HMAC512(Constants.SECRET.getBytes(StandardCharsets.UTF_8));
 
         assertThat(algorithm, is(notNullValue()));
         assertThat(algorithm, is(instanceOf(HMACAlgorithm.class)));
@@ -264,7 +264,7 @@ public class AlgorithmTest {
 
     @Test
     public void shouldCreateHMAC256AlgorithmWithString() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
 
         assertThat(algorithm, is(notNullValue()));
         assertThat(algorithm, is(instanceOf(HMACAlgorithm.class)));
@@ -274,7 +274,7 @@ public class AlgorithmTest {
 
     @Test
     public void shouldCreateHMAC384AlgorithmWithString() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC384("secret");
+        Algorithm algorithm = Algorithm.HMAC384(Constants.SECRET);
 
         assertThat(algorithm, is(notNullValue()));
         assertThat(algorithm, is(instanceOf(HMACAlgorithm.class)));
@@ -284,7 +284,7 @@ public class AlgorithmTest {
 
     @Test
     public void shouldCreateHMAC512AlgorithmWithString() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC512("secret");
+        Algorithm algorithm = Algorithm.HMAC512(Constants.SECRET);
 
         assertThat(algorithm, is(notNullValue()));
         assertThat(algorithm, is(instanceOf(HMACAlgorithm.class)));

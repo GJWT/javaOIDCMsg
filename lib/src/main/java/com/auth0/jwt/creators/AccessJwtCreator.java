@@ -21,7 +21,7 @@ package com.auth0.jwt.creators;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.auth0.jwt.jwts.JWT;
 
 import java.util.Date;
@@ -41,8 +41,8 @@ public class AccessJwtCreator {
     public AccessJwtCreator() {
         jwt = JWT.create();
         addedClaims = new HashMap<String, Boolean>() {{
-            put("Issuer", false);
-            put("Subject", false);
+            put(Constants.ISSUER_CAPITALIZED, false);
+            put(Constants.SUBJECT_CAPITALIZED, false);
             put("Iat", false);
         }};
         publicClaims = new HashSet<String>() {{
@@ -65,7 +65,7 @@ public class AccessJwtCreator {
      */
     public AccessJwtCreator withIssuer(String... issuer) {
         jwt.withIssuer(issuer);
-        addedClaims.put("Issuer", true);
+        addedClaims.put(Constants.ISSUER_CAPITALIZED, true);
         return this;
     }
 
@@ -78,7 +78,7 @@ public class AccessJwtCreator {
      */
     public AccessJwtCreator withSubject(String... subject) {
         jwt.withSubject(subject);
-        addedClaims.put("Subject", true);
+        addedClaims.put(Constants.SUBJECT_CAPITALIZED, true);
         return this;
     }
 

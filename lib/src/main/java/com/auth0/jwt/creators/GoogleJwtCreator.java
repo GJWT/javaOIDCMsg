@@ -21,7 +21,8 @@ package com.auth0.jwt.creators;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.interfaces.constants.Constants;
+import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.auth0.jwt.jwts.JWT;
 
 import java.util.Date;
@@ -41,11 +42,11 @@ public class GoogleJwtCreator {
     public GoogleJwtCreator() {
         jwt = JWT.create();
         addedClaims = new HashMap<String, Boolean>() {{
-            put("Name", false);
-            put("Email", false);
-            put("Picture", false);
-            put("Issuer", false);
-            put("Subject", false);
+            put(Constants.NAME_CAPITALIZED, false);
+            put(Constants.EMAIL_CAPITALIZED, false);
+            put(Constants.PICTURE_CAPITALIZED, false);
+            put(Constants.ISSUER_CAPITALIZED, false);
+            put(Constants.SUBJECT_CAPITALIZED, false);
             put("Iat", false);
         }};
         publicClaims = new HashSet<String>() {{
@@ -68,7 +69,7 @@ public class GoogleJwtCreator {
      */
     public GoogleJwtCreator withName(String name) {
         jwt.withNonStandardClaim("name", name);
-        addedClaims.put("Name", true);
+        addedClaims.put(Constants.NAME_CAPITALIZED, true);
         return this;
     }
 
@@ -79,8 +80,8 @@ public class GoogleJwtCreator {
      * @return this same Builder instance.
      */
     public GoogleJwtCreator withEmail(String email) {
-        jwt.withNonStandardClaim("email", email);
-        addedClaims.put("Email", true);
+        jwt.withNonStandardClaim(Constants.EMAIL, email);
+        addedClaims.put(Constants.EMAIL_CAPITALIZED, true);
         return this;
     }
 
@@ -91,8 +92,8 @@ public class GoogleJwtCreator {
      * @return this same Builder instance.
      */
     public GoogleJwtCreator withPicture(String picture) {
-        jwt.withNonStandardClaim("picture", picture);
-        addedClaims.put("Picture", true);
+        jwt.withNonStandardClaim(Constants.PICTURE, picture);
+        addedClaims.put(Constants.PICTURE_CAPITALIZED, true);
         return this;
     }
 
@@ -105,7 +106,7 @@ public class GoogleJwtCreator {
      */
     public GoogleJwtCreator withIssuer(String... issuer) {
         jwt.withIssuer(issuer);
-        addedClaims.put("Issuer", true);
+        addedClaims.put(Constants.ISSUER_CAPITALIZED, true);
         return this;
     }
 
@@ -118,7 +119,7 @@ public class GoogleJwtCreator {
      */
     public GoogleJwtCreator withSubject(String... subject) {
         jwt.withSubject(subject);
-        addedClaims.put("Subject", true);
+        addedClaims.put(Constants.SUBJECT_CAPITALIZED, true);
         return this;
     }
 

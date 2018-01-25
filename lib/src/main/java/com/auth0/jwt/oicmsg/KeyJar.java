@@ -22,6 +22,13 @@ public class KeyJar {
     private KeyBundle keyBundle;
     private float removeAfter;
     private Map<String, List<KeyBundle>> issuerKeys;
+    private static final String OCT = "oct";
+    private static final String ENC = "enc";
+    private static final String DEC = "dec";
+    private static final String SIG = "sig";
+    private static final String EC = "EC";
+    private static final String ALG = "alg";
+    private static final String RSA = "RSA";
     final private static org.slf4j.Logger logger = LoggerFactory.getLogger(KeyJar.class);
 
     public KeyJar(boolean verifySSL, KeyBundle keyBundle, int removeAfter) {
@@ -61,8 +68,8 @@ public class KeyJar {
         Key key = b64e(key.toString().getBytes());
         if (usage == null || usage.isEmpty()) {
             List<KeyBundle> kbList = new ArrayList<>();
-            List<Key> keyList = new ArrayList<>(Arrays.asList(key));
-            KeyBundle kb = new KeyBundle(keyList, "oct");
+            List<Key> keyList = Arrays.asList(key);
+            KeyBundle kb = new KeyBundle(keyList, OCT);
             kbList.add(kb);
             issuerKeys.put(owner, kbList);
         } else {
@@ -72,9 +79,9 @@ public class KeyJar {
             List<String> usageList = new ArrayList<>();
             for (String use : usage) {
                 kbList = issuerKeys.get(owner);
-                keyList = new ArrayList<>(Arrays.asList(key));
+                keyList = Arrays.asList(key);
                 usageList.add(use);
-                kb = new KeyBundle(keyList, "oct", usageList);
+                kb = new KeyBundle(keyList, OCT, usageList);
                 kbList.add(kb);
                 issuerKeys.put(owner, kbList);
             }
@@ -84,7 +91,7 @@ public class KeyJar {
     public void addKeyBundle(String owner, KeyBundle keyBundle) {
         List<KeyBundle> kbList;
         if (issuerKeys.get(owner) == null) {
-            kbList = new ArrayList<>(Arrays.asList(keyBundle));
+            kbList = Arrays.asList(keyBundle);
             issuerKeys.put(owner, kbList);
         } else {
             kbList = issuerKeys.get(owner);
@@ -99,10 +106,10 @@ public class KeyJar {
 
     public List<Key> getKeys(String keyUse, String keyType, String owner, String kid, Map<String, String> args) {
         String use;
-        if (keyUse.equals("dec") || keyUse.equals("enc")) {
-            use = "enc";
+        if (keyUse.equals(DEC) || keyUse.equals(ENC)) {
+            use = ENC;
         } else {
-            use = "sig";
+            use = SIG;
         }
 
         List<KeyBundle> keyBundleList = null;
@@ -134,7 +141,7 @@ public class KeyJar {
             }
 
             for (Key key : keyList) {
-                if (key.getInactiveSince() == 0 && !"sig".equals(keyUse)) {
+                if (key.getInactiveSince() == 0 && !SIG.equals(keyUse)) {
                     continue;
                 }
                 if (key.getUse() != null || use.equals(key.getUse())) {
@@ -151,8 +158,8 @@ public class KeyJar {
         }
 
         String name;
-        if (keyType.equals("EC") && args.containsKey("alg")) {
-            name = "P-{}" + args.get("alg").substring(2);
+        if (keyType.equals(EC) && args.containsKey(ALG)) {
+            name = "P-{}" + args.get(ALG).substring(2);
             List<Key> tempKeyList = new ArrayList<>();
             for (Key key : keyList) {
                 try {
@@ -166,7 +173,7 @@ public class KeyJar {
             keyList = tempKeyList;
         }
 
-        if (use.equals("enc") && keyType.equals("oct") && !Strings.isNullOrEmpty(owner)) {
+        if (use.equals(ENC) && keyType.equals(OCT) && !Strings.isNullOrEmpty(owner)) {
             for (KeyBundle keyBundle : this.issuerKeys.get("")) {
                 for (Key key : keyBundle.get(keyType)) {
                     if (key.getUse() == null || key.getUse().equals(use)) {
@@ -180,7 +187,7 @@ public class KeyJar {
     }
 
     public List<Key> getSigningKey(String keyType, String owner, String kid, Map<String, String> args) {
-        return getKeys("sig", keyType, owner, kid, args);
+        return getKeys(SIG, keyType, owner, kid, args);
     }
 
     public List<Key> getVerifyKey(String keyType, String owner, String kid, Map<String, String> args) {
@@ -188,16 +195,16 @@ public class KeyJar {
     }
 
     public List<Key> getEncryptKey(String keyType, String owner, String kid, Map<String, String> args) {
-        return getKeys("enc", keyType, owner, kid, args);
+        return getKeys(ENC, keyType, owner, kid, args);
     }
 
     public List<Key> getDecryptKey(String keyType, String owner, String kid, Map<String, String> args) {
-        return getKeys("dec", keyType, owner, kid, args);
+        return getKeys(DEC, keyType, owner, kid, args);
     }
 
     public List<Key> keysByAlgAndUsage(String issuer, String algorithm, String usage) {
         String keyType;
-        if (usage.equals("sig") || usage.equals("ver")) {
+        if (usage.equals(SIG) || usage.equals("ver")) {
             keyType = algorithmToKeytypeForJWS(algorithm);
         } else {
             keyType = algorithmToKeytypeForJWE(algorithm);
@@ -218,23 +225,23 @@ public class KeyJar {
         if (algorithm == null || algorithm.equalsIgnoreCase("none")) {
             return "none";
         } else if (algorithm.startsWith("RS") || algorithm.startsWith("PS")) {
-            return "RSA";
+            return RSA;
         } else if (algorithm.startsWith("HS") || algorithm.startsWith("A")) {
-            return "oct";
+            return OCT;
         } else if (algorithm.startsWith("ES") || algorithm.startsWith("ECDH-ES")) {
-            return "EC";
+            return EC;
         } else {
             return null;
         }
     }
 
     private String algorithmToKeytypeForJWE(String algorithm) {
-        if (algorithm.startsWith("RSA")) {
-            return "RSA";
+        if (algorithm.startsWith(RSA)) {
+            return RSA;
         } else if (algorithm.startsWith("A")) {
-            return "oct";
+            return OCT;
         } else if (algorithm.startsWith("ECDH")) {
-            return "EC";
+            return EC;
         } else {
             return null;
         }
@@ -291,7 +298,7 @@ public class KeyJar {
 
     public void importJwks(Map<String, String> jwks, String issuer) throws ImportException {
         String keys = jwks.get("keys");
-        List<KeyBundle> keyBundleList = this.issuerKeys.get("issuer");
+        List<KeyBundle> keyBundleList = this.issuerKeys.get(Constants.ISSUER);
         if (keyBundleList == null) {
             keyBundleList = new ArrayList<>();
         }

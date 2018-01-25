@@ -24,7 +24,7 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.impl.ClaimsHolder;
 import com.auth0.jwt.impl.PayloadSerializer;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

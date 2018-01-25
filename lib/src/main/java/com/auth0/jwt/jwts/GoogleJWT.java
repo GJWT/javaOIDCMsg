@@ -58,7 +58,7 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
      */
     @Override
     public GoogleVerification withPicture(String picture) {
-        requireClaim("picture", picture);
+        requireClaim(Constants.PICTURE, picture);
         return this;
     }
 
@@ -70,7 +70,7 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
      */
     @Override
     public GoogleVerification withEmail(String email) {
-        requireClaim("email", email);
+        requireClaim(Constants.EMAIL, email);
         return this;
     }
 

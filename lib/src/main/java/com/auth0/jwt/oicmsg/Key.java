@@ -1,6 +1,7 @@
 package com.auth0.jwt.oicmsg;
 
 import com.auth0.jwt.exceptions.oicmsg_exceptions.HeaderError;
+import com.google.common.base.Strings;
 import com.google.common.primitives.Bytes;
 import com.google.gson.Gson;
 import org.bouncycastle.util.encoders.Base64;
@@ -30,10 +31,14 @@ public class Key {
     protected Key key;
     protected long inactiveSince;
     protected Map<String, String> args;
+    private static final String SHA_256 = "SHA-256";
+    private static final String SHA_384 = "SHA-384";
+    private static final String SHA_512 = "SHA-512";
     private static Map<String, Object> longs = new HashMap<String, Object>();
     protected static Set<String> members = new HashSet<>(Arrays.asList("kty", "alg", "use", "kid", "x5c", "x5t", "x5u"));
     public static Set<String> publicMembers = new HashSet<>(Arrays.asList("kty", "alg", "use", "kid", "x5c", "x5t", "x5u"));
-    protected static List<String> required = new ArrayList<>(Arrays.asList("kty"));
+    protected static List<String> required = Arrays.asList("kty");
+    private static final List<String> signs = Arrays.asList("+", "/", "=");
 
     public Key(String kty, String alg, String use, String kid, String x5c, String x5t, String x5u, Key key, Map<String, String> args) {
         this.kty = kty;
@@ -112,10 +117,6 @@ public class Key {
         this.inactiveSince = System.currentTimeMillis();
     }
 
-    public void setInactiveSince(long now) {
-        this.inactiveSince = now;
-    }
-
     public long getInactiveSince() {
         return inactiveSince;
     }
@@ -137,13 +138,13 @@ public class Key {
     public Map<String, String> common() {
         Map<String, String> args = new HashMap<>();
         args.put("kty", this.kty);
-        if (this.use != null && !this.use.isEmpty()) {
+        if (!Strings.isNullOrEmpty(this.use)) {
             args.put("use", this.use);
         }
-        if (this.kid != null && !this.kid.isEmpty()) {
+        if (!Strings.isNullOrEmpty(this.kid)) {
             args.put("kid", this.kid);
         }
-        if (this.alg != null && !this.alg.isEmpty()) {
+        if (!Strings.isNullOrEmpty(this.alg)) {
             args.put("alg", this.alg);
         }
         return args;
@@ -152,10 +153,6 @@ public class Key {
     @Override
     public String toString() {
         return this.toDict().toString();
-    }
-
-    public Key getKey() {
-        return this.key;
     }
 
     public boolean verify() throws HeaderError {
@@ -181,15 +178,14 @@ public class Key {
                 base64URLToLong(item);
             } catch (Exception e) {
                 return false;
-            } finally {
-                for (String sign : new ArrayList<>(Arrays.asList("+", "/", "="))) {
-                    if (((String) item).contains(sign)) {
-                        return false;
-                    }
+            }
+            for (String sign : signs){
+                if (((String) item).contains(sign)) {
+                    return false;
                 }
             }
 
-            if (this.kid != null && !this.kid.isEmpty()) {
+            if (!Strings.isNullOrEmpty(this.kid)) {
                 try {
                     Assert.assertTrue(this.kid instanceof String);
                 } catch (AssertionError error) {
@@ -220,16 +216,15 @@ public class Key {
             Assert.assertEquals(this.getX5u(), otherKey.x5u);
         } catch (AssertionError error) {
             return false;
-        } finally {
-            return true;
         }
+        return true;
     }
 
     public List<String> getKeys() {
         return new ArrayList<>(this.toDict().keySet());
     }
 
-    public byte[] thumbprint(String hashFunction, List<String> members) {
+    public byte[] thumbprint(String hashFunction, List<String> members) throws NoSuchFieldException {
         if (members == null || members.isEmpty()) {
             members = required;
         }
@@ -239,24 +234,20 @@ public class Key {
         String value = null;
         Map<String, String> hmap = new HashMap<>();
         for (String member : members) {
-            try {
-                value = key.getClass().getField(member).toString();
-            } catch (NoSuchFieldException e) {
-                logger.error(e.toString());
-            }
+            value = key.getClass().getField(member).toString();
             hmap.put(member, value);
         }
 
         String json = new Gson().toJson(hmap);
         byte[] byteArr = null;
         switch (hashFunction) {
-            case "SHA-256":
+            case SHA_256:
                 byteArr = sha256_digest(json);
                 break;
-            case "SHA-384":
+            case SHA_384:
                 byteArr = sha384_digest(json);
                 break;
-            case "SHA-512":
+            case SHA_512:
                 byteArr = sha512_digest(json);
                 break;
             default:

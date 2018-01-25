@@ -21,15 +21,16 @@ package com.auth0.jwt.creators;
 
 import static com.auth0.jwt.TimeUtil.generateRandomExpDateInFuture;
 import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
+import static com.auth0.jwt.interfaces.constants.Constants.SECRET;
 import static org.junit.Assert.assertTrue;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.impl.PublicClaims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
+import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.auth0.jwt.jwts.FbJWT;
 import com.auth0.jwt.jwts.JWT;
 import org.junit.Rule;
@@ -51,7 +52,7 @@ public class FbJwtCreatorTest {
 
     @Test
     public void testFbJwtCreatorAllStandardClaimsMustBeRequired() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -67,7 +68,7 @@ public class FbJwtCreatorTest {
 
     @Test
     public void testFbJwtCreatorBase16Encoding() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -83,7 +84,7 @@ public class FbJwtCreatorTest {
 
     @Test
     public void testFbJwtCreatorBase32Encoding() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -101,7 +102,7 @@ public class FbJwtCreatorTest {
     public void testFbJwtCreatorInvalidUserId() throws Exception {
         thrown.expect(InvalidClaimException.class);
         thrown.expectMessage("The Claim 'userId' value doesn't match the required one.");
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -117,7 +118,7 @@ public class FbJwtCreatorTest {
     public void testFbJwtCreatorInvalidAppId() throws Exception {
         thrown.expect(InvalidClaimException.class);
         thrown.expectMessage("The Claim 'appId' value doesn't match the required one.");
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -133,7 +134,7 @@ public class FbJwtCreatorTest {
     public void testFbJwtCreatorUserIdNotProvided() throws Exception {
         thrown.expect(Exception.class);
         thrown.expectMessage("Standard claim: UserId has not been set");
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -198,7 +199,7 @@ public class FbJwtCreatorTest {
 
     @Test
     public void testFbJwtCreatorArrayClaim() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -216,7 +217,7 @@ public class FbJwtCreatorTest {
 
     @Test
     public void testFbJwtCreatorNonStandardClaimStringValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -234,7 +235,7 @@ public class FbJwtCreatorTest {
 
     @Test
     public void testFbJwtCreatorNonStandardClaimIntegerValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -252,7 +253,7 @@ public class FbJwtCreatorTest {
 
     @Test
     public void testFbJwtCreatorNonStandardClaimLongValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -270,7 +271,7 @@ public class FbJwtCreatorTest {
 
     @Test
     public void testFbJwtCreatorNonStandardClaimDoubleValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -288,7 +289,7 @@ public class FbJwtCreatorTest {
 
     @Test
     public void testFbJwtCreatorNonStandardClaimBooleanValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -306,7 +307,7 @@ public class FbJwtCreatorTest {
 
     @Test
     public void testFbJwtCreatorNonStandardClaimDateValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(exp)
                 .withIat(iat)
@@ -333,7 +334,7 @@ public class FbJwtCreatorTest {
         long expLong = date.getTime();
         Date expDate = new Date(expLong);
 
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String token = FbJwtCreator.build()
                 .withExp(expDate)
                 .withIat(iat)

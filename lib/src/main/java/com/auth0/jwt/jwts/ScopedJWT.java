@@ -23,6 +23,7 @@ import com.auth0.jwt.ClockImpl;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.Verification;
+import com.auth0.jwt.interfaces.constants.Constants;
 
 import java.util.List;
 
@@ -54,7 +55,7 @@ public class ScopedJWT extends JWT.BaseVerification implements Verification {
      * @return this same Verification instance.
      */
     public Verification withScope(String scope) {
-        requireClaim("scope", scope);
+        requireClaim(Constants.SCOPE, scope);
         return this;
     }
 
@@ -92,7 +93,6 @@ public class ScopedJWT extends JWT.BaseVerification implements Verification {
 
     /**
      * Creates a new and reusable instance of the JWT the configuration already provided.
-     * ONLY FOR TEST PURPOSES.
      *
      * @param clock the instance that will handle the current time.
      * @return a new JWT instance with a custom Clock.

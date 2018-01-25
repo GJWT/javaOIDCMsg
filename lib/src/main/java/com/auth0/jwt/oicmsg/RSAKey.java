@@ -2,6 +2,7 @@ package com.auth0.jwt.oicmsg;
 
 import com.auth0.jwt.exceptions.oicmsg_exceptions.DeserializationNotPossible;
 import com.auth0.jwt.exceptions.oicmsg_exceptions.SerializationNotPossible;
+import com.google.common.base.Strings;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,13 +81,13 @@ public class RSAKey extends Key {
                 }
             }
 
-            List<String> list = new ArrayList<>(Arrays.asList(this.n, this.e));
-            if (this.d != null && !this.d.isEmpty()) {
+            List<String> list = Arrays.asList(this.n, this.e);
+            if (!Strings.isNullOrEmpty(this.d)) {
                 list.add(this.d);
             }
-            if (this.p != null && !this.p.isEmpty()) {
+            if (!Strings.isNullOrEmpty(this.p)) {
                 list.add(this.p);
-                if (this.q != null && !this.q.isEmpty()) {
+                if (!Strings.isNullOrEmpty(this.q)) {
                     list.add(this.q);
                 }
                 this.key = RSA.construct(tuple(list));  //TODO
@@ -133,8 +134,8 @@ public class RSAKey extends Key {
 
         if (isPrivate) {
             for (String param : longs) {
-                if (!isPrivate && new ArrayList<>(Arrays.asList("d", "p", "q", "dp", "dq", "di",
-                        "qi")).contains(param)) {
+                if (!isPrivate && Arrays.asList("d", "p", "q", "dp", "dq", "di",
+                        "qi").contains(param)) {
                     continue;
                 }
                 try {
@@ -158,7 +159,7 @@ public class RSAKey extends Key {
 
         this.d = this.key.d;
         Object item = null;
-        for (String param : new ArrayList<>(Arrays.asList("p", "q"))) {
+        for (String param : Arrays.asList("p", "q")) {
             try {
                 item = this.getClass().getField(param).get(this);
             } catch (Exception e1) {

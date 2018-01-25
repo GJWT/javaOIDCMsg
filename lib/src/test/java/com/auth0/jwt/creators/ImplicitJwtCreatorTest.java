@@ -26,7 +26,8 @@ import static org.junit.Assert.assertTrue;
 import com.auth0.jwt.TimeUtil;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.InvalidClaimException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.interfaces.constants.Constants;
+import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
@@ -48,15 +49,15 @@ public class ImplicitJwtCreatorTest {
 
     @Test
     public void testImplicitJwtCreatorAllStandardClaimsMustBeRequired() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -64,15 +65,15 @@ public class ImplicitJwtCreatorTest {
 
     @Test
     public void testImplicitJwtCreatorBase16Encoding() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(iat)
                 .signBase16Encoding(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode16Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -80,15 +81,15 @@ public class ImplicitJwtCreatorTest {
 
     @Test
     public void testImplicitJwtCreatorBase32Encoding() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(iat)
                 .signBase32Encoding(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode32Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -98,15 +99,15 @@ public class ImplicitJwtCreatorTest {
     public void testImplicitJwtCreatorInvalidIssuer() throws Exception {
         thrown.expect(InvalidClaimException.class);
         thrown.expectMessage("The Claim 'iss' value doesn't match the required one.");
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
                 .withIssuer("invalid")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -116,15 +117,15 @@ public class ImplicitJwtCreatorTest {
     public void testImplicitJwtCreatorInvalidAudience() throws Exception {
         thrown.expect(InvalidClaimException.class);
         thrown.expectMessage("The Claim 'aud' value doesn't contain the required audience.");
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
                 .withAudience("invalid")
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -134,14 +135,14 @@ public class ImplicitJwtCreatorTest {
     public void testImplicitJwtCreatorIssuerNotProvided() throws Exception {
         thrown.expect(Exception.class);
         thrown.expectMessage("Standard claim: Issuer has not been set");
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
-                .withSubject("subject")
-                .withAudience("audience")
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -154,15 +155,15 @@ public class ImplicitJwtCreatorTest {
 
         Algorithm algorithm = Algorithm.none();
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .setIsNoneAlgorithmAllowed(false)
                 .withIat(iat)
                 .sign(algorithm);
 
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -173,13 +174,13 @@ public class ImplicitJwtCreatorTest {
 
         Algorithm algorithm = Algorithm.none();
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -187,14 +188,14 @@ public class ImplicitJwtCreatorTest {
     public void testImplicitJwtCreatorNoneAlgorithmAllowed() throws Exception {
         Algorithm algorithm = Algorithm.none();
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .setIsNoneAlgorithmAllowed(true)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -202,16 +203,16 @@ public class ImplicitJwtCreatorTest {
 
     @Test
     public void testImplicitJwtCreatorArrayClaim() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(TimeUtil.generateRandomIatDateInPast())
                 .withArrayClaim("arrayKey", "arrayValue1", "arrayValue2")
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -219,16 +220,16 @@ public class ImplicitJwtCreatorTest {
 
     @Test
     public void testImplicitJwtCreatorNonStandardClaimStringValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(TimeUtil.generateRandomIatDateInPast())
                 .withNonStandardClaim("nonStandardClaim", "nonStandardClaimValue")
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -236,16 +237,16 @@ public class ImplicitJwtCreatorTest {
 
     @Test
     public void testImplicitJwtCreatorNonStandardClaimIntegerValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(TimeUtil.generateRandomIatDateInPast())
                 .withNonStandardClaim("nonStandardClaim", 999)
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -253,16 +254,16 @@ public class ImplicitJwtCreatorTest {
 
     @Test
     public void testImplicitJwtCreatorNonStandardClaimLongValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(TimeUtil.generateRandomIatDateInPast())
                 .withNonStandardClaim("nonStandardClaim", 999L)
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -270,16 +271,16 @@ public class ImplicitJwtCreatorTest {
 
     @Test
     public void testImplicitJwtCreatorNonStandardClaimDoubleValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(TimeUtil.generateRandomIatDateInPast())
                 .withNonStandardClaim("nonStandardClaim", 9.99)
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -287,16 +288,16 @@ public class ImplicitJwtCreatorTest {
 
     @Test
     public void testImplicitJwtCreatorNonStandardClaimBooleanValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(TimeUtil.generateRandomIatDateInPast())
                 .withNonStandardClaim("nonStandardClaim", true)
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
@@ -304,24 +305,24 @@ public class ImplicitJwtCreatorTest {
 
     @Test
     public void testImplicitJwtCreatorNonStandardClaimDateValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(TimeUtil.generateRandomIatDateInPast())
                 .withNonStandardClaim("nonStandardClaim", new Date())
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForImplicit(asList("issuer"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims);
     }
 
     private static void verifyClaims(Map<String, Claim> claims) {
-        assertTrue(claims.get(PublicClaims.ISSUER).asList(String.class).get(0).equals("issuer"));
-        assertTrue(claims.get(PublicClaims.SUBJECT).asList(String.class).get(0).equals("subject"));
-        assertTrue(claims.get(PublicClaims.AUDIENCE).asString().equals("audience"));
+        assertTrue(claims.get(PublicClaims.ISSUER).asList(String.class).get(0).equals(Constants.ISSUER));
+        assertTrue(claims.get(PublicClaims.SUBJECT).asList(String.class).get(0).equals(Constants.SUBJECT));
+        assertTrue(claims.get(PublicClaims.AUDIENCE).asString().equals(Constants.AUDIENCE));
     }
 }

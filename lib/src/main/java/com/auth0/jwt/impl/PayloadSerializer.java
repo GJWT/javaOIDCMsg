@@ -19,6 +19,7 @@
 
 package com.auth0.jwt.impl;
 
+import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;

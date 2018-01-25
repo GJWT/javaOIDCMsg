@@ -27,7 +27,8 @@ import static org.junit.Assert.assertTrue;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.interfaces.constants.Constants;
+import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
@@ -51,16 +52,16 @@ public class AccessJwtCreatorTest {
 
     @Test
     public void testAccessJwtCreatorAllStandardClaimsMustBeRequired() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -68,16 +69,16 @@ public class AccessJwtCreatorTest {
 
     @Test
     public void testAccessJwtCreatorBase16Encoding() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
                 .signBase16Encoding(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode16Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -85,16 +86,16 @@ public class AccessJwtCreatorTest {
 
     @Test
     public void testAccessJwtCreatorBase32Encoding() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
                 .signBase32Encoding(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode32Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -104,16 +105,16 @@ public class AccessJwtCreatorTest {
     public void testAccessJwtCreatorInvalidIssuer() throws Exception {
         thrown.expect(InvalidClaimException.class);
         thrown.expectMessage("The Claim 'iss' value doesn't match the required one.");
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
                 .withIssuer("invalid")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -121,16 +122,16 @@ public class AccessJwtCreatorTest {
     public void testAccessJwtCreatorInvalidAudience() throws Exception {
         thrown.expect(InvalidClaimException.class);
         thrown.expectMessage("The Claim 'aud' value doesn't contain the required audience.");
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
                 .withAudience("invalid")
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -141,16 +142,16 @@ public class AccessJwtCreatorTest {
 
         Algorithm algorithm = Algorithm.none();
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
                 .setIsNoneAlgorithmAllowed(false)
                 .sign(algorithm);
 
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -161,15 +162,15 @@ public class AccessJwtCreatorTest {
 
         Algorithm algorithm = Algorithm.none();
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
 
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -177,15 +178,15 @@ public class AccessJwtCreatorTest {
     public void testAccessJwtCreatorNoneAlgorithmAllowed() throws Exception {
         Algorithm algorithm = Algorithm.none();
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .setIsNoneAlgorithmAllowed(true)
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -193,17 +194,17 @@ public class AccessJwtCreatorTest {
 
     @Test
     public void testAccessJwtCreatorArrayClaim() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withArrayClaim("arrayKey", "arrayValue1", "arrayValue2")
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -211,17 +212,17 @@ public class AccessJwtCreatorTest {
 
     @Test
     public void testAccessJwtCreatorNonStandardClaimStringValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withNonStandardClaim("nonStandardClaim", "nonStandardClaimValue")
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -229,17 +230,17 @@ public class AccessJwtCreatorTest {
 
     @Test
     public void testAccessJwtCreatorNonStandardClaimIntegerValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withNonStandardClaim("nonStandardClaim", 999)
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -247,17 +248,17 @@ public class AccessJwtCreatorTest {
 
     @Test
     public void testAccessJwtCreatorNonStandardClaimDoubleValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withNonStandardClaim("nonStandardClaim", 9.99)
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -265,17 +266,17 @@ public class AccessJwtCreatorTest {
 
     @Test
     public void testAccessJwtCreatorNonStandardClaimLongValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withNonStandardClaim("nonStandardClaim", 999L)
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -283,17 +284,17 @@ public class AccessJwtCreatorTest {
 
     @Test
     public void testAccessJwtCreatorNonStandardClaimBooleanValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withNonStandardClaim("nonStandardClaim", true)
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -301,17 +302,17 @@ public class AccessJwtCreatorTest {
 
     @Test
     public void testAccessJwtCreatorNonStandardClaimDateValue() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withNonStandardClaim("nonStandardClaim", new Date())
                 .withExp(exp)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -328,26 +329,26 @@ public class AccessJwtCreatorTest {
         long expLong = date.getTime();
         Date expDate = new Date(expLong);
 
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = AccessJwtCreator.build()
-                .withIssuer("issuer")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withIssuer(Constants.ISSUER)
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withNonStandardClaim("nonStandardClaim", new Date())
                 .withExp(expDate)
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = AccessJWT.require(algorithm);
-        JWT verifier = verification.createVerifierForAccess(asList("issuer"), asList("audience"), 1, 1).build();
+        JWT verifier = verification.createVerifierForAccess(asList(Constants.ISSUER), asList(Constants.AUDIENCE), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
     }
 
     private static void verifyClaims(Map<String, Claim> claims, Date exp) {
-        assertTrue(claims.get(PublicClaims.ISSUER).asList(String.class).get(0).equals("issuer"));
-        assertTrue(claims.get(PublicClaims.SUBJECT).asList(String.class).get(0).equals("subject"));
-        assertTrue(claims.get(PublicClaims.AUDIENCE).asString().equals("audience"));
+        assertTrue(claims.get(PublicClaims.ISSUER).asList(String.class).get(0).equals(Constants.ISSUER));
+        assertTrue(claims.get(PublicClaims.SUBJECT).asList(String.class).get(0).equals(Constants.SUBJECT));
+        assertTrue(claims.get(PublicClaims.AUDIENCE).asString().equals(Constants.AUDIENCE));
         assertTrue(claims.get(PublicClaims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
     }
 }

@@ -23,6 +23,7 @@ import static com.auth0.jwt.PemUtils.readPublicKeyFromFile;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.constants.Constants;
 import com.auth0.jwt.jwts.JWT;
 import net.jodah.concurrentunit.Waiter;
 import org.junit.AfterClass;
@@ -102,7 +103,7 @@ public class ConcurrentVerifyTest {
 
     @Test
     public void shouldPassHMAC256Verification() throws Exception {
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         String token = "eyJhbGciOiJIUzI1NiIsImN0eSI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCJ9.mZ0m_N1J4PgeqWmi903JuUoDRZDBPB7HwkS4nVyWH1M";
 
@@ -112,7 +113,7 @@ public class ConcurrentVerifyTest {
     @Test
     public void shouldPassHMAC384Verification() throws Exception {
         String token = "eyJhbGciOiJIUzM4NCIsImN0eSI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCJ9.uztpK_wUMYJhrRv8SV-1LU4aPnwl-EM1q-wJnqgyb5DHoDteP6lN_gE1xnZJH5vw";
-        Algorithm algorithm = Algorithm.HMAC384("secret");
+        Algorithm algorithm = Algorithm.HMAC384(Constants.SECRET);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
 
         concurrentVerify(jwt, token);
@@ -121,7 +122,7 @@ public class ConcurrentVerifyTest {
     @Test
     public void shouldPassHMAC512Verification() throws Exception {
         String token = "eyJhbGciOiJIUzUxMiIsImN0eSI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCJ9.VUo2Z9SWDV-XcOc_Hr6Lff3vl7L9e5Vb8ThXpmGDFjHxe3Dr1ZBmUChYF-xVA7cAdX1P_D4ZCUcsv3IefpVaJw";
-        Algorithm algorithm = Algorithm.HMAC512("secret");
+        Algorithm algorithm = Algorithm.HMAC512(Constants.SECRET);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
 
         concurrentVerify(jwt, token);

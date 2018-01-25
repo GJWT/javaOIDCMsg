@@ -17,7 +17,24 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package com.auth0.jwt.interfaces;
+package com.auth0.jwt.interfaces.constants;
 
-public interface ExtendedVerification {
+
+public interface PublicClaims {
+
+    //Header
+    String ALGORITHM = "alg";
+    String CONTENT_TYPE = "cty";
+    String TYPE = "typ";
+    String KEY_ID = "kid";
+
+    //Payload
+    String ISSUER = "iss";
+    String SUBJECT = "sub";
+    String EXPIRES_AT = "exp";
+    String NOT_BEFORE = "nbf";
+    String ISSUED_AT = "iat";
+    String JWT_ID = "jti";
+    String AUDIENCE = "aud";
+
 }

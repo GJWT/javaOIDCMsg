@@ -58,15 +58,15 @@ public class VerificationAndAssertionTest {
     public void testVerifyAlgorithmWithMismatchingAlgorithms() throws Exception {
         thrown.expect(AlgorithmMismatchException.class);
         thrown.expectMessage("The provided Algorithm doesn't match the one defined in the JWT's Header.");
-        Algorithm algorithm = Algorithm.HMAC256("secret");
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET);
         String token = ImplicitJwtCreator.build()
                 .withIssuer("accounts.fake.com")
-                .withSubject("subject")
-                .withAudience("audience")
+                .withSubject(Constants.SUBJECT)
+                .withAudience(Constants.AUDIENCE)
                 .withIat(TimeUtil.generateRandomIatDateInPast())
                 .sign(algorithm);
         Verification verification = ImplicitJWT.require(Algorithm.none());
-        JWT verifier = verification.createVerifierForImplicit(asList("accounts.fake.com"), asList("audience"), 1).build();
+        JWT verifier = verification.createVerifierForImplicit(asList("accounts.fake.com"), asList(Constants.AUDIENCE), 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 

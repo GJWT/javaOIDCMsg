@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertTrue;
 
 import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.constants.Constants;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.hamcrest.collection.IsCollectionWithSize;
@@ -59,7 +60,7 @@ public class PayloadImplTest {
         issuedAt = Mockito.mock(Date.class);
         Map<String, JsonNode> tree = new HashMap<>();
         tree.put("extraClaim", new TextNode("extraValue"));
-        payload = new PayloadImpl(Collections.singletonList("issuer"), Collections.singletonList("subject"), Collections.singletonList("audience"), expiresAt, notBefore, issuedAt, "jwtId", tree);
+        payload = new PayloadImpl(Collections.singletonList(Constants.ISSUER), Collections.singletonList(Constants.SUBJECT), Collections.singletonList(Constants.AUDIENCE), expiresAt, notBefore, issuedAt, "jwtId", tree);
     }
 
     @SuppressWarnings("Convert2Diamond")
@@ -73,7 +74,7 @@ public class PayloadImplTest {
     @Test
     public void shouldGetIssuer() throws Exception {
         assertThat(payload, is(notNullValue()));
-        assertTrue(payload.getIssuer().contains("issuer"));
+        assertTrue(payload.getIssuer().contains(Constants.ISSUER));
     }
 
     @Test
@@ -86,7 +87,7 @@ public class PayloadImplTest {
     @Test
     public void shouldGetSubject() throws Exception {
         assertThat(payload, is(notNullValue()));
-        assertTrue(payload.getSubject().contains("subject"));
+        assertTrue(payload.getSubject().contains(Constants.SUBJECT));
     }
 
     @Test
@@ -101,7 +102,7 @@ public class PayloadImplTest {
         assertThat(payload, is(notNullValue()));
 
         assertThat(payload.getAudience(), is(IsCollectionWithSize.hasSize(1)));
-        assertThat(payload.getAudience(), is(IsCollectionContaining.hasItems("audience")));
+        assertThat(payload.getAudience(), is(IsCollectionContaining.hasItems(Constants.AUDIENCE)));
     }
 
     @Test
