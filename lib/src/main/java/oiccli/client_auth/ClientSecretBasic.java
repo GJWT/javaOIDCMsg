@@ -1,15 +1,14 @@
 package oiccli.client_auth;
 
 import com.auth0.jwt.jwts.JWT;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import oiccli.StringUtil;
 import oiccli.client_info.ClientInfo;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ClientSecretBasic extends ClientAuthenticationMethod {
 

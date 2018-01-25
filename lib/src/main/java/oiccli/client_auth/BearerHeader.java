@@ -1,9 +1,8 @@
 package oiccli.client_auth;
 
-import oiccli.client_info.ClientInfo;
-
 import java.util.HashMap;
 import java.util.Map;
+import oiccli.client_info.ClientInfo;
 
 public class BearerHeader {
 

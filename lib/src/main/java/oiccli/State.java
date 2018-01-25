@@ -1,13 +1,12 @@
 package oiccli;
 
 import com.google.common.base.Strings;
-import oiccli.exceptions.ExpiredToken;
-import oiccli.exceptions.UnknownState;
-import sun.swing.plaf.synth.DefaultSynthStyle;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import oiccli.exceptions.ExpiredToken;
+import oiccli.exceptions.UnknownState;
+import sun.swing.plaf.synth.DefaultSynthStyle;
 
 public class State {
 

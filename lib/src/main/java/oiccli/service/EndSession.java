@@ -1,13 +1,12 @@
 package oiccli.service;
 
 import com.auth0.jwt.creators.Message;
-import oiccli.client_info.ClientInfo;
-import oiccli.exceptions.MissingParameter;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import oiccli.client_info.ClientInfo;
+import oiccli.exceptions.MissingParameter;
 
 public class EndSession extends Service {
     private static EndSessionRequest endSessionRequest;

@@ -1,12 +1,11 @@
 package oiccli.service;
 
+import java.util.Arrays;
+import java.util.Map;
 import oiccli.AuthorizationResponse;
 import oiccli.client_info.ClientInfo;
 import oiccli.exceptions.ParameterError;
 import oiccli.exceptions.UnknownState;
-
-import java.util.Arrays;
-import java.util.Map;
 
 public class AccessToken extends service.AccessToken {
     private AccessTokenRequest accessTokenRequest;

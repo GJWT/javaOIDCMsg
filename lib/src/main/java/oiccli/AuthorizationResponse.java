@@ -1,12 +1,11 @@
 package oiccli;
 
-import oiccli.exceptions.AtHashError;
-import oiccli.exceptions.CHashError;
-import oiccli.exceptions.MissingRequiredAttribute;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import oiccli.exceptions.AtHashError;
+import oiccli.exceptions.CHashError;
+import oiccli.exceptions.MissingRequiredAttribute;
 
 public class AuthorizationResponse {
 

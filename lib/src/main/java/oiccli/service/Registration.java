@@ -1,11 +1,10 @@
 package oiccli.service;
 
-import oiccli.client_info.ClientInfo;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import oiccli.client_info.ClientInfo;
 
 public class Registration extends Service {
 

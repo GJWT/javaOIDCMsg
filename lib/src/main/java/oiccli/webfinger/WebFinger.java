@@ -1,15 +1,6 @@
 package oiccli.webfinger;
 
 import com.google.common.base.Strings;
-import oiccli.StringUtil;
-import oiccli.Tuple;
-import oiccli.exceptions.MessageException;
-import oiccli.exceptions.OicMsgError;
-import oiccli.exceptions.WebFingerError;
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -18,6 +9,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import oiccli.Tuple;
+import oiccli.exceptions.MessageException;
+import oiccli.exceptions.OicMsgError;
+import oiccli.exceptions.WebFingerError;
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebFinger {
 

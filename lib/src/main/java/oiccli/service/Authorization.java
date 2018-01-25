@@ -1,9 +1,5 @@
 package oiccli.service;
 
-import oiccli.AuthorizationResponse;
-import oiccli.StringUtil;
-import oiccli.client_info.ClientInfo;
-
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,6 +7,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import oiccli.AuthorizationResponse;
+import oiccli.StringUtil;
+import oiccli.client_info.ClientInfo;
 
 public class Authorization extends service.Authorization {
 

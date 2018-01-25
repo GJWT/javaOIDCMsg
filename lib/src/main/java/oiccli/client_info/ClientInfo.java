@@ -3,19 +3,18 @@ package oiccli.client_info;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
-import oiccli.State;
-import oiccli.StringUtil;
-import oiccli.exceptions.ExpiredToken;
-import org.junit.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import oiccli.State;
+import oiccli.StringUtil;
+import oiccli.exceptions.ExpiredToken;
+import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClientInfo {
 

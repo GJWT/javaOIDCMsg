@@ -1,11 +1,10 @@
 package oiccli.client_auth;
 
+import java.security.Key;
+import java.util.Map;
 import oiccli.StringUtil;
 import oiccli.client_info.ClientInfo;
 import oiccli.exceptions.AuthenticationFailure;
-
-import java.security.Key;
-import java.util.Map;
 
 public class ClientSecretJwt extends JWSAuthenticationMethod {
 

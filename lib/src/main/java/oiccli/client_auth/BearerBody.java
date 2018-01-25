@@ -1,15 +1,14 @@
 package oiccli.client_auth;
 
 import com.auth0.jwt.jwts.JWT;
-import oiccli.State;
-import oiccli.StringUtil;
-import oiccli.client_info.ClientInfo;
-import oiccli.exceptions.AuthenticationFailure;
-
 import java.security.Key;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import oiccli.State;
+import oiccli.StringUtil;
+import oiccli.client_info.ClientInfo;
+import oiccli.exceptions.AuthenticationFailure;
 
 public class BearerBody {
 

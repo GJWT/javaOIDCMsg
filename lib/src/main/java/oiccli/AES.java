@@ -1,11 +1,10 @@
 package oiccli;
 
+import java.util.Arrays;
+import java.util.List;
 import oiccli.exceptions.AESError;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.Assert;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class AES {
 

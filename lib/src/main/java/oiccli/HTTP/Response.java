@@ -2,8 +2,6 @@ package oiccli.HTTP;
 
 import com.auth0.jwt.creators.Message;
 import com.google.common.base.Strings;
-import oiccli.StringUtil;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

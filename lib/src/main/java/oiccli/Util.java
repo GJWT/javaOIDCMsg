@@ -2,12 +2,6 @@ package oiccli;
 
 import com.auth0.jwt.creators.Message;
 import com.google.common.base.Strings;
-import oiccli.exceptions.UnsupportedType;
-import oiccli.exceptions.ValueError;
-import oiccli.exceptions.WrongContentType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -16,6 +10,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import oiccli.exceptions.UnsupportedType;
+import oiccli.exceptions.ValueError;
+import oiccli.exceptions.WrongContentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Util {
 
