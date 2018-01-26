@@ -21,7 +21,6 @@ package com.auth0.jwt.creators;
 
 import static com.auth0.jwt.TimeUtil.generateRandomExpDateInFuture;
 import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
-import static com.auth0.jwt.creators.GoogleJwtCreatorTest.NAME;
 import static com.auth0.jwt.creators.GoogleJwtCreatorTest.verifyClaims;
 import static java.util.Arrays.asList;
 
@@ -61,11 +60,11 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -83,11 +82,11 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .signBase16Encoding(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode16Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -105,11 +104,11 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .signBase32Encoding(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode32Bytes(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -129,11 +128,11 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -151,11 +150,11 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -173,11 +172,11 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -197,11 +196,11 @@ public class ExtendedJwtCreatorTest {
                 .withAudience("invalid")
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -225,7 +224,7 @@ public class ExtendedJwtCreatorTest {
                 .sign(algorithm);
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -246,13 +245,13 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .setIsNoneAlgorithmAllowed(false)
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -271,13 +270,13 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .setIsNoneAlgorithmAllowed(false)
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -293,13 +292,13 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .setIsNoneAlgorithmAllowed(true)
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -317,13 +316,13 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .withNonStandardClaim("nonStandardClaim", "nonStandardClaimValue")
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -339,13 +338,13 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .withNonStandardClaim("nonStandardClaim", 999)
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -361,13 +360,13 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .withNonStandardClaim("nonStandardClaim", 999L)
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -383,13 +382,13 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .withNonStandardClaim("nonStandardClaim", 9.99)
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -405,13 +404,13 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .withNonStandardClaim("nonStandardClaim", true)
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -427,13 +426,13 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(exp)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .withNonStandardClaim("nonStandardClaim", new Date())
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -458,13 +457,13 @@ public class ExtendedJwtCreatorTest {
                 .withAudience(Constants.AUDIENCE)
                 .withExp(expDate)
                 .withIat(iat)
-                .withName(NAME)
+                .withName(Constants.NAME)
                 .withNonStandardClaim("nonStandardClaim", new Date())
                 .sign(algorithm);
 
         GoogleVerification verification = ExtendedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForExtended(Constants.PICTURE, Constants.EMAIL, asList(Constants.ISSUER), asList(Constants.AUDIENCE),
-                NAME, 1, 1, 1).build();
+                Constants.NAME, 1, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 }

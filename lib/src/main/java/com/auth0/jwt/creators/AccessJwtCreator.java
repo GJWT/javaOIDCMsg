@@ -21,6 +21,7 @@ package com.auth0.jwt.creators;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.interfaces.constants.Constants;
 import com.auth0.jwt.interfaces.constants.PublicClaims;
 import com.auth0.jwt.jwts.JWT;
 import java.util.Date;

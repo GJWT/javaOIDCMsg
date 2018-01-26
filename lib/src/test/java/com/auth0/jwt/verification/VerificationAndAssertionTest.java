@@ -27,6 +27,7 @@ import com.auth0.jwt.creators.ImplicitJwtCreator;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
+import com.auth0.jwt.interfaces.constants.Constants;
 import com.auth0.jwt.jwts.ImplicitJWT;
 import com.auth0.jwt.jwts.JWT;
 import org.junit.Rule;

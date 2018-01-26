@@ -28,6 +28,7 @@ import static org.mockito.Mockito.withSettings;
 
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
+import com.auth0.jwt.interfaces.constants.Constants;
 import java.nio.charset.StandardCharsets;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
