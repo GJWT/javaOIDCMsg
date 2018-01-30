@@ -34,9 +34,11 @@ public class ScopedJWT extends JWT.BaseVerification implements Verification{
 
     /**
      * Create Verification object for verification purposes
-     * @issuer scope
+     * @param scope
      * @param issuer
      * @param audience
+     * @param expLeeway
+     * @param iatLeeway
      * @return
      */
     public Verification createVerifierForScoped(String scope, List<String> issuer,

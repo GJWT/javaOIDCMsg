@@ -34,9 +34,9 @@ public class ImplicitJWT extends JWT.BaseVerification implements Verification{
 
     /**
      * Create Verification object for verification purposes
-     * @issuer scope
      * @param issuer
      * @param audience
+     * @param iatLeeway
      * @return
      */
     public Verification createVerifierForImplicit(List<String> issuer,
