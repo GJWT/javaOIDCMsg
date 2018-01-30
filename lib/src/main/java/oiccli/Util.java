@@ -1,6 +1,7 @@
 package oiccli;
 
 import com.auth0.jwt.creators.Message;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
@@ -66,7 +67,7 @@ public class Util {
         return getOrPost(uri, method, cis, DEFAULT_POST_CONTENT_TYPE, null, args);
     }
 
-    public static Map<String, Object> getOrPost(String uri, String method, Message request, String contentType, String accept, Map<String, String> args) throws UnsupportedEncodingException, UnsupportedType {
+    public static Map<String, Object> getOrPost(String uri, String method, Message request, String contentType, String accept, Map<String, String> args) throws UnsupportedEncodingException, UnsupportedType, JsonProcessingException {
         Map<String, Object> response = new HashMap<>();
         String urlEncoded;
         if (method.equals("GET") || method.equals("DELETE")) {
@@ -81,7 +82,7 @@ public class Util {
             if (contentType.equals(URL_ENCODED)) {
                 response.put("body", request.toUrlEncoded(request.toString()));
             } else if (contentType.equals(JSON_ENCODED)) {
-                response.put("body", request.toJSON(request.toHashMap()));
+                response.put("body", request.toJSON());
             } else {
                 throw new UnsupportedType("Unsupported content type " + contentType);
             }
@@ -212,7 +213,7 @@ public class Util {
         } else if (bodyType.equals(JSON)) {
             if (matchTo(JWT_ENCODED, contentType)) {
                 bodyType = JWT;
-            } else {
+            } else if(!matchTo(JSON_ENCODED, contentType) || !matchTo(JRD_JSON, contentType)){
                 throw new WrongContentType(contentType);
             }
         } else if (bodyType.equals(JWT)) {

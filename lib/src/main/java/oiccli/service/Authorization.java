@@ -1,5 +1,7 @@
 package oiccli.service;
 
+import com.auth0.jwt.creators.Message;
+import com.google.common.base.Strings;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import oiccli.AuthorizationResponse;
 import oiccli.StringUtil;
+import oiccli.Tuple;
+import oiccli.Utils;
 import oiccli.client_info.ClientInfo;
 
 public class Authorization extends service.Authorization {
@@ -103,18 +107,22 @@ public class Authorization extends service.Authorization {
 
         /*
             _req = make_openid_request(req, **kwargs)
+        */
 
-            # Should the request be encrypted
-            _req = request_object_encryption(_req, cli_info, **kwargs)
-         */
+        Message _req = Utils.requestObjectEncryption(_req, clientInfo, args);
 
+        String webName;
+        String fileName;
         if (requestParam.equals("request")) {
             req.put("request", _req);
         } else {
-            //_webname = cli_info.registration_response['request_uris'][0]
-            String fileName = clientInfo.filenameFromWebname(webName);
-            //except KeyError:
-            //filename, _webname = construct_request_uri(**kwargs)
+            webName = clientInfo.getRegistrationResponse().get("requestUris").get(0);
+            fileName = clientInfo.filenameFromWebname(webName);
+            if(Strings.isNullOrEmpty(fileName)) {
+                Tuple tuple = Utils.constructRequestUri(null, null, args);
+                webName = tuple.getA();
+                fileName = tuple.getB();
+            }
             BufferedWriter writer = null;
             try {
                 writer = new BufferedWriter(new FileWriter(fileName));
@@ -123,7 +131,7 @@ public class Authorization extends service.Authorization {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            req.put("requestUri", _webname);
+            req.put("requestUri", webName);
         }
 
         return req;

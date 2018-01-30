@@ -20,6 +20,7 @@ public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
         put("private_key_jwt", "RS256");
     }};
     private static final String JWT_BEARER = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+    private static final String V_Required = 1;
 
     public static String chooseAlgorithm(String entity, Map<String, String> args) throws AuthenticationFailure {
         String algorithm = args.get("algorithm");
@@ -58,24 +59,24 @@ public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
         }
     }
 
-    public Map<String, String> construct(Map<String, String> cis, ClientInfo clientInfo, Map<String, String> requestArgs,
+    public Map<String, String> construct(AccessTokenRequest request, ClientInfo clientInfo, Map<String, String> requestArgs,
                                          Map<String, String> httpArgs, Map<String, String> args) throws AuthenticationFailure, NoMatchingKey {
         String algorithm = null;
         List<String> audience = null;
         if (args.containsKey("clientAssertion")) {
-            cis.put("clientAssertion", args.get("clientAssertion"));
+            request.setClientAssertion(args.get("clientAssertion"));
             if (args.containsKey("clientAssertionType")) {
-                cis.put("clientAssertionType", args.get("clientAssertionType"));
+                request.setClientAssertionType(args.get("clientAssertionType"));
             } else {
-                cis.put("clientAssertionType", JWT_BEARER);
+                request.setClientAssertionType(JWT_BEARER);
             }
-        } else if (cis.containsKey("clientAssertion")) {
-            if (!cis.containsKey("clientAssertionType")) {
-                cis.put("clientAssertionType", JWT_BEARER);
+        } else if (request.getClientAssertion() != null) {
+            if (request.getClientAssertionType() == null) {
+                request.setClientAssertionType(JWT_BEARER);
             }
         } else {
             if (args.get("authenticationEndpoint").equals("token") || args.get("authenticationEndpoint").equals("refresh")) {
-                algorithm = clientInfo.registrationInfo("tokenEndpointAuthSigningAlg");
+                algorithm = clientInfo.registrationInfo().get("tokenEndpointAuthSigningAlg");
                 audience = clientInfo.getProviderInfo().get("tokenEndpoint");
             } else {
                 audience = clientInfo.getProviderInfo().get("issuer");
@@ -102,12 +103,12 @@ public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
         Map<String, String> hMap = new HashMap<>();
         hMap.put("lifetime", args.get("lifetime"));
 
-        cis.put("clientAssertion", BearerBody.assertionJWT(clientInfo.getClientId(), signingKey, audience, algorithm, 600));
-        cis.put("clientAssertionType", JWT_BEARER);
-        cis.remove("clientSecret");
+        request.setClientAssertion(BearerBody.assertionJWT(clientInfo.getClientId(), signingKey, audience, algorithm, 600));
+        request.setClientAssertionType(JWT_BEARER);
+        request.setClientSecret(null);
 
-        if (cis.get("clientId").get(1)) {
-            cis.remove("clientId");
+        if (request.getCParam.getClientId().get(V_Required) == null) {
+            request.setClientId(null);
         }
 
         return new HashMap<>();

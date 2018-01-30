@@ -144,7 +144,7 @@ public class State {
         return getTokenInfo(state, 0);
     }
 
-    public Map<String, Object> getResponseArgs(String state, ABCMeta request, int now) throws ExpiredToken {
+    public Map<String, Object> getResponseArgs(String state, AccessTokenRequest request, int now) throws ExpiredToken {
         Map<String, String> info = state.getState(state);
         Map<String, Object> responseArgs = new HashMap<>();
         for (String claim : request.c_param) {

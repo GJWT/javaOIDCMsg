@@ -1,6 +1,8 @@
 package oiccli.webfinger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -26,6 +28,7 @@ public class WebFinger {
     private static final String WF_URL = "https://%s/.well-known/webfinger";
     final private static Logger logger = LoggerFactory.getLogger(WebFinger.class);
     private static final String OIC_ISSUER = "http://openid.net/specs/connect/1.0/issuer";
+    private static final Gson gson = new Gson();
 
     public WebFinger(String defaultRelt, Object httpd) {
         this.defaultRelt = defaultRelt;
@@ -85,7 +88,7 @@ public class WebFinger {
         return new JRD(json.loads(item));
     }
 
-    public Map<String, Map<String, String>> httpArgs(JRD jrd) {
+    public Map<String, Object> httpArgs(JRD jrd) throws JsonProcessingException {
         if (jrd == null) {
             if (this.jrd != null) {
                 jrd = this.jrd;
@@ -99,68 +102,19 @@ public class WebFinger {
             put("Content-Type", "application/json; charset=UTF-8");
         }};
 
-        Map<String, Map<String, String>> headersAndBody = new HashMap<>();
+        Map<String, Object> headersAndBody = new HashMap<>();
         headersAndBody.put("headers", hMap);
-        headersAndBody.put("body", json.dumps(jrd.export()));
+        headersAndBody.put("body", jrd.toJSON());
 
         return headersAndBody;
     }
-
-    /*
-    TODO: I don't see this in Roland's code anymore; might want to remove
-    public String discoveryQuery(String resource) throws URISyntaxException, WebFingerError {
-        logger.debug("Looking for OIDC OP for '" + resource + "'");
-        String url = this.query(resource, Arrays.asList(OIC_ISSUER));
-        HttpResponse response = this.httpd(url, true);
-        int statusCode = response.getStatusCode();
-        Map<String,Object> hMap = new HashMap<>();
-        if(statusCode == 200) {
-            if(this.events != null) {
-                hMap.put("Response", response.getResponseHeader());
-                this.events.add(hMap);
-            }
-
-            this.jrd = load(response.getResponseHeader());
-            if(this.events != null) {
-                hMap = new HashMap<>();
-                hMap.put("JRD Response", this.jrd);
-                this.events.add(hMap);
-            }
-            for(Object link : this.jrd.getcParam().get("links")) {
-                if(link.getRel().equals(OIC_ISSUER)) {
-                    if(!link.getHRef().startsWith("https://")) {
-                        throw new WebFingerError("Must be a HTTPS href");
-                    }
-                    return link.getHRef();
-                }
-            }
-            return null;
-        } else if(statusCode == 301 || statusCode == 302 || statusCode == 307) {
-            return this.discoveryQuery(response.getResponseHeader("location"));
-        } else {
-            throw new WebFingerError("Status code is: " + statusCode);
-        }
-    }*/
-
-    /*public String response(String subject, String base, Map<String,Object> args) throws NoSuchFieldException, IllegalAccessException {
-        this.jrd = new JRD();
-        this.jrd.setSubject(subject);
-        Base.link.put("rel", OIC_ISSUER);
-        Base.link.put("href", base);
-        this.jrd.setLinks(Arrays.asList(Base.link));
-        for(String key : args.keySet()) {
-            this.jrd.getClass().getField(key).set(key, args.get(key));
-        }
-        return json.dumps(this.jrd.export());
-    }*/
-
 
     public static Object linkDeser(Object val, String sFormat) {
         if (val instanceof Map) {
             return val;
         } else if (sFormat.equals("dict") || sFormat.equals("json")) {
             if (!(val instanceof String)) {
-                val = json.dumps(val);
+                val = gson.toJson(val);
                 sFormat = "json";
             }
         }
@@ -173,7 +127,7 @@ public class WebFinger {
         if (sFormat.equals("urlencoded") || sFormat.equals("json")) {
             if (inst instanceof Map) {
                 if (sFormat.equals("json")) {
-                    res = json.dumps(inst);
+                    res = gson.toJson(inst);
                 } else {
                     res = Base64.encodeBase64URLSafe()
                 }

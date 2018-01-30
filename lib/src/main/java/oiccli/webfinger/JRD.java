@@ -1,16 +1,13 @@
 package oiccli.webfinger;
 
+import com.auth0.jwt.creators.Message;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JRD extends Base {
+public class JRD extends Message {
     private static final Map<String, Object> cParam = new HashMap<String, Object>() {{
-        put("expires", new HashMap<String, Object>() {{
-            put("type", String.class);
-            put("required", false);
-        }});
         put("subject", new HashMap<String, Object>() {{
             put("type", String.class);
             put("required", false);

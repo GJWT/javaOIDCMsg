@@ -3,6 +3,7 @@ package oiccli;
 import com.auth0.jwt.creators.Message;
 import com.google.common.base.Strings;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.xml.ws.http.HTTPException;
 import oiccli.HTTP.Response;
 import oiccli.client_info.ClientInfo;
@@ -67,33 +69,60 @@ public class Service {
     private List<Object> preConstruct;
     private List<String> postConstruct;
     private List<String> postParseResponse;
+    private Map<String,String> conf;
 
 
-    public Service(String httpLib, KeyJar keyJar, String clientAuthenticationMethod, Map<String, String> args) {
+    public Service(String httpLib, KeyJar keyJar, String clientAuthenticationMethod, Map<String,String> conf, Map<String, String> args) throws NoSuchFieldException, IllegalAccessException {
         this.httpLib = httpLib;
         this.keyJar = keyJar;
         this.clientAuthenticationMethod = clientAuthenticationMethod;
         this.events = new ArrayList<>();
         this.endpoint = "";
         this.defaultRequestArgs = new HashMap<>();
+
+        if(conf != null) {
+            this.conf = conf;
+            List<String> params = Arrays.asList("msgType", "responseCls", "errorMsg", "defaultAuthenticationMethod",
+                    "httpMethod", "bodyType", "responseBodyType");
+            for(String param : params) {
+                if(conf.containsKey(param)) {
+                    this.getClass().getField(param).set(this, conf.get("param"));
+                }
+            }
+        } else {
+            this.conf = new HashMap<>();
+        }
+
         this.preConstruct = new ArrayList<>();
         this.postConstruct = new ArrayList<>();
         this.postParseResponse = new ArrayList<>();
-        this.httpMethod = "GET";
-        this.bodyType = "urlencoded";
-        this.responseBodyType = "json";
-        this.defaultAuthenticationMethod = "";
-        this.request = "";
-        this.endpoint = "";
-        this.endpointName = "";
-        this.setUp();
     }
 
-    public void gatherRequestArgs(ClientInfo clientInfo, Map<String, Object> args) {
+    public Map<String, Object> gatherRequestArgs(ClientInfo clientInfo, Map<String, Object> args) throws NoSuchFieldException {
+        Map<String,Object> arArgs = new HashMap<>(args);
+        Set<String> properties = this.msgType.getCParam().keySet();
 
+        Field field;
+        for(String property : properties) {
+            if(!arArgs.containsKey(property)) {
+                field = clientInfo.getClass().getField(property);
+                if(field != null) {
+                    arArgs.put(property, field);
+                } else {
+                    field = this.conf.getRequestArgs().getProp();
+                    if(field != null) {
+                        arArgs.put(property, field);
+                    } else {
+                        arArgs.put(property, this.defaultRequestArgs.get(property));
+                    }
+                }
+            }
+        }
+
+        return arArgs;
     }
 
-    public static Map<String, Map<String, String>> updateHttpArgs(Map<String, String> httpArgs, Map<String, Map<String, String>> info) {
+    public static Map<String, Object> updateHttpArgs(Map<String, String> httpArgs, Map<String, Map<String, String>> info) {
         Map<String, String> hArgs = info.get("hArgs");
         if (hArgs == null) {
             hArgs = new HashMap<>();
@@ -161,7 +190,7 @@ public class Service {
 
         List<Map<String, Object>> returnedArgs = this.doPreConstruct(clientInfo, requestArgs, args);
 
-        if (!this.msgType.c_param.containsKey("state")) {
+        if (!this.msgType.getCParam().containsKey("state")) {
             args.remove("state");
         }
 
@@ -295,7 +324,8 @@ public class Service {
     }
 
     public String getUrlInfo(String info) throws URISyntaxException {
-        String query = null, fragment = null;
+        String query = null;
+        String fragment = null;
         if (info.contains("?") || info.contains("#")) {
             URI uri = new URI(info);
             query = uri.getQuery();
@@ -395,7 +425,7 @@ public class Service {
         }
     }
 
-    public ErrorResponse parseRequestResponse(ErrorResponse response, ClientInfo clientInfo, String responseBodyType,
+    public static ErrorResponse parseRequestResponse(ErrorResponse response, ClientInfo clientInfo, String responseBodyType,
                                               String state, Map<String, Object> args) {
         int statusCode = response.getStatusCode();
         if (successfulCodes.contains(statusCode)) {

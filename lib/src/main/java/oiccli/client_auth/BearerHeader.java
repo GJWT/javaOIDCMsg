@@ -3,11 +3,12 @@ package oiccli.client_auth;
 import java.util.HashMap;
 import java.util.Map;
 import oiccli.client_info.ClientInfo;
+import oiccli.exceptions.MissingRequiredAttribute;
 
 public class BearerHeader {
 
     public Map<String, Map<String, String>> construct(Map<String, String> cis, ClientInfo clientInfo, Map<String, String> requestArgs, Map<String, Map<String, String>> httpArgs,
-                                                      Map<String, String> args) {
+                                                      Map<String, String> args) throws MissingRequiredAttribute {
         String accessToken;
         if (cis != null) {
             if (cis.containsKey("accessToken")) {
@@ -16,19 +17,15 @@ public class BearerHeader {
                 //cis.c_param["access_token"] = SINGLE_OPTIONAL_STRING
             } else {
                 accessToken = requestArgs.get("accessToken");
-                requestArgs.remove(accessToken);
 
-                if (accessToken != null) {
-                    accessToken = args.get("accessToken");
-                    if (accessToken == null) {
-                        accessToken = clientInfo.getStateDb().getTokenInfo(args).get("accessToken");
-                    }
+                if (accessToken == null) {
+                    accessToken = clientInfo.getStateDb().getTokenInfo(args).get("accessToken");
                 }
             }
         } else {
             accessToken = args.get("accessToken");
             if (accessToken == null) {
-                accessToken = requestArgs.get("accessToken");
+                throw new MissingRequiredAttribute("accessToken");
             }
         }
 

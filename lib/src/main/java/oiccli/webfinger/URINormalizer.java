@@ -23,7 +23,7 @@ public class URINormalizer {
         return true;
     }
 
-    public boolean isAccountSchemeAssumed(String path) {
+    public static boolean isAccountSchemeAssumed(String path) {
         String[] arr;
         if (path.contains("@")) {
             arr = path.split("@");

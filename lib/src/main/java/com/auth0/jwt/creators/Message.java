@@ -19,10 +19,10 @@
 
 package com.auth0.jwt.creators;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-
+import com.fasterxml.jackson.databind.ObjectWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -40,8 +40,9 @@ public class Message {
         return URLDecoder.decode(urlEncoded, "UTF-8");
     }
 
-    public String toJSON(HashMap<String,Object> hashMap) {
-        return new Gson().toJson(hashMap);
+    public String toJSON() throws JsonProcessingException {
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        return ow.writeValueAsString(this);
     }
 
     public HashMap<String,Object> fromJSON(String json) throws IOException {

@@ -21,4 +21,20 @@ public class PrivateKeyJwt extends JWSAuthenticationMethod {
     public Key getSigningKey(String algorithm, ClientInfo clientInfo) {
         return clientInfo.getKeyJar().getSigningKey(StringUtil.alg2keytype(algorithm), "", algorithm);
     }
+
+    public static boolean validClientInfo(ClientInfo clientInfo, long when) {
+        long eta = clientInfo.getClientSecretExpiresAt();
+        long now;
+        if(when != 0) {
+            now = when;
+        } else {
+            now = System.currentTimeMillis();
+        }
+
+        if(eta != 0 && eta < now) {
+            return false;
+        }
+
+        return true;
+    }
 }

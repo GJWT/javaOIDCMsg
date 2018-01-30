@@ -2,6 +2,7 @@ package oiccli.HTTP;
 
 import java.util.HashMap;
 import java.util.Map;
+import oiccli.exceptions.ValueError;
 
 public class Http {
 
@@ -12,13 +13,13 @@ public class Http {
     private Object events;
     private Object reqCallback;
 
-    public Http(String caCerts, boolean shouldVerifySSL, KeyJar keyjar, String clientCert) {
+    public Http(String caCerts, boolean shouldVerifySSL, KeyJar keyjar, String clientCert) throws ValueError {
         this.caCerts = caCerts;
         this.requestArgs = new HashMap() {{
             put("allowRedirects", false);
         }};
         this.keyJar = keyjar; //or KeyJar(verify_ssl=verify_ssl)
-        //this.cookiejar = FileCookieJar()
+        this.cookiejar = FileCookieJar();
         if (caCerts != null) {
             if (!shouldVerifySSL) {
                 throw new ValueError("conflict: ca_certs defined, but verify_ssl is False");

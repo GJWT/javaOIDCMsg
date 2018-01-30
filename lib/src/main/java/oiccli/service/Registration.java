@@ -1,5 +1,6 @@
 package oiccli.service;
 
+import com.google.common.base.Strings;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -40,24 +41,24 @@ public class Registration extends Service {
             requestArgs.put("redirectUris", clientInfo.getRedirectUris());
         }
 
-        if (clientInfo.getProviderInfo().get("requireRequestUriRegistration")) {
+        if (!Strings.isNullOrEmpty(clientInfo.getProviderInfo().get("requireRequestUriRegistration").get(0))) {
             requestArgs.put("requestUris", clientInfo.generateRequestUris(clientInfo.getRequestsDir()));
         }
 
         return Arrays.asList(requestArgs, new HashMap<String, List<String>>());
     }
 
-    public void oicPostParseResponse(Map<String, String> response, ClientInfo cliInfo) {
+    public void oicPostParseResponse(Map<String, List<String>> response, ClientInfo cliInfo) {
         cliInfo.setRegistrationResponse(response);
         if (!cliInfo.getRegistrationResponse().containsKey("tokenEndpointAuthMethod")) {
-            Map<String, String> hMap = cliInfo.getRegistrationResponse();
-            hMap.put("tokenEndpointAuthMethod", "clientSecretBasic");
+            Map<String, List<String>> hMap = cliInfo.getRegistrationResponse();
+            hMap.put("tokenEndpointAuthMethod", Arrays.asList("clientSecretBasic"));
             cliInfo.setRegistrationResponse(hMap);
         }
 
-        cliInfo.setClientId(response.get("clientId"));
-        cliInfo.setClientSecret(response.get("clientSecret"));
-        cliInfo.setRegistrationExpires(response.get("clientSecretExpiresAt"));
-        cliInfo.setRegistrationAccessToken(response.get("registrationAccessToken"));
+        cliInfo.setClientId(response.get("clientId").get(0));
+        cliInfo.setClientSecret(response.get("clientSecret").get(0));
+        cliInfo.setRegistrationExpires(response.get("clientSecretExpiresAt").get(0));
+        cliInfo.setRegistrationAccessToken(response.get("registrationAccessToken").get(0));
     }
 }
