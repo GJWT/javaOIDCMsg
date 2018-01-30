@@ -40,6 +40,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -441,14 +442,11 @@ public class ExtendedJwtCreatorTest {
 
     @Test
     public void testExtendedJwtCreatorExpTimeHasPassed() throws Exception {
-        thrown.expect(TokenExpiredException.class);
-        thrown.expectMessage("The Token has expired on Wed Oct 29 00:00:00 PDT 2014.");
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2014, Calendar.OCTOBER, 29);
 
-        String myDate = "2014/10/29";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-        Date date = sdf.parse(myDate);
-        long expLong = date.getTime();
-        Date expDate = new Date(expLong);
+        thrown.expect(TokenExpiredException.class);
+        thrown.expectMessage(String.format("The Token has expired on %s", calendar.getTime()));
 
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = ExtendedJwtCreator.build()
@@ -458,7 +456,7 @@ public class ExtendedJwtCreatorTest {
                 .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
-                .withExp(expDate)
+                .withExp(calendar.getTime())
                 .withIat(iat)
                 .withName(NAME)
                 .withNonStandardClaim("nonStandardClaim", new Date())

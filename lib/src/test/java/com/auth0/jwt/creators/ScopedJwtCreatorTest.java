@@ -370,14 +370,11 @@ public class ScopedJwtCreatorTest {
 
     @Test
     public void testScopedJwtCreatorExpTimeHasPassed() throws Exception {
-        thrown.expect(TokenExpiredException.class);
-        thrown.expectMessage("The Token has expired on Wed Oct 29 00:00:00 PDT 2014.");
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2014, Calendar.OCTOBER, 29);
 
-        String myDate = "2014/10/29";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-        Date date = sdf.parse(myDate);
-        long expLong = date.getTime();
-        Date expDate = new Date(expLong);
+        thrown.expect(TokenExpiredException.class);
+        thrown.expectMessage(String.format("The Token has expired on %s", calendar.getTime()));
 
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = ScopedJwtCreator.build()
@@ -386,14 +383,14 @@ public class ScopedJwtCreatorTest {
                 .withSubject("subject")
                 .withAudience("audience")
                 .withNonStandardClaim("nonStandardClaim", new Date())
-                .withExp(expDate)
+                .withExp(calendar.getTime())
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = ScopedJWT.require(algorithm);
         JWT verifier = verification.createVerifierForScoped("scope", asList("issuer"), asList("audience"), 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
-        verifyClaims(claims, expDate);
+        verifyClaims(claims, calendar.getTime());
     }
 
     private static void verifyClaims(Map<String,Claim> claims, Date exp) {

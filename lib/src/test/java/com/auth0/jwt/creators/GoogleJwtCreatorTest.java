@@ -19,10 +19,7 @@
 
 package com.auth0.jwt.creators;
 
-import static com.auth0.jwt.TimeUtil.generateRandomExpDateInFuture;
-import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.creators.GoogleJwtCreator;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.impl.PublicClaims;
@@ -31,15 +28,18 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.GoogleVerification;
 import com.auth0.jwt.jwts.GoogleJWT;
 import com.auth0.jwt.jwts.JWT;
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import static com.auth0.jwt.TimeUtil.generateRandomExpDateInFuture;
+import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertTrue;
 
 public class GoogleJwtCreatorTest {
 
@@ -133,7 +133,7 @@ public class GoogleJwtCreatorTest {
 
         GoogleVerification verification = GoogleJWT.require(algorithm);
         JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("issuer"), asList("audience"),
-                 NAME, 1, 1).build();
+                NAME, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -157,7 +157,7 @@ public class GoogleJwtCreatorTest {
 
         GoogleVerification verification = GoogleJWT.require(algorithm);
         JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("issuer"), asList("audience"),
-                 NAME, 1, 1).build();
+                NAME, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -180,7 +180,7 @@ public class GoogleJwtCreatorTest {
 
         GoogleVerification verification = GoogleJWT.require(algorithm);
         JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("issuer"), asList("audience"),
-                 NAME, 1, 1).build();
+                NAME, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -201,7 +201,7 @@ public class GoogleJwtCreatorTest {
 
         GoogleVerification verification = GoogleJWT.require(algorithm);
         JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("issuer"), asList("audience"),
-                 NAME, 1, 1).build();
+                NAME, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -251,7 +251,7 @@ public class GoogleJwtCreatorTest {
 
         GoogleVerification verification = GoogleJWT.require(algorithm);
         JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("issuer"), asList("audience"),
-                 NAME, 1, 1).build();
+                NAME, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
     }
 
@@ -363,7 +363,7 @@ public class GoogleJwtCreatorTest {
                 .sign(algorithm);
         GoogleVerification verification = GoogleJWT.require(algorithm);
         JWT verifier = verification.createVerifierForGoogle(PICTURE, EMAIL, asList("issuer"), asList("audience"),
-                 NAME, 1, 1).build();
+                NAME, 1, 1).build();
         DecodedJWT jwt = verifier.decode(token);
         Map<String, Claim> claims = jwt.getClaims();
         verifyClaims(claims, exp);
@@ -481,14 +481,11 @@ public class GoogleJwtCreatorTest {
 
     @Test
     public void testGoogleJwtCreatorExpTimeHasPassed() throws Exception {
-        thrown.expect(TokenExpiredException.class);
-        thrown.expectMessage("The Token has expired on Wed Oct 29 00:00:00 PDT 2014.");
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2014, Calendar.OCTOBER, 29);
 
-        String myDate = "2014/10/29";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-        Date date = sdf.parse(myDate);
-        long expLong = date.getTime();
-        Date expDate = new Date(expLong);
+        thrown.expect(TokenExpiredException.class);
+        thrown.expectMessage(String.format("The Token has expired on %s", calendar.getTime()));
 
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = GoogleJwtCreator.build()
@@ -497,7 +494,7 @@ public class GoogleJwtCreatorTest {
                 .withIssuer("issuer")
                 .withSubject("subject")
                 .withAudience("audience")
-                .withExp(expDate)
+                .withExp(calendar.getTime())
                 .withIat(iat)
                 .withName(NAME)
                 .sign(algorithm);
@@ -509,14 +506,11 @@ public class GoogleJwtCreatorTest {
 
     @Test
     public void testGoogleJwtCreatorTokenCantBeUsedBefore() throws Exception {
-        thrown.expect(InvalidClaimException.class);
-        thrown.expectMessage("The Token can't be used before Mon Oct 29 00:00:00 PDT 2018.");
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2018, Calendar.OCTOBER, 29);
 
-        String myDate = "2018/10/29";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-        Date date = sdf.parse(myDate);
-        long expLong = date.getTime();
-        Date iatDate = new Date(expLong);
+        thrown.expect(InvalidClaimException.class);
+        thrown.expectMessage(String.format("The Token can't be used before %s", calendar.getTime()));
 
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = GoogleJwtCreator.build()
@@ -526,7 +520,7 @@ public class GoogleJwtCreatorTest {
                 .withSubject("subject")
                 .withAudience("audience")
                 .withExp(exp)
-                .withIat(iatDate)
+                .withIat(calendar.getTime())
                 .withName(NAME)
                 .sign(algorithm);
         GoogleVerification verification = GoogleJWT.require(algorithm);
@@ -536,14 +530,14 @@ public class GoogleJwtCreatorTest {
     }
 
     @Test
-    public void testCreateVerifierForExtended() throws Exception{
+    public void testCreateVerifierForExtended() throws Exception {
         thrown.expect(UnsupportedOperationException.class);
         thrown.expectMessage("you shouldn't be calling this method");
         GoogleVerification verification = GoogleJWT.require(Algorithm.HMAC256("secret"));
         verification.createVerifierForExtended(null, null, null, null, null, 1L, 1L, 1L);
     }
 
-    protected static void verifyClaims(Map<String,Claim> claims, Date exp) {
+    protected static void verifyClaims(Map<String, Claim> claims, Date exp) {
         assertTrue(claims.get(PICTURE).asString().equals(PICTURE));
         assertTrue(claims.get(EMAIL).asString().equals(EMAIL));
         assertTrue(claims.get(PublicClaims.ISSUER).asList(String.class).get(0).equals("issuer"));

@@ -378,14 +378,11 @@ public class RiscJwtCreatorTest {
 
     @Test
     public void testRiscJwtCreatorExpTimeHasPassed() throws Exception {
-        thrown.expect(TokenExpiredException.class);
-        thrown.expectMessage("The Token has expired on Wed Oct 29 00:00:00 PDT 2014.");
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2014, Calendar.OCTOBER, 29);
 
-        String myDate = "2014/10/29";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-        Date date = sdf.parse(myDate);
-        long expLong = date.getTime();
-        Date expDate = new Date(expLong);
+        thrown.expect(TokenExpiredException.class);
+        thrown.expectMessage(String.format("The Token has expired on %s", calendar.getTime()));
 
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = RiscJwtCreator.build()
@@ -394,7 +391,7 @@ public class RiscJwtCreatorTest {
                 .withSubject("subject")
                 .withAudience("audience")
                 .withNonStandardClaim("nonStandardClaim", new Date())
-                .withExp(expDate)
+                .withExp(calendar.getTime())
                 .withIat(iat)
                 .sign(algorithm);
         Verification verification = RiscJWT.require(algorithm);
