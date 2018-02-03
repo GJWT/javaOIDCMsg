@@ -19,10 +19,10 @@
 
 package com.auth0.jwt.creators;
 
+import com.auth0.jwt.oiccli.Token;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -30,9 +30,19 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Message {
+public class Message implements Cloneable{
 
-    public String toUrlEncoded(String json) throws UnsupportedEncodingException {
+    private String state;
+    private String code;
+    private String claim;
+    private String accessToken;
+    private Integer expiresIn;
+    private String tokenType;
+    private String scope;
+    private Token idToken;
+    private String refreshToken;
+
+    public String toUrlEncoded() throws UnsupportedEncodingException, NoSuchFieldException {
         return URLEncoder.encode(json, "UTF-8");
     }
 
@@ -40,7 +50,7 @@ public class Message {
         return URLDecoder.decode(urlEncoded, "UTF-8");
     }
 
-    public String toJSON(HashMap<String,Object> hashMap) {
+    public String toJSON(Map<String,Object> hashMap) {
         return new Gson().toJson(hashMap);
     }
 
@@ -48,4 +58,47 @@ public class Message {
         return new ObjectMapper().readValue(json, new TypeReference<Map<String, Object>>(){});
     }
 
+    public Map getCParam() {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getClaim() {
+        return claim;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public Integer getExpiresIn() {
+        return expiresIn;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public Token getIdToken() {
+        return idToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public Object clone() throws CloneNotSupportedException{
+        return super.clone();
+    }
 }
