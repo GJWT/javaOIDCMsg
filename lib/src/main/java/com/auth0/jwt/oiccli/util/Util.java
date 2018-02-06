@@ -167,7 +167,7 @@ public class Util {
         return d.getTime();
     }
 
-    public static Map<String, Object> getOrPost(String uri, String method, AuthorizationRequest request, String contentType, String accept, Map<String, Object> args) throws UnsupportedEncodingException, UnsupportedType, JsonProcessingException, CloneNotSupportedException, URISyntaxException, NoSuchFieldException, IllegalAccessException {
+    public static Map<String, Object> getOrPost(String uri, String method, AuthorizationRequest request, String contentType, boolean accept, Map<String, Object> args) throws UnsupportedEncodingException, UnsupportedType, JsonProcessingException, CloneNotSupportedException, URISyntaxException, NoSuchFieldException, IllegalAccessException {
         Map<String, Object> response = new HashMap<>();
         String urlEncoded;
         Field[] keys;
@@ -202,7 +202,7 @@ public class Util {
             Map<String, Object> headers = new HashMap<>();
             headers.put("Content-Type", contentType);
 
-            if (accept != null) {
+            if (accept) {
                 headers = new HashMap<>();
                 headers.put("Accept", accept);
             }

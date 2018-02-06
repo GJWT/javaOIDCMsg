@@ -29,7 +29,7 @@ public class BearerBody {
                     args.put("state", state);
                 }
 
-                //resourceRequest.setAccessToken(clientInfo.getStateDb().getTokenInfo(state).get("accessToken"));
+                resourceRequest.setAccessToken(clientInfo.getStateDb().getTokenInfo(args).get("accessToken"));
             }
         }
 

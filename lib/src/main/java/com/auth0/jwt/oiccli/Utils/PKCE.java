@@ -2,6 +2,7 @@ package com.auth0.jwt.oiccli.Utils;
 
 import com.auth0.jwt.oiccli.StringUtil;
 import com.auth0.jwt.oiccli.exceptions.ExpiredToken;
+import com.google.common.base.Strings;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -26,7 +27,7 @@ public class PKCE {
         codeVerifier = Base64.encode(codeVerifier.getBytes());
 
         String method = (String) clientInfo.getConfig().get("codeChallenge").get("method");
-        if (method == null) {
+        if (Strings.isNullOrEmpty(method)) {
             method = S256;
         }
 

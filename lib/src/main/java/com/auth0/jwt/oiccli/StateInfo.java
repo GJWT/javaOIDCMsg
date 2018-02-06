@@ -8,6 +8,15 @@ public class StateInfo {
     private String claim;
     private Token token;
     private String refreshToken;
+    private String clientId;
+    private String as;
+    private long iat;
+
+    public StateInfo(String clientId, String receiver, long now) {
+        this.clientId = clientId;
+        this.as = receiver;
+        this.iat = now;
+    }
 
     public void setCode(String code) {
         this.code = code;
@@ -31,5 +40,9 @@ public class StateInfo {
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public void update(AuthorizationRequest request) {
+        throw new UnsupportedOperationException();
     }
 }

@@ -4,7 +4,6 @@ import com.auth0.jwt.creators.Message;
 import com.auth0.jwt.oiccli.exceptions.ExpiredToken;
 import com.auth0.jwt.oiccli.exceptions.UnknownState;
 import com.google.common.base.Strings;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +26,20 @@ public class State {
             }
         }
         this.lifetime = lifetime;
+    }
+
+    public String createState(String receiver, AuthorizationRequest request, String state) {
+        if(Strings.isNullOrEmpty(state)) {
+            state = StringUtil.generateRandomString(24);
+        }
+
+        long now = System.currentTimeMillis();
+
+        StateInfo stateInfo = new StateInfo(this.clientId, receiver, now);
+        stateInfo.update(request);
+
+        //self[_state] = _state_info
+        return state;
     }
 
     public StateInfo updateTokenInfo(StateInfo info, Message authorizationResponse) {
@@ -114,16 +127,20 @@ public class State {
         return getTokenInfo(state, 0);
     }
 
+    public Map<String, String> getNonceToState(String nonce) {
+        return this.getDB().get("nonce" + nonce);
+    }
+
     public Map<String, Object> getResponseArgs(String state, AccessTokenRequest request, int now) throws ExpiredToken, NoSuchFieldException, IllegalAccessException {
         StateInfo stateInfo = this.getDB().getStateInfo(state);
         Map<String, Object> responseArgs = new HashMap<>();
         for (String claim : request.getCParam().keySet()) {
             if (claim.equals("accessToken")) {
-                Map<String, Object> tInfo = this.getTokenInfo(state, now);
+                Token tInfo = this.getTokenInfo(state, now);
                 if (tInfo == null) {
                     continue;
                 }
-                responseArgs.put(claim, tInfo.get("accessToken"));
+                responseArgs.put(claim, tInfo.getAccessToken());
             } else {
                 responseArgs.put(claim, stateInfo.getClass().getField(claim).get(this));
             }
@@ -132,7 +149,7 @@ public class State {
         return responseArgs;
     }
 
-    private Token getIdToken(String state) {
+    public Token getIdToken(String state) {
         return this.getDB().getStateInfo(state).getToken();
     }
 

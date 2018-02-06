@@ -4,6 +4,7 @@ import com.auth0.jwt.oiccli.StringUtil;
 import com.auth0.jwt.oiccli.Utils.ClientInfo;
 import com.auth0.jwt.oiccli.exceptions.AuthenticationFailure;
 import com.auth0.jwt.oiccli.exceptions.NoMatchingKey;
+import com.google.common.base.Strings;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -20,13 +21,13 @@ public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
         put("private_key_jwt", "RS256");
     }};
     private static final String JWT_BEARER = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
-    private static final String V_Required = 1;
+    public static final int V_Required = 1;
 
     public static String chooseAlgorithm(String context, Map<String, String> args) throws AuthenticationFailure {
         String algorithm = args.get("algorithm");
-        if (algorithm == null) {
+        if (Strings.isNullOrEmpty(algorithm)) {
             algorithm = DEF_SIGN_ALG.get(context);
-            if (algorithm == null) {
+            if (Strings.isNullOrEmpty(algorithm)) {
                 throw new AuthenticationFailure("Missing algorithm specification");
             }
         }
@@ -59,7 +60,7 @@ public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
         }
     }
 
-    public Map<String, String> construct(AccessTokenRequest request, ClientInfo clientInfo, Map<String, String> requestArgs,
+    public Map<String, String> construct(AccessTokenRequest request, ClientInfo clientInfo,
                                          Map<String, String> httpArgs, Map<String, String> args) throws AuthenticationFailure, NoMatchingKey {
         String algorithm = null;
         List<String> audience = null;
@@ -75,15 +76,15 @@ public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
                 request.setClientAssertionType(JWT_BEARER);
             }
         } else {
-            if (args.get("authenticationEndpoint").equals("token") || args.get("authenticationEndpoint").equals("refresh")) {
-                algorithm = clientInfo.getRegistrationResponse().get("tokenEndpointAuthSigningAlg");
+            if (args.get("authenticationEndpoint") != null && args.get("authenticationEndpoint").equals("token") || args.get("authenticationEndpoint") != null && args.get("authenticationEndpoint").equals("refresh")) {
+                algorithm = clientInfo.getRegistrationResponse().get("tokenEndpointAuthSigningAlg").get(0);
                 audience = clientInfo.getProviderInfo().get("tokenEndpoint");
             } else {
                 audience = clientInfo.getProviderInfo().get("issuer");
             }
         }
 
-        if (algorithm == null) {
+        if (Strings.isNullOrEmpty(algorithm)) {
             algorithm = this.chooseAlgorithm(args);
         }
 
@@ -98,6 +99,8 @@ public class JWSAuthenticationMethod extends ClientAuthenticationMethod {
             } else {
                 signingKey = Arrays.asList(this.getSigningKey(algorithm, clientInfo));
             }
+        } else {
+            signingKey = Arrays.asList(this.getSigningKey(algorithm, clientInfo));
         }
 
         Map<String, String> hMap = new HashMap<>();

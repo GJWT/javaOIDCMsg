@@ -4,6 +4,7 @@ import com.auth0.jwt.creators.Message;
 import com.auth0.jwt.oiccli.Utils.ClientInfo;
 import com.auth0.jwt.oiccli.exceptions.HTTPError;
 import com.auth0.jwt.oiccli.exceptions.MissingEndpoint;
+import com.auth0.jwt.oiccli.exceptions.UnsupportedType;
 import com.auth0.jwt.oiccli.exceptions.ValueError;
 import com.auth0.jwt.oiccli.exceptions.WrongContentType;
 import com.auth0.jwt.oiccli.responses.ErrorResponse;
@@ -11,6 +12,7 @@ import com.auth0.jwt.oiccli.responses.Response;
 import com.auth0.jwt.oiccli.util.FakeResponse;
 import com.auth0.jwt.oiccli.util.Util;
 import com.google.common.base.Strings;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -43,12 +45,12 @@ public class Service {
     private String clientAuthenticationMethod;
     private List<String> events;
     private Map<String, String> defaultRequestArgs;
-    private List<Object> preConstruct;
+    protected List<Object> preConstruct;
     private List<String> postConstruct;
-    private List<String> postParseResponse;
+    protected List<String> postParseResponse;
     private Map<String,String> conf;
 
-    public Service(String httpLib, KeyJar keyJar, String clientAuthenticationMethod, Map<String,String> conf, Map<String, String> args) throws NoSuchFieldException, IllegalAccessException {
+    public Service(String httpLib, KeyJar keyJar, String clientAuthenticationMethod, Map<String,String> conf) throws NoSuchFieldException, IllegalAccessException {
         this.httpLib = httpLib;
         this.keyJar = keyJar;
         this.clientAuthenticationMethod = clientAuthenticationMethod;
@@ -278,6 +280,10 @@ public class Service {
         } else {
             return defaultValue;
         }
+    }
+
+    public String getConfigurationAttribute(String attribute) {
+        return getConfigurationAttribute(attribute, null);
     }
 
     public void buildServices() {

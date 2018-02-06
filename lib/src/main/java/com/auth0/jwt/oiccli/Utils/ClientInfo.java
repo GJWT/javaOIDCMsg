@@ -49,7 +49,7 @@ public class ClientInfo {
     private String cId;
     private String cSecret;
     private String issuer;
-    private Map<String, Object> redirectUris;
+    private List<String> redirectUris;
     private Map<String, List<String>> clientPrefs;
     private Map<String, String> allow;
     Map<String,List<String>> behavior;
@@ -57,7 +57,7 @@ public class ClientInfo {
     private State stateDB;
     private boolean shouldBeStrictOnPreferences;
     private Map<String, List<String>> providerInfo;
-    private Map<String, String> registrationResponse;
+    private Map<String, List<String>> registrationResponse;
     private Map<String, Map<String, String>> kid;
     private List<String> events;
     private Map<String, Map<String, Object>> config;
@@ -124,7 +124,7 @@ public class ClientInfo {
                 try {
                     file.mkdir();
                 } catch (SecurityException se) {
-                    logger.error("Directory " + requestsDir + " was not created");
+                    throw new SecurityException("Directory " + requestsDir + " was not created");
                 }
             }
         }
@@ -139,6 +139,7 @@ public class ClientInfo {
         this.importKeys(config.get("keys"));
 
         if (config.containsKey("keydefs")) {
+            //oicmsg
             this.keyJar = buildKeyJar(config.get("keydefs"), this.keyJar)[1];
         }
     }
@@ -202,7 +203,7 @@ public class ClientInfo {
     }
 
     public boolean verifyAlgSupport(String algorithm, String usage, String type) {
-        List<String> supported = this.providerInfo.get(usage + "" + type + "valuesSupported");
+        List<String> supported = this.providerInfo.get(usage + type + "valuesSupported");
         return supported.contains(algorithm);
     }
 
@@ -270,11 +271,43 @@ public class ClientInfo {
         return keyJar;
     }
 
-    public Map<String,String> getRegistrationResponse() {
+    public Map<String, List<String>> getRegistrationResponse() {
         return registrationResponse;
     }
 
     public Map<String,List<String>> getProviderInfo() {
         return providerInfo;
+    }
+
+    public void setIssuer(String issuer) {
+        this.issuer = issuer;
+    }
+
+    public String getIssuer() {
+        return issuer;
+    }
+
+    public Map<String, List<String>> getClientPrefs() {
+        return clientPrefs;
+    }
+
+    public boolean getShouldBeStrictOnPreferences() {
+        return shouldBeStrictOnPreferences;
+    }
+
+    public void setBehavior(Map<String,List<String>> behavior) {
+        this.behavior = behavior;
+    }
+
+    public List<String> getRedirectUris() {
+        return redirectUris;
+    }
+
+    public String getRequestsDir() {
+        return requestsDir;
+    }
+
+    public void setRegistrationResponse(Map<String, List<String>> registrationResponse) {
+        this.registrationResponse = registrationResponse;
     }
 }

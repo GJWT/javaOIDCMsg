@@ -12,7 +12,7 @@ public class ClientSecretJWT {
         return JWSAuthenticationMethod.chooseAlgorithm(entity, args);
     }
 
-    public static String chooseAlgorithm(Map<String, String> args) {
+    public static String chooseAlgorithm(Map<String, String> args) throws AuthenticationFailure {
         return JWSAuthenticationMethod.chooseAlgorithm("clientSecretJwt", args);
     }
 

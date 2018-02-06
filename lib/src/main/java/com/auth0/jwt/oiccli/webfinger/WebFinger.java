@@ -67,9 +67,7 @@ public class WebFinger {
         }
 
         String queryParams = "";
-        for (int i = 0;
-             i < queryParamsTuple.size();
-             i++) {
+        for (int i = 0; i < queryParamsTuple.size(); i++) {
             queryParams += queryParamsTuple.get(i).getA() + "=" + queryParamsTuple.get(i).getB();
             if (i != queryParamsTuple.size() - 1) {
                 queryParams += "&";
@@ -77,6 +75,10 @@ public class WebFinger {
         }
 
         return String.format(WF_URL, host) + "?" + URLEncoder.encode(queryParams);
+    }
+
+    public String query(String resource) throws URISyntaxException, WebFingerError {
+        return query(resource, null);
     }
 
     public Map<String, Object> httpArgs(JRD jrd) throws JsonProcessingException {

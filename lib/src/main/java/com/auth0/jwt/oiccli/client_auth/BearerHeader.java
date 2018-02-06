@@ -19,13 +19,13 @@ public class BearerHeader {
             } else {
                 accessToken = requestArgs.get("accessToken");
 
-                if (accessToken == null) {
+                if (Strings.isNullOrEmpty(accessToken)) {
                     accessToken = clientInfo.getStateDb().getTokenInfo(args).get("accessToken");
                 }
             }
         } else {
             accessToken = args.get("accessToken");
-            if (accessToken == null) {
+            if (Strings.isNullOrEmpty(accessToken)) {
                 throw new MissingRequiredAttribute("accessToken");
             }
         }

@@ -17,11 +17,9 @@ public class Utils {
 
         if(Strings.isNullOrEmpty(encryptionAlg)) {
             List<String> listOfAlgs = clientInfo.getBehavior().get("requestObjectEncryptionAlg");
-            if(listOfAlgs != null || !listOfAlgs.isEmpty()) {
+            if(listOfAlgs != null && !listOfAlgs.isEmpty()) {
                 encryptionAlg = listOfAlgs.get(0);
-            }
-
-            if(encryptionAlg == null) {
+            } else {
                 return message;
             }
         }
@@ -30,15 +28,13 @@ public class Utils {
 
         if(Strings.isNullOrEmpty(encryptionEnc)) {
             List<String> listOfAlgs = clientInfo.getBehavior().get("requestObjectEncryptionEnc");
-            if(listOfAlgs != null || !listOfAlgs.isEmpty()) {
+            if(listOfAlgs != null && !listOfAlgs.isEmpty()) {
                 encryptionEnc = listOfAlgs.get(0);
-            }
-
-            if(encryptionEnc == null) {
+            } else {
                 throw new MissingRequiredAttribute("No requestObjectEncryptionEnc specified");
             }
         }
-
+        //JWE - cryptojwt
         JWE jwe = new JWE(message, encryptionAlg, encryptionEnc);
         String keyType = StringUtil.alg2keytype(encryptionAlg);
 
@@ -68,13 +64,13 @@ public class Utils {
             file.mkdirs();
         }
         String name = StringUtil.generateRandomString(10) + ".jwt";
-        File fileExists = Paths.get(localDir, name).toFile();
-        while(fileExists.exists()) {
+        File fileName = Paths.get(localDir, name).toFile();
+        while(fileName.exists()) {
             name = StringUtil.generateRandomString(10);
-            fileExists = Paths.get(localDir, name).toFile();
+            fileName = Paths.get(localDir, name).toFile();
         }
 
         String webName = basePath + name;
-        return new Tuple(fileExists.toString(), webName);
+        return new Tuple(fileName.toString(), webName);
     }
 }

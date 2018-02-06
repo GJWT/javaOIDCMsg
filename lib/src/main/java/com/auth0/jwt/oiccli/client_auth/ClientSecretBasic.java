@@ -3,6 +3,7 @@ package com.auth0.jwt.oiccli.client_auth;
 import com.auth0.jwt.oiccli.AccessTokenRequest;
 import com.auth0.jwt.oiccli.Utils.ClientInfo;
 import com.auth0.jwt.oiccli.exceptions.AuthenticationFailure;
+import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
@@ -20,18 +21,18 @@ public class ClientSecretBasic {
         }
 
         String password = args.get("password");
-        if (password == null) {
+        if (Strings.isNullOrEmpty(password)) {
             password = httpArgs.get("password").get("password");
-            if (password == null) {
+            if (Strings.isNullOrEmpty(password)) {
                 password = request.getClientSecret();
-                if (password == null) {
+                if (Strings.isNullOrEmpty(password)) {
                     password = cliInfo.getClientSecret();
                 }
             }
         }
 
         String user = args.get("user");
-        if (user == null) {
+        if (Strings.isNullOrEmpty(user)) {
             user = cliInfo.getClientId();
         }
 
@@ -43,12 +44,12 @@ public class ClientSecretBasic {
 
         request.setClientSecret(null);
 
-        if (request.get("grantType").equals("authorizationCode")) {
-            if (request.getClientId() != null) {
+        if (request.get("grantType") != null && request.get("grantType").equals("authorizationCode")) {
+            if (Strings.isNullOrEmpty(request.getClientId())) {
                 request.setClientId(cliInfo.getClientId());
             }
         } else {
-            boolean req = request.getCParam("clientId").get(VREQUIRED);
+            boolean req = request.getCParam("clientId").get(JWSAuthenticationMethod.V_Required);
 
             if (!req) {
                 request.remove("clientId");
