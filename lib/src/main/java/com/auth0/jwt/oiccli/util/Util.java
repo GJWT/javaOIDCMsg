@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class Util {
 
     private static final String URL_ENCODED = "application/x-www-form-urlencoded";
-    private static final String JSON_ENCODED = "application/json";
+    public static final String JSON_ENCODED = "application/json";
     private static final String JRD_JSON = "application/jrd+json";
     private static final String JWT_ENCODED = "application/jwt";
     private static final String PLAIN_TEXT = "text/plain";

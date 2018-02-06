@@ -4,11 +4,13 @@ import com.auth0.jwt.creators.Message;
 import com.auth0.jwt.oiccli.Utils.ClientInfo;
 import com.auth0.jwt.oiccli.exceptions.HTTPError;
 import com.auth0.jwt.oiccli.exceptions.MissingEndpoint;
+import com.auth0.jwt.oiccli.exceptions.OiccliError;
 import com.auth0.jwt.oiccli.exceptions.UnsupportedType;
 import com.auth0.jwt.oiccli.exceptions.ValueError;
 import com.auth0.jwt.oiccli.exceptions.WrongContentType;
 import com.auth0.jwt.oiccli.responses.ErrorResponse;
 import com.auth0.jwt.oiccli.responses.Response;
+import com.auth0.jwt.oiccli.tuples.Tuple;
 import com.auth0.jwt.oiccli.util.FakeResponse;
 import com.auth0.jwt.oiccli.util.Util;
 import com.google.common.base.Strings;
@@ -28,7 +30,7 @@ public class Service {
     private final static org.slf4j.Logger logger = LoggerFactory.getLogger(Service.class);
     private static final List<Integer> successfulCodes =
             Arrays.asList(200, 201, 202, 203, 204, 205, 206);
-    private static final List<String> specialArgs = Arrays.asList("authenticationEndpoint", "algs");
+    private static final List<String> SPECIAL_ARGS = Arrays.asList("authenticationEndpoint", "algs");
     public Message msgType;
     public Message responseCls;
     public ErrorResponse errorMessage;
@@ -76,8 +78,29 @@ public class Service {
         this.postParseResponse = new ArrayList<>();
     }
 
-    public void gatherRequestArgs() {
-        throw new UnsupportedOperationException();
+    public Map<String, String> gatherRequestArgs(ClientInfo clientInfo, Map<String,String> args) throws NoSuchFieldException, IllegalAccessException {
+
+        Map<String,String> arArgs = new HashMap<>(args);
+
+        String value;
+        String requestArgsValue;
+        for(String property : this.msgType.getCParam().keySet()) {
+            if(!arArgs.containsKey(property)) {
+                value = (String) clientInfo.getClass().getField(property).get(this);
+                if(!Strings.isNullOrEmpty(value)) {
+                    arArgs.put(property, value);
+                } else {
+                    requestArgsValue = this.conf.get("requestArgs").get(property);
+                    if(!Strings.isNullOrEmpty(requestArgsValue)) {
+                        arArgs.put(property, requestArgsValue);
+                    } else {
+                        arArgs.put(property, this.defaultRequestArgs.get(property));
+                    }
+                }
+            }
+        }
+
+        return arArgs;
     }
 
     public void doPreConstruct() {
@@ -179,8 +202,48 @@ public class Service {
         return this.updateHttpArgs(httpArgs, info);
     }
 
-    private Map<String,Map<String,String>> requestInfo(ClientInfo clientInfo, String method, Map<String, Object> requestArgs, String bodyType, String authenticationMethod, boolean b, Map<String, String> args) {
-        throw new UnsupportedOperationException();
+    private Map<String,Map<String,String>> requestInfo(ClientInfo clientInfo, String method, Map<String,String> requestArgs, String bodyType, String authenticationMethod, boolean lax, Map<String, String> args) {
+        if(Strings.isNullOrEmpty(method)) {
+            method = this.httpMethod;
+        }
+
+        if(requestArgs == null) {
+            requestArgs = new HashMap<>();
+        }
+
+        Map<String,String> newArgs = new HashMap<>();
+        for(String key : args.keySet()) {
+            if(!(SPECIAL_ARGS.contains(key) && SPECIAL_ARGS.contains(args.get(key)))) {
+                newArgs.put(key, args.get(key));
+            }
+        }
+
+        DummyMessage request = this.construct(clientInfo, requestArgs, newArgs);
+
+        if(this.events != null && !this.events.isEmpty()) {
+            this.events.add("Protocol request", request);
+        }
+
+        request.setLax(lax);
+        Map<String,String> hArgs = new HashMap<>();
+
+        if(!Strings.isNullOrEmpty(authenticationMethod)) {
+            hArgs = this.initAuthenticationMethod(request, clientInfo, authenticationMethod, args);
+        }
+
+        if(hArgs != null) {
+            if(hArgs.keySet().contains("headers")) {
+                args.get("headers").update(hArgs.get("headers"));
+            } else {
+                args.put("headers", hArgs.get("headers"));
+            }
+        }
+
+        if(bodyType.equals("json")) {
+            args.put("contentType", Util.JSON_ENCODED);
+        }
+
+        return this.uriAndBody(request, method, args);
     }
 
     public String getUrlInfo(String info) throws URISyntaxException {
@@ -286,8 +349,17 @@ public class Service {
         return getConfigurationAttribute(attribute, null);
     }
 
-    public void buildServices() {
-        throw new UnsupportedOperationException();
+    public Service buildServices(List<Tuple> services, Function serviceFactor, String httpLib, KeyJar keyJar, String clientAuthenticationMethod) throws NoSuchFieldException, IllegalAccessException {
+        Map<String,Service> hMap = new HashMap<>();
+        Service service = null;
+        for(Tuple tuple : services) {
+            service = serviceFactory(tuple.getA(), httpLib, keyJar, clientAuthenticationMethod, tuple.getB());
+            hMap.put(service.request, service);
+        }
+
+        hMap.put("any", new Service(httpLib, keyJar, clientAuthenticationMethod, null));
+
+        return service;
     }
 
     public Response serviceRequest(String url, Map<String, Object> args) throws ParseException, ValueError, WrongContentType {
@@ -302,8 +374,83 @@ public class Service {
         return serviceRequest(url, "GET", null, "", null, null, null);
     }
 
-    private static FakeResponse parseResponse(Object text, ClientInfo clientInfo, String valueType, String state, Map<String, Object> args) {
-        throw new UnsupportedOperationException();
+    private Response parseResponse(String info, ClientInfo clientInfo, String sFormat, String state, Map<String, Object> args) throws URISyntaxException, ValueError, OiccliError {
+        if(Strings.isNullOrEmpty(sFormat)) {
+            sFormat = this.responseBodyType;
+        }
+
+        logger.debug("response format: " + sFormat);
+
+        if(sFormat.equals("urlencoded")) {
+            info = this.getUrlInfo(info);
+        }
+
+        if(this.events != null && !this.events.isEmpty()) {
+            this.events.add("Response", info);
+        }
+
+        logger.debug("response cls: " + this.responseCls.toString());
+
+        Response response = this.responseCls.deserialize(info, sFormat, args);
+
+        if(this.events != null && !this.events.isEmpty()) {
+            this.events.add("Protocol Response", response);
+        }
+
+        List<ErrorResponse> errorMessages = null;
+        if(response.getError() != null && !(response instanceof  ErrorResponse)) {
+            response = null;
+            errorMessages = Arrays.asList(this.errorMessage);
+
+            /*
+                            if ErrorResponse not in errmsgs:
+                    # Allow unspecified error response
+                    errmsgs.append(ErrorResponse)
+             */
+
+            for(ErrorResponse errorResponse : errorMessages) {
+                response = errorResponse.deserialize(info, sFormat);
+                response.verify();
+                break;
+            }
+
+            if(response == null) {
+                logger.debug("Could not map into an error message");
+                throw new ValueError("No error message: " + info);
+            }
+
+            logger.debug("Error response: " + response);
+        } else {
+            args.put("clientId", clientInfo.getClientId());
+            args.put("issuer", clientInfo.getIssuer());
+
+            if(!args.containsKey("key") && !args.containsKey("keyjar")) {
+                args.put("keyjar", this.keyJar);
+            }
+
+            args.update(this.conf.get("verify"));
+
+            logger.debug("Verify response with " + args);
+
+            boolean shouldVerify = response.verify(args);
+
+            if(!shouldVerify) {
+                logger.error("Verification of the response failed");
+                throw new OiccliError("Verification of the response failed");
+            }
+
+            if(response != null && response.getType().equals("AuthorizationResponse") && response.getScope() == null) {
+                response.setScope(args.get("scope"));
+            } else {
+                throw new ResponseError("Missing or faulty response");
+            }
+
+            if(!(response instanceof ErrorResponse)) {
+                this.doPostParseResponse(response, clientInfo, state);
+            }
+        }
+
+        return response;
     }
 
 }
