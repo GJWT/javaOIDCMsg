@@ -1,8 +1,6 @@
 package com.auth0.jwt.oicmsg;
 
-import com.auth0.jwt.exceptions.oicmsg_exceptions.HeaderError;
 import com.google.common.base.Strings;
-import com.google.common.primitives.Bytes;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,11 +10,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.bouncycastle.util.encoders.Base64;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *     Basic JSON Web key class. Jason Web keys are described in
+ RFC 7517 (https://tools.ietf.org/html/rfc7517).
+ The name of parameters used in this class are the same as
+ specified in RFC 7518 (https://tools.ietf.org/html/rfc7518).
+ */
 public class Key {
 
     final private static Logger logger = LoggerFactory.getLogger(Key.class);
@@ -120,6 +123,12 @@ public class Key {
         return inactiveSince;
     }
 
+    /**
+     * A wrapper for to_dict that makes sure that all the private information
+     as well as extra arguments are included. This method should *not* be
+     used for exporting information about the key.
+     * @return
+     */
     public Map<String, String> toDict() {
         Map<String, String> hmap = serialize();
         for (String key : args.keySet()) {
@@ -134,6 +143,10 @@ public class Key {
         //TODO
     }
 
+    /**
+     * Return the set of parameters that are common to all types of keys.
+     * @return: hashmap
+     */
     public Map<String, String> common() {
         Map<String, String> args = new HashMap<>();
         args.put("kty", this.kty);
@@ -154,6 +167,13 @@ public class Key {
         return this.toDict().toString();
     }
 
+    /**
+     * Verify that the information gathered from the on-the-wire
+     representation is of the right type.
+     This is supposed to run before the info is deserialized.
+     * @return
+     * @throws HeaderError
+     */
     public boolean verify() throws HeaderError {
         Object item = null;
         for (String key : longs.keySet()) {
@@ -200,6 +220,11 @@ public class Key {
 
     }
 
+    /**
+     * Compare 2 Key instances to find out if they represent the same key
+     * @param other: The other Key instance
+     * @return True if they are the same otherwise False.
+     */
     @Override
     public boolean equals(Object other) {
         try {
@@ -223,6 +248,16 @@ public class Key {
         return new ArrayList<>(this.toDict().keySet());
     }
 
+    /**
+     * Create a thumbprint of the key following the outline in
+     https://tools.ietf.org/html/draft-jones-jose-jwk-thumbprint-01
+     * @param hashFunction: A hash function to use for hashing the
+                            information
+     * @param members: Which attributes of the Key instance should
+                        be included when computing the hash value.
+     * @return A base64 encode hash over a set of Key attributes
+     * @throws NoSuchFieldException
+     */
     public byte[] thumbprint(String hashFunction, List<String> members) throws NoSuchFieldException {
         if (members == null || members.isEmpty()) {
             members = required;
@@ -260,6 +295,10 @@ public class Key {
         thumbprint(hashFunction, null);
     }
 
+    /**
+     *  Construct a Key ID using the thumbprint method and add it to
+        the key attributes.
+     */
     public void addKid() {
         this.kid = new String(Base64.encode(this.thumbprint("SHA-256")));
     }

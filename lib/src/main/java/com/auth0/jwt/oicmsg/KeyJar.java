@@ -15,6 +15,9 @@ import java.util.Map;
 import org.junit.Assert;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A keyjar contains a number of keybundles
+ */
 public class KeyJar {
 
     private boolean verifySSL;
@@ -30,6 +33,12 @@ public class KeyJar {
     private static final String RSA = "RSA";
     final private static org.slf4j.Logger logger = LoggerFactory.getLogger(KeyJar.class);
 
+    /**
+     *
+     * @param verifySSL: CA certificates, to be used for HTTPS
+     * @param keyBundle: Attempting SSL certificate verification
+     * @param removeAfter
+     */
     public KeyJar(boolean verifySSL, KeyBundle keyBundle, int removeAfter) {
         this.verifySSL = verifySSL;
         this.keyBundle = keyBundle;
@@ -42,6 +51,16 @@ public class KeyJar {
         this.removeAfter = 3600;
     }
 
+    /**
+     * Add a set of keys by url. This method will create a
+       `KeyBundle` instance with the url as source specification.
+     * @param owner: Who issued the keys
+     * @param url: Where can the key(s) be found
+     * @param args: extra parameters for instantiating KeyBundle
+     * @return A `KeyBundle` instance
+     * @throws KeyException
+     * @throws ImportException
+     */
     public KeyBundle addUrl(String owner, String url, Map<String, String> args) throws KeyException, ImportException {
         if (Strings.isNullOrEmpty(url)) {
             throw new KeyException("No jwksUri");
@@ -59,6 +78,16 @@ public class KeyJar {
         return keyBundle;
     }
 
+    /**
+     *  Add a symmetric key. This is done by wrapping it in a key bundle
+        cloak since KeyJar does not handle keys directly but only through
+        key bundles.
+     * @param owner: Owner of the key
+     * @param key: The key
+     * @param usage: What the key can be used for signing/signature
+                     verification (sig) and/or encryption/decryption (enc)
+     * @throws ImportException
+     */
     public void addSymmetricKey(String owner, Key key, List<String> usage) throws ImportException {
         if (!issuerKeys.containsKey(owner)) {
             issuerKeys.put(owner, new ArrayList<KeyBundle>());
@@ -87,6 +116,11 @@ public class KeyJar {
         }
     }
 
+    /**
+     * Add a key bundle and bind it to an identifier
+     * @param owner: Owner of the keys in the keybundle
+     * @param keyBundle
+     */
     public void addKeyBundle(String owner, KeyBundle keyBundle) {
         List<KeyBundle> kbList;
         if (issuerKeys.get(owner) == null) {
@@ -99,10 +133,23 @@ public class KeyJar {
         }
     }
 
+    /**
+     * Get all owner ID's and their key bundles
+     * @return list of 2-tuples (Owner ID., list of KeyBundles)
+     */
     public Collection<List<KeyBundle>> getItems() {
         return this.issuerKeys.values();
     }
 
+    /**
+     * Get all keys that match a set of search criteria
+     * @param keyUse: A key useful for this usage (enc, dec, sig, ver)
+     * @param keyType: Type of key (rsa, ec, oct, ..)
+     * @param owner: Who is the owner of the keys, "" == me
+     * @param kid: A Key Identifier
+     * @param args
+     * @return  A possibly empty list of keys
+     */
     public List<Key> getKeys(String keyUse, String keyType, String owner, String kid, Map<String, String> args) {
         String use;
         if (keyUse.equals(DEC) || keyUse.equals(ENC)) {
@@ -140,6 +187,7 @@ public class KeyJar {
             }
 
             for (Key key : keyList) {
+                //Skip inactive keys unless for signature verification
                 if (key.getInactiveSince() == 0 && !SIG.equals(keyUse)) {
                     continue;
                 }
@@ -157,6 +205,7 @@ public class KeyJar {
         }
 
         String name;
+        //if elliptic curve, have to check I have a key of the right curve
         if (keyType.equals(EC) && args.containsKey(ALG)) {
             name = "P-{}" + args.get(ALG).substring(2);
             List<Key> tempKeyList = new ArrayList<>();
@@ -172,6 +221,7 @@ public class KeyJar {
             keyList = tempKeyList;
         }
 
+        //Add my symmetric keys
         if (use.equals(ENC) && keyType.equals(OCT) && !Strings.isNullOrEmpty(owner)) {
             for (KeyBundle keyBundle : this.issuerKeys.get("")) {
                 for (Key key : keyBundle.get(keyType)) {
@@ -256,6 +306,14 @@ public class KeyJar {
         throw new KeyException(String.format("No keys for %s", url));
     }
 
+    /**
+     * Fetch keys from another server
+     * @param pcr: The provider information
+     * @param issuer: The provider URL
+     * @param shouldReplace: If all previously gathered keys from this provider
+                            should be replaced.
+       @return: hashmap with usage as key and keys as values
+     */
     public void loadKeys(Map<String, String> pcr, String issuer, boolean shouldReplace) {
         logger.debug("loading keys for issuer: " + issuer);
 
@@ -266,6 +324,12 @@ public class KeyJar {
         //this.addUrl(null, issuer, pcr.get("jwks_uri"));  ??
     }
 
+    /**
+     * Find a key bundle based on the source of the keys
+     * @param source: A source url
+     * @param issuer: The issuer of keys
+     * @return
+     */
     public KeyBundle find(String source, String issuer) {
         for (KeyBundle keyBundle : this.issuerKeys.get(issuer)) {
             if (keyBundle.getSource().equals(source)) {
@@ -276,6 +340,13 @@ public class KeyJar {
         return null;
     }
 
+    /**
+     *  Produces a hashmap that later can be easily mapped into a
+        JSON string representing a JWKS.
+     * @param isPrivate
+     * @param issuer
+     * @return
+     */
     public Map<String, List<Key>> exportsJwks(boolean isPrivate, String issuer) {
         List<Key> keys = new ArrayList<>();
         for (KeyBundle keyBundle : this.issuerKeys.get(issuer)) {
@@ -295,6 +366,12 @@ public class KeyJar {
         return this.exportsJwks(isPrivate, issuer);
     }
 
+    /**
+     *
+     * @param jwks: Dictionary representation of a JWKS
+     * @param issuer: Who 'owns' the JWKS
+     * @throws ImportException
+     */
     public void importJwks(Map<String, String> jwks, String issuer) throws ImportException {
         String keys = jwks.get("keys");
         List<KeyBundle> keyBundleList = this.issuerKeys.get(Constants.ISSUER);
@@ -310,6 +387,14 @@ public class KeyJar {
         importJwks();
     }
 
+    /**
+     *  Goes through the complete list of issuers and for each of them removes
+        outdated keys.  Outdated keys are keys that have been marked as inactive at a time that
+        is longer ago than some set number of seconds.  The number of seconds carried in
+        the remove_after parameter.
+     * @param when
+     * @throws TypeError
+     */
     public void removeOutdated(int when) throws TypeError {
         List<KeyBundle> keyBundleList;
         for (String owner : this.issuerKeys.keySet()) {
@@ -369,6 +454,12 @@ public class KeyJar {
         return keys;
     }
 
+    /**
+     * Get decryption keys from a keyjar.  These keys should be usable to decrypt an encrypted JWT.
+     * @param jwt: a JWT instance
+     * @param args: other keyword arguments
+     * @return: list of usable keys
+     */
     public void getJwtVerifyKeys(JWT jwt, Map<String, String> args) {
         List<Key> keyList = new ArrayList<>();
         JWTParser converter = new JWTParser();

@@ -12,6 +12,19 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *     JSON Web key representation of a Elliptic curve key.
+ According to RFC 7517 a JWK representation of a EC key can look like
+ this::
+ {"kty":"EC",
+ "crv":"P-256",
+ "x":"MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
+ "y":"4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM",
+ "d":"870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE"
+ }
+
+ Parameters according to https://tools.ietf.org/html/rfc7518#section-6.2
+ */
 public class ECKey extends Key {
 
     private String crv;
@@ -20,6 +33,7 @@ public class ECKey extends Key {
     private Object d;
     private Object curve;
     final private static Logger logger = LoggerFactory.getLogger(ECKey.class);
+    //The elliptic curve specific attributes
     private static Set<String> longs = new HashSet<String>(Arrays.asList("x", "y", "d"));
     protected static Set<String> members = new HashSet<>(Arrays.asList("kty", "alg", "use", "kid", "crv", "x", "y", "d"));
     public static Set<String> publicMembers = new HashSet<>(Arrays.asList("kty", "alg", "use", "kid", "crv", "x", "y"));
@@ -50,6 +64,27 @@ public class ECKey extends Key {
         this("EC", "", "", "", null, "", null, null, null, null, null);
     }
 
+    /**
+     *   Starting with information gathered from the on-the-wire representation
+         of an elliptic curve key (a JWK) initiate an
+         cryptography.hazmat.primitives.asymmetric.ec.EllipticCurvePublicKey
+         or EllipticCurvePrivateKey instance. So we have to get from having::
+         {
+         "kty":"EC",
+         "crv":"P-256",
+         "x":"MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
+         "y":"4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM",
+         "d":"870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE"
+         }
+         to having a key that can be used for signing/verifying and/or
+         encrypting/decrypting.
+         If 'd' has value then we're dealing with a private key otherwise
+         a public key. 'x' and 'y' must have values.
+         If this.key has a value beforehand this will overwrite whatever
+         was there to begin with.
+
+         x, y and d (if present) must be strings or bytes.
+     */
     public void deserialize() {
         try {
             if (!(this.x instanceof Number)) {
@@ -88,6 +123,14 @@ public class ECKey extends Key {
         }
     }
 
+    /**
+     * Go from a
+       cryptography.hazmat.primitives.asymmetric.ec.EllipticCurvePrivateKey
+       or EllipticCurvePublicKey instance to a JWK representation.
+     * @param isPrivate: Whether we should include the private parts or not.
+     * @return A JWK as a hashmap
+     * @throws SerializationNotPossible
+     */
     public Object serialize(boolean isPrivate) throws SerializationNotPossible {
         if (this.crv == null && this.curve == null) {
             throw new SerializationNotPossible();
@@ -105,6 +148,11 @@ public class ECKey extends Key {
         return args;
     }
 
+    /**
+     * Load an Elliptic curve key
+     * @param key: An elliptic curve key instance
+     * @return
+     */
     public ECKey loadKey(Key key) {
         this.curve = key;
         //how to return multiple objects in Java?
@@ -116,6 +164,7 @@ public class ECKey extends Key {
     }
 
     public List<Object> getEncryptionKey(boolean isPrivate) {
+        //both for encryption and decryption.
         return this.getKey(isPrivate);
     }
 

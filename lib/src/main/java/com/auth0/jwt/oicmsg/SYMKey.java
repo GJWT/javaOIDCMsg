@@ -9,6 +9,16 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * JSON Web key representation of a Symmetric key.
+ According to RFC 7517 a JWK representation of a symmetric key can look like
+ this::
+ {
+ "kty":"oct",
+ "alg":"A128KW",
+ "k":"GawgguFyGrWKav7AX4VKUg"
+ }
+ */
 public class SYMKey extends Key {
 
     final private static Logger logger = LoggerFactory.getLogger(SYMKey.class);
@@ -46,6 +56,14 @@ public class SYMKey extends Key {
         return args;
     }
 
+    /**
+     * Return an encryption key as per
+     http://openid.net/specs/openid-connect-core-1_0.html#Encryption
+
+     * @param alg
+     * @return
+     * @throws JWKException
+     */
     public String encryptionKey(String alg) throws JWKException {
         if (this.key == null) {
             deserialize();
