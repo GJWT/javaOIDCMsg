@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import oicclient.exceptions.ValueError;
 import org.slf4j.LoggerFactory;
+import oicclient.state.State;
 
 public class ClientInfo {
 
