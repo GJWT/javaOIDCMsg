@@ -19,21 +19,27 @@
 
 package com.auth0.jwt;
 
-import com.auth0.jwt.creators.*;
-import com.auth0.jwt.impl.JWTParser;
+import com.auth0.jwt.creators.EncodeType;
+import com.auth0.jwt.creators.FbJwtCreator;
+import com.auth0.jwt.creators.GoogleJwtCreator;
+import com.auth0.jwt.creators.GoogleOrFbJwtCreator;
 import com.auth0.jwt.impl.Claims;
+import com.auth0.jwt.impl.JWTParser;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Header;
 import com.auth0.jwt.interfaces.Payload;
 import com.auth0.jwt.utils.TokenUtils;
+import com.google.common.base.Strings;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.binary.StringUtils;
-
-import java.net.URLDecoder;
-import java.util.*;
 
 /**
  * The JWTDecoder class holds the decode method to parse a given JWT token into it's JWT representation.
@@ -44,9 +50,8 @@ public final class JWTDecoder implements DecodedJWT {
     private final String[] parts;
     private final Header header;
     private final Payload payload;
-
-    private static final String FACEBOOK = "facebook";
-    private static final String GOOGLE = "google";
+    private static final String ISSUER_FACEBOOK = "facebook";
+    private static final String ISSUER_GOOGLE = "google";
 
     public JWTDecoder(String jwt, EncodeType encodeType) throws Exception {
         parts = TokenUtils.splitToken(jwt);
@@ -55,13 +60,13 @@ public final class JWTDecoder implements DecodedJWT {
         String payloadJson = null;
         switch (encodeType) {
             case Base16:
-                headerJson = URLDecoder.decode(new String(Hex.decodeHex(parts[0])), "UTF-8");
-                payloadJson = URLDecoder.decode(new String(Hex.decodeHex(parts[1])), "UTF-8");
+                headerJson = URLDecoder.decode(new String(Hex.decodeHex(parts[0])), StandardCharsets.UTF_8.name());
+                payloadJson = URLDecoder.decode(new String(Hex.decodeHex(parts[1])), StandardCharsets.UTF_8.name());
                 break;
             case Base32:
                 Base32 base32 = new Base32();
-                headerJson = URLDecoder.decode(new String(base32.decode(parts[0]), "UTF-8"));
-                payloadJson = URLDecoder.decode(new String(base32.decode(parts[1]), "UTF-8"));
+                headerJson = URLDecoder.decode(new String(base32.decode(parts[0]), StandardCharsets.UTF_8.name()));
+                payloadJson = URLDecoder.decode(new String(base32.decode(parts[1]), StandardCharsets.UTF_8.name()));
                 break;
             case Base64:
                 headerJson = StringUtils.newStringUtf8(Base64.decodeBase64(parts[0]));
@@ -162,17 +167,24 @@ public final class JWTDecoder implements DecodedJWT {
         return String.format("%s.%s.%s", parts[0], parts[1], parts[2]);
     }
 
-    public static GoogleOrFbJwtCreator decodeJWT(DecodedJWT jwt) {
+    public GoogleOrFbJwtCreator decodeJWT(DecodedJWT jwt) {
         Map<String, Claim> claims = jwt.getClaims();
-        String issuer = claims.get(Claims.ISSUER).asString();
+        Claim issuerClaim = claims.get(Claims.ISSUER);
+        if(issuerClaim == null) {
+            throw new IllegalArgumentException("null issuer claim");
+        }
+        String issuer = issuerClaim.asString();
         GoogleOrFbJwtCreator googleOrFbJwtCreator = null;
-        if(issuer.contains(FACEBOOK)) {
+        if(Strings.isNullOrEmpty(issuer)) {
+            throw new IllegalArgumentException("null or empty issuer");
+        }
+        if(ISSUER_FACEBOOK.contains(issuer)) {
             googleOrFbJwtCreator = FbJwtCreator.build()
                     .withExp(claims.get(Claims.EXPIRES_AT).asDate())
                     .withIat(claims.get(Claims.ISSUED_AT).asDate())
                     .withAppId(claims.get(Claims.APP_ID).asString())
                     .withUserId(claims.get(Claims.USER_ID).asString());
-        } else if(issuer.contains(GOOGLE)) {
+        } else if(ISSUER_GOOGLE.contains(issuer)) {
             googleOrFbJwtCreator = GoogleJwtCreator.build()
                     .withPicture(claims.get(Claims.PICTURE).asString())
                     .withEmail(claims.get(Claims.EMAIL).asString())
@@ -188,4 +200,5 @@ public final class JWTDecoder implements DecodedJWT {
 
         return googleOrFbJwtCreator;
     }
+
 }

@@ -47,7 +47,7 @@ public class ScopedJWT extends JWT.BaseVerification {
     }
 
     /**
-     * Require a specific Scope (Claims.SCOPE) claim.
+     * Require a specific Scope ("scope") claim.
      *
      * @param scope the required Scope value
      * @return this same Verification instance.

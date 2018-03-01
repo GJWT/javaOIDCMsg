@@ -19,54 +19,38 @@
 
 package com.auth0.jwt.creators;
 
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.impl.Claims;
-import com.auth0.jwt.jwts.JWT;
-
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The ImplicitJwtCreator class holds the sign method to generate a complete Implicit JWT (with Signature) from a given Header and Payload content.
  */
-public class ImplicitJwtCreator {
-
-    protected JWTCreator.Builder jwt;
-    protected HashMap<String, Boolean> requiredClaims;
+public class ImplicitJwtCreator extends Creator{
 
     private ImplicitJwtCreator() {
-        jwt = JWT.create();
-        requiredClaims = new HashMap<String, Boolean>() {{
-            put(Claims.ISSUER, false);
-            put(Claims.SUBJECT, false);
-            put(Claims.ISSUED_AT, false);
-        }};
     }
 
     /**
-     * Add a specific Issuer (Claims.ISSUER) claim to the Payload.
+     * Add a specific Issuer ("issuer") claim to the Payload.
      *
      * @param issuer the Issuer value.
      * @return this same Builder instance.
      */
     public ImplicitJwtCreator withIssuer(String issuer) {
         jwt.withIssuer(issuer);
-        requiredClaims.put(Claims.ISSUER, true);
+        requiredClaimsImplicit.put(Claims.ISSUER, true);
         return this;
     }
 
     /**
-     * Add a specific Subject (Claims.SUBJECT) claim to the Payload.
+     * Add a specific Subject ("subject") claim to the Payload.
      *
      * @param subject the Subject value.
      * @return this same Builder instance.
      */
     public ImplicitJwtCreator withSubject(String subject) {
         jwt.withSubject(subject);
-        requiredClaims.put(Claims.SUBJECT, true);
+        requiredClaimsImplicit.put(Claims.SUBJECT, true);
         return this;
     }
 
@@ -83,14 +67,14 @@ public class ImplicitJwtCreator {
     }
 
     /**
-     * Add a specific Issued At (Claims.ISSUED_AT) claim to the Payload.
+     * Add a specific Issued At ("iat") claim to the Payload.
      *
      * @param iat the Issued At value.
      * @return this same Builder instance.
      */
     public ImplicitJwtCreator withIat(Date iat) {
         jwt.withIssuedAt(iat);
-        requiredClaims.put(Claims.ISSUED_AT, true);
+        requiredClaimsImplicit.put(Claims.ISSUED_AT, true);
         return this;
     }
 
@@ -103,9 +87,9 @@ public class ImplicitJwtCreator {
      * @throws IllegalArgumentException if the name is null.
      */
     public ImplicitJwtCreator withNonStandardClaim(String name, String value) {
-        if(name.equalsIgnoreCase("subject") || name.equalsIgnoreCase(Claims.SUBJECT)) {
+        if("subject".equalsIgnoreCase(name) || Claims.SUBJECT.equalsIgnoreCase(name)) {
             withSubject(value);
-        } else if(name.equalsIgnoreCase("issuer") || name.equalsIgnoreCase(Claims.ISSUER)) {
+        } else if("issuer".equalsIgnoreCase(name) || Claims.ISSUER.equalsIgnoreCase(name)) {
             withIssuer(value);
         } else {
             jwt.withNonStandardClaim(name, value);
@@ -174,7 +158,7 @@ public class ImplicitJwtCreator {
      * @throws IllegalArgumentException if the name is null.
      */
     public ImplicitJwtCreator withNonStandardClaim(String name, Date value) throws IllegalArgumentException {
-        if(name.equalsIgnoreCase(Claims.ISSUED_AT) || name.equalsIgnoreCase("issuedAt") || name.equalsIgnoreCase("issued_at")) {
+        if(Claims.ISSUED_AT.equalsIgnoreCase(name) || "issuedAt".equalsIgnoreCase(name) || "issued_at".equalsIgnoreCase(name)) {
             withIat(value);
         } else {
             jwt.withNonStandardClaim(name, value);
@@ -192,8 +176,8 @@ public class ImplicitJwtCreator {
      */
     public ImplicitJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
         jwt.withArrayClaim(name, items);
-        if(requiredClaims.containsKey(name))
-            requiredClaims.put(name, true);
+        if(requiredClaimsImplicit.containsKey(name))
+            requiredClaimsImplicit.put(name, true);
         return this;
     }
 
@@ -207,70 +191,6 @@ public class ImplicitJwtCreator {
     public ImplicitJwtCreator setIsNoneAlgorithmAllowed(boolean isNoneAlgorithmAllowed) {
         jwt.setIsNoneAlgorithmAllowed(isNoneAlgorithmAllowed);
         return this;
-    }
-
-    /**
-     * Creates a new JWT and signs it with the given algorithm.
-     *
-     * @param algorithm used to sign the JWT
-     * @return a new JWT token
-     * @throws IllegalAccessException   if the developer didn't want NONE algorithm to be allowed and it was passed in
-     * @throws IllegalArgumentException if the provided algorithm is null.
-     * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
-     */
-    public String sign(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && Algorithm.none().equals(algorithm)) {
-            throw new IllegalAccessException("None algorithm isn't allowed");
-        }
-        verifyClaims();
-        String JWS = jwt.sign(algorithm);
-        return JWS;
-    }
-
-    /**
-     * Creates a new JWT and signs it with the given algorithm.
-     *
-     * @param algorithm used to sign the JWT
-     * @return a new JWT token
-     * @throws IllegalAccessException   if the developer didn't want NONE algorithm to be allowed and it was passed in
-     * @throws IllegalArgumentException if the provided algorithm is null.
-     * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
-     */
-    public String signBase16Encoding(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && Algorithm.none().equals(algorithm)) {
-            throw new IllegalAccessException("None algorithm isn't allowed");
-        }
-        verifyClaims();
-        String JWS = jwt.sign(algorithm, EncodeType.Base16);
-        return JWS;
-    }
-
-    /**
-     * Creates a new JWT and signs it with the given algorithm.
-     *
-     * @param algorithm used to sign the JWT
-     * @return a new JWT token
-     * @throws IllegalAccessException   if the developer didn't want NONE algorithm to be allowed and it was passed in
-     * @throws IllegalArgumentException if the provided algorithm is null.
-     * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
-     */
-    public String signBase32Encoding(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && Algorithm.none().equals(algorithm)) {
-            throw new IllegalAccessException("None algorithm isn't allowed");
-        }
-        verifyClaims();
-        String JWS = jwt.sign(algorithm, EncodeType.Base32);
-        return JWS;
-    }
-
-    /**
-     * Verifies that all the standard claims were provided
-     * @throws Exception if all the standard claims weren't provided
-     */
-    private void verifyClaims() throws Exception {
-        for(String claim : requiredClaims.keySet())
-            if(!requiredClaims.get(claim))
-                throw new Exception("Standard claim: " + claim + " has not been set");
     }
 
     public static ImplicitJwtCreator build() {

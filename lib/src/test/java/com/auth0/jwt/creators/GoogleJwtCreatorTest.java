@@ -19,11 +19,12 @@
 
 package com.auth0.jwt.creators;
 
-import com.auth0.jwt.JWTDecoder;
 import static com.auth0.jwt.TimeUtil.generateRandomExpDateInFuture;
 import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertTrue;
+
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.creators.GoogleJwtCreator;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.impl.Claims;
@@ -32,15 +33,12 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.GoogleVerification;
 import com.auth0.jwt.jwts.GoogleJWT;
 import com.auth0.jwt.jwts.JWT;
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertTrue;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 public class GoogleJwtCreatorTest {
 
@@ -48,9 +46,9 @@ public class GoogleJwtCreatorTest {
     public ExpectedException thrown = ExpectedException.none();
     private static final Date exp = generateRandomExpDateInFuture();
     private static final Date iat = generateRandomIatDateInPast();
-    public static final String PICTURE = Claims.PICTURE;
-    public static final String EMAIL = Claims.EMAIL;
-    public static final String NAME = Claims.NAME;
+    public static final String PICTURE = "picture";
+    public static final String EMAIL = "email";
+    public static final String NAME = "name";
 
 
     @Test

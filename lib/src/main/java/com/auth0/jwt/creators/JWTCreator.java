@@ -22,23 +22,22 @@ package com.auth0.jwt.creators;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.impl.ClaimsHolder;
 import com.auth0.jwt.impl.PayloadSerializer;
-import com.auth0.jwt.impl.Claims;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
-
-import java.io.*;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 
 /**
  * The JWTCreator class holds the sign method to generate a complete JWT (with Signature) from a given Header and Payload content.
@@ -170,7 +169,7 @@ public final class JWTCreator {
         }
 
         /**
-         * Add a specific Issued At (Claims.ISSUED_AT) claim to the Payload.
+         * Add a specific Issued At ("iat") claim to the Payload.
          *
          * @param issuedAt the Issued At value.
          * @return this same Builder instance.
@@ -181,7 +180,7 @@ public final class JWTCreator {
         }
 
         /**
-         * Add a specific JWT Id (Claims.JWT_ID) claim to the Payload.
+         * Add a specific JWT Id ("jti") claim to the Payload.
          *
          * @param jwtId the Token Id value.
          * @return this same Builder instance.
@@ -404,38 +403,38 @@ public final class JWTCreator {
     }
 
     private String signBase16Encoding() throws UnsupportedEncodingException {
-        String header = URLEncoder.encode(headerJson, "UTF-8");
-        String payload = URLEncoder.encode(payloadJson, "UTF-8");
+        String header = URLEncoder.encode(headerJson, StandardCharsets.UTF_8.name());
+        String payload = URLEncoder.encode(payloadJson, StandardCharsets.UTF_8.name());
 
-        byte[] bHeader = header.getBytes("UTF-8");
+        byte[] bHeader = header.getBytes(StandardCharsets.UTF_8.name());
         String encodedHeader = Hex.encodeHexString(bHeader);
 
-        byte[] bPayload = payload.getBytes("UTF-8");
+        byte[] bPayload = payload.getBytes(StandardCharsets.UTF_8.name());
         String encodedPayload = Hex.encodeHexString(bPayload);
 
         String content = String.format("%s.%s", encodedHeader, encodedPayload);
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
         String signature = Hex.encodeHexString(signatureBytes);
-        String signatureFinal = URLEncoder.encode(signature, "UTF-8");
+        String signatureFinal = URLEncoder.encode(signature, StandardCharsets.UTF_8.name());
 
         return String.format("%s.%s", content, signatureFinal);
     }
 
     private String signBase32Encoding() throws UnsupportedEncodingException{
         Base32 base32 = new Base32();
-        String header = URLEncoder.encode(headerJson, "UTF-8");
-        String payload = URLEncoder.encode(payloadJson, "UTF-8");
+        String header = URLEncoder.encode(headerJson, StandardCharsets.UTF_8.name());
+        String payload = URLEncoder.encode(payloadJson, StandardCharsets.UTF_8.name());
 
-        byte[] bHeader = header.getBytes("UTF-8");
+        byte[] bHeader = header.getBytes(StandardCharsets.UTF_8.name());
         String encodedHeader = base32.encodeAsString(bHeader);
 
-        byte[] bPayload = payload.getBytes("UTF-8");
+        byte[] bPayload = payload.getBytes(StandardCharsets.UTF_8.name());
         String encodedPayload = base32.encodeAsString(bPayload);
 
         String content = String.format("%s.%s", encodedHeader, encodedPayload);
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
         String signature = base32.encodeAsString(signatureBytes);
-        String signatureFinal = URLEncoder.encode(signature, "UTF-8");
+        String signatureFinal = URLEncoder.encode(signature, StandardCharsets.UTF_8.name());
 
         return String.format("%s.%s", content, signatureFinal);
     }

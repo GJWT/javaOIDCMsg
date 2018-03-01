@@ -28,21 +28,28 @@ import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.util.io.pem.PemReader;
-
-import java.io.*;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 class RSAAlgorithm extends Algorithm {
 
@@ -76,7 +83,7 @@ class RSAAlgorithm extends Algorithm {
                 Jwk jwk = provider.get(kid);
                 String cert = jwk.getCertificateChain().get(0);
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                        new FileOutputStream("./jwks.cert"), "utf-8"))) {
+                        new FileOutputStream("./jwks.cert"), StandardCharsets.UTF_8.name()))) {
                     writer.write("-----BEGIN CERTIFICATE-----");
                     writer.append("\n" + cert + "\n");
                     writer.append("-----END CERTIFICATE-----");
@@ -122,18 +129,18 @@ class RSAAlgorithm extends Algorithm {
     }
 
     private List<byte[]> fetchContentAndSignatureByteArrays(DecodedJWT jwt, EncodeType encodeType) throws Exception{
-        byte[] contentBytes = String.format("%s.%s", jwt.getHeader(), jwt.getPayload()).getBytes(StandardCharsets.UTF_8);
+        byte[] contentBytes = String.format("%s.%s", jwt.getHeader(), jwt.getPayload()).getBytes(StandardCharsets.UTF_8.name());
         byte[] signatureBytes = null;
         String signature = jwt.getSignature();
         String urlDecoded = null;
         switch (encodeType) {
             case Base16:
-                urlDecoded = URLDecoder.decode(signature, "UTF-8");
+                urlDecoded = URLDecoder.decode(signature, StandardCharsets.UTF_8.name());
                 signatureBytes = Hex.decodeHex(urlDecoded);
                 break;
             case Base32:
                 Base32 base32 = new Base32();
-                urlDecoded = URLDecoder.decode(signature, "UTF-8");
+                urlDecoded = URLDecoder.decode(signature, StandardCharsets.UTF_8.name());
                 signatureBytes = base32.decode(urlDecoded);
                 break;
             case Base64:
@@ -141,7 +148,7 @@ class RSAAlgorithm extends Algorithm {
                 break;
         }
 
-        return new ArrayList<>(Arrays.asList(contentBytes, signatureBytes));
+        return Arrays.asList(contentBytes, signatureBytes);
     }
 
     @Override

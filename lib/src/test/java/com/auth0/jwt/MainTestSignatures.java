@@ -21,6 +21,9 @@ package com.auth0.jwt;
 
 import static com.auth0.jwt.TimeUtil.generateRandomExpDateInFuture;
 import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertTrue;
+
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.creators.GoogleJwtCreator;
 import com.auth0.jwt.creators.GoogleJwtCreatorTest;
@@ -31,15 +34,12 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.GoogleVerification;
 import com.auth0.jwt.jwts.GoogleJWT;
 import com.auth0.jwt.jwts.JWT;
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertTrue;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class MainTestSignatures {
 
@@ -121,7 +121,6 @@ public class MainTestSignatures {
         thrown.expectMessage("The Claim 'aud' value doesn't contain the required audience.");
 
         Algorithm algorithm = Algorithm.HMAC256("secret");
-        String[] arr = {"accounts.fake.com", "subject"};
         String token = GoogleJwtCreator.build()
                 .withPicture(GoogleJwtCreatorTest.PICTURE)
                 .withEmail(GoogleJwtCreatorTest.EMAIL)
@@ -144,7 +143,6 @@ public class MainTestSignatures {
         thrown.expectMessage("The Claim 'aud' value doesn't contain the required audience.");
 
         Algorithm algorithm = Algorithm.HMAC256("secret");
-        String[] arr = {"accounts.fake.com", "subject"};
         String token = GoogleJwtCreator.build()
                 .withPicture(GoogleJwtCreatorTest.PICTURE)
                 .withEmail(GoogleJwtCreatorTest.EMAIL)

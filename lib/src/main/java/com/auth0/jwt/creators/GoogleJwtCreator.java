@@ -19,94 +19,75 @@
 
 package com.auth0.jwt.creators;
 
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.impl.Claims;
-import com.auth0.jwt.jwts.JWT;
-
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The GoogleJwtCreator class holds the sign method to generate a complete Google JWT (with Signature) from a given Header and Payload content.
  */
 public class GoogleJwtCreator extends GoogleOrFbJwtCreator {
 
-    protected JWTCreator.Builder jwt;
-    protected HashMap<String, Boolean> requiredClaims;
-
     protected GoogleJwtCreator() {
-        jwt = JWT.create();
-        requiredClaims = new HashMap<String, Boolean>() {{
-            put(Claims.NAME, false);
-            put(Claims.EMAIL, false);
-            put(Claims.PICTURE, false);
-            put(Claims.ISSUER, false);
-            put(Claims.SUBJECT, false);
-            put(Claims.ISSUED_AT, false);
-        }};
     }
 
 
     /**
-     * Add a specific Name (Claims.NAME) claim to the Payload.
+     * Add a specific Name ("name") claim to the Payload.
      *
      * @param name the Name value.
      * @return this same Builder instance.
      */
     public GoogleJwtCreator withName(String name) {
         jwt.withNonStandardClaim(Claims.NAME, name);
-        requiredClaims.put(Claims.NAME, true);
+        requiredClaimsGoogle.put(Claims.NAME, true);
         return this;
     }
 
     /**
-     * Add a specific Email (Claims.EMAIL) claim to the Payload.
+     * Add a specific Email ("email") claim to the Payload.
      *
      * @param email the Email value.
      * @return this same Builder instance.
      */
     public GoogleJwtCreator withEmail(String email) {
         jwt.withNonStandardClaim(Claims.EMAIL, email);
-        requiredClaims.put(Claims.EMAIL, true);
+        requiredClaimsGoogle.put(Claims.EMAIL, true);
         return this;
     }
 
     /**
-     * Add a specific Picture (Claims.PICTURE) claim to the Payload.
+     * Add a specific Picture ("picture") claim to the Payload.
      *
      * @param picture the Picture value.
      * @return this same Builder instance.
      */
     public GoogleJwtCreator withPicture(String picture) {
         jwt.withNonStandardClaim(Claims.PICTURE, picture);
-        requiredClaims.put(Claims.PICTURE, true);
+        requiredClaimsGoogle.put(Claims.PICTURE, true);
         return this;
     }
 
     /**
-     * Add a specific Issuer (Claims.ISSUER) claim to the Payload.
+     * Add a specific Issuer ("issuer") claim to the Payload.
      *
      * @param issuer the Issuer value.
      * @return this same Builder instance.
      */
     public GoogleJwtCreator withIssuer(String issuer) {
         jwt.withIssuer(issuer);
-        requiredClaims.put(Claims.ISSUER, true);
+        requiredClaimsGoogle.put(Claims.ISSUER, true);
         return this;
     }
 
     /**
-     * Add a specific Subject (Claims.SUBJECT) claim to the Payload.
+     * Add a specific Subject ("subject") claim to the Payload.
      *
      * @param subject the Subject value.
      * @return this same Builder instance.
      */
     public GoogleJwtCreator withSubject(String subject) {
         jwt.withSubject(subject);
-        requiredClaims.put(Claims.SUBJECT, true);
+        requiredClaimsGoogle.put(Claims.SUBJECT, true);
         return this;
     }
 
@@ -123,14 +104,14 @@ public class GoogleJwtCreator extends GoogleOrFbJwtCreator {
     }
 
     /**
-     * Add a specific Issued At (Claims.ISSUED_AT) claim to the Payload.
+     * Add a specific Issued At ("iat") claim to the Payload.
      *
      * @param iat the Issued At value.
      * @return this same Builder instance.
      */
     public GoogleJwtCreator withIat(Date iat) {
         jwt.withIssuedAt(iat);
-        requiredClaims.put(Claims.ISSUED_AT, true);
+        requiredClaimsGoogle.put(Claims.ISSUED_AT, true);
         return this;
     }
 
@@ -154,15 +135,15 @@ public class GoogleJwtCreator extends GoogleOrFbJwtCreator {
      * @throws IllegalArgumentException if the name is null.
      */
     public GoogleJwtCreator withNonStandardClaim(String name, String value) {
-        if(value.equalsIgnoreCase(Claims.NAME)) {
+        if(Claims.NAME.equalsIgnoreCase(value)) {
             withName(value);
-        } else if(value.equalsIgnoreCase(Claims.EMAIL)) {
+        } else if(Claims.EMAIL.equalsIgnoreCase(value)) {
             withEmail(value);
-        } else if(value.equalsIgnoreCase(Claims.PICTURE)) {
+        } else if(Claims.PICTURE.equalsIgnoreCase(value)) {
             withPicture(value);
-        } else if(value.equalsIgnoreCase(Claims.ISSUER) || value.equalsIgnoreCase("issuer")) {
+        } else if(Claims.ISSUER.equalsIgnoreCase(value) || "issuer".equalsIgnoreCase(value)) {
             withIssuer(value);
-        } else if(name.equalsIgnoreCase("subject") || name.equalsIgnoreCase(Claims.SUBJECT)) {
+        } else if("subject".equalsIgnoreCase(name) || Claims.SUBJECT.equalsIgnoreCase(name)) {
             withSubject(value);
         } else {
             jwt.withNonStandardClaim(name, value);
@@ -231,7 +212,7 @@ public class GoogleJwtCreator extends GoogleOrFbJwtCreator {
      * @throws IllegalArgumentException if the name is null.
      */
     public GoogleJwtCreator withNonStandardClaim(String name, Date value) throws IllegalArgumentException {
-        if(name.equalsIgnoreCase(Claims.ISSUED_AT) || name.equalsIgnoreCase("issuedAt") || name.equalsIgnoreCase("issued_at")) {
+        if(Claims.ISSUED_AT.equalsIgnoreCase(name) || "issuedAt".equalsIgnoreCase(name) || "issued_at".equalsIgnoreCase(name)) {
             withIat(value);
         } else {
             jwt.withNonStandardClaim(name, value);
@@ -249,8 +230,8 @@ public class GoogleJwtCreator extends GoogleOrFbJwtCreator {
      */
     public GoogleJwtCreator withArrayClaim(String name, String... items) throws IllegalArgumentException {
         jwt.withArrayClaim(name, items);
-        if(requiredClaims.containsKey(name))
-            requiredClaims.put(name, true);
+        if(requiredClaimsGoogle.containsKey(name))
+            requiredClaimsGoogle.put(name, true);
         return this;
     }
 
@@ -264,70 +245,6 @@ public class GoogleJwtCreator extends GoogleOrFbJwtCreator {
     public GoogleJwtCreator setIsNoneAlgorithmAllowed(boolean isNoneAlgorithmAllowed) {
         jwt.setIsNoneAlgorithmAllowed(isNoneAlgorithmAllowed);
         return this;
-    }
-
-    /**
-     * Creates a new JWT and signs it with the given algorithm.
-     *
-     * @param algorithm used to sign the JWT
-     * @return a new JWT token
-     * @throws IllegalAccessException   if the developer didn't want NONE algorithm to be allowed and it was passed in
-     * @throws IllegalArgumentException if the provided algorithm is null.
-     * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
-     */
-    public String sign(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && Algorithm.none().equals(algorithm)) {
-            throw new IllegalAccessException("None algorithm isn't allowed");
-        }
-        verifyClaims();
-        String JWS = jwt.sign(algorithm);
-        return JWS;
-    }
-
-    /**
-     * Creates a new JWT and signs it with the given algorithm.
-     *
-     * @param algorithm used to sign the JWT
-     * @return a new JWT token
-     * @throws IllegalAccessException   if the developer didn't want NONE algorithm to be allowed and it was passed in
-     * @throws IllegalArgumentException if the provided algorithm is null.
-     * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
-     */
-    public String signBase16Encoding(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && Algorithm.none().equals(algorithm)) {
-            throw new IllegalAccessException("None algorithm isn't allowed");
-        }
-        verifyClaims();
-        String JWS = jwt.sign(algorithm, EncodeType.Base16);
-        return JWS;
-    }
-
-    /**
-     * Creates a new JWT and signs it with the given algorithm.
-     *
-     * @param algorithm used to sign the JWT
-     * @return a new JWT token
-     * @throws IllegalAccessException   if the developer didn't want NONE algorithm to be allowed and it was passed in
-     * @throws IllegalArgumentException if the provided algorithm is null.
-     * @throws JWTCreationException     if the claims could not be converted to a valid JSON or there was a problem with the signing key.
-     */
-    public String signBase32Encoding(Algorithm algorithm) throws Exception {
-        if(!jwt.getIsNoneAlgorithmAllowed() && Algorithm.none().equals(algorithm)) {
-            throw new IllegalAccessException("None algorithm isn't allowed");
-        }
-        verifyClaims();
-        String JWS = jwt.sign(algorithm, EncodeType.Base32);
-        return JWS;
-    }
-
-    /**
-     * Verifies that all the standard claims were provided
-     * @throws Exception if all the standard claims weren't provided
-     */
-    private void verifyClaims() throws Exception {
-        for(String claim : requiredClaims.keySet())
-            if(!requiredClaims.get(claim))
-                throw new Exception("Standard claim: " + claim + " has not been set");
     }
 
     public static GoogleJwtCreator build() {

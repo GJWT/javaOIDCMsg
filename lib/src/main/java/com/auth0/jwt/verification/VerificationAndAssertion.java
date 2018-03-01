@@ -57,8 +57,7 @@ public class VerificationAndAssertion {
         for (Map.Entry<String, Object> entry : claims.entrySet()) {
             switch (entry.getKey()) {
                 case Claims.AUDIENCE:
-                    //noinspection unchecked
-                    VerificationAndAssertion.assertValidAudienceClaim(jwt.getAudience(), (List<String>) entry.getValue());
+                    assertValidAudienceClaim(jwt.getAudience(), (List<String>) entry.getValue());
                     break;
                 case Claims.EXPIRES_AT:
                     assertValidDateClaim(clock, jwt.getExpiresAt(), (Long) entry.getValue(), true);
@@ -70,13 +69,13 @@ public class VerificationAndAssertion {
                     assertValidDateClaim(clock, jwt.getNotBefore(), (Long) entry.getValue(), false);
                     break;
                 case Claims.ISSUER:
-                    VerificationAndAssertion.assertValidIssuerClaim(jwt.getIssuer(), (List<String>) entry.getValue());
+                    assertValidIssuerClaim(jwt.getIssuer(), (List<String>) entry.getValue());
                     break;
                 case Claims.JWT_ID:
-                    VerificationAndAssertion.assertValidStringClaim(entry.getKey(), jwt.getId(), (String) entry.getValue());
+                    assertValidStringClaim(entry.getKey(), jwt.getId(), (String) entry.getValue());
                     break;
                 default:
-                    VerificationAndAssertion.assertValidClaim(jwt.getClaim(entry.getKey()), entry.getKey(), entry.getValue());
+                    assertValidClaim(jwt.getClaim(entry.getKey()), entry.getKey(), entry.getValue());
                     break;
             }
         }
@@ -138,13 +137,13 @@ public class VerificationAndAssertion {
     }
 
     private static void assertValidAudienceClaim(List<String> actual, List<String> expected) {
-        if (expected == null || !expected.containsAll(actual)) {
+        if (actual == null || !actual.containsAll(expected)) {
             throw new InvalidClaimException("The Claim 'aud' value doesn't contain the required audience.");
         }
     }
 
     private static void assertValidIssuerClaim(List<String> actual, List<String> expected) {
-        if (expected == null || !expected.contains(actual.get(0))) {
+        if (actual == null || !actual.containsAll(expected)) {
             throw new InvalidClaimException("The Claim 'iss' value doesn't match the required one.");
         }
     }

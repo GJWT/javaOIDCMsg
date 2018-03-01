@@ -19,27 +19,31 @@
 
 package com.auth0.jwt;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertTrue;
+
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.jwts.JWT;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.hamcrest.collection.IsCollectionWithSize;
 import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Assert;
-import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
 public class JWTDecoderTest {
 

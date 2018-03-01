@@ -50,7 +50,7 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
     }
 
     /**
-     * Require a specific Picture (Claims.PICTURE) claim.
+     * Require a specific Picture ("picture") claim.
      *
      * @param picture the required Picture value
      * @return this same Verification instance.
@@ -62,7 +62,7 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
     }
 
     /**
-     * Require a specific Email (Claims.EMAIL) claim.
+     * Require a specific Email ("email") claim.
      *
      * @param email the required Email value
      * @return this same Verification instance.
@@ -74,7 +74,7 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
     }
 
     /**
-     * Require a specific Name (Claims.NAME) claim.
+     * Require a specific Name ("name") claim.
      *
      * @param name the required Name value
      * @return this same Verification instance.

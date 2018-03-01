@@ -20,18 +20,25 @@
 package com.auth0.jwt.jwts;
 
 import com.auth0.jwt.ClockImpl;
-import com.auth0.jwt.creators.EncodeType;
-import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.JWTDecoder;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.*;
+import com.auth0.jwt.creators.EncodeType;
+import com.auth0.jwt.creators.JWTCreator;
+import com.auth0.jwt.exceptions.AlgorithmMismatchException;
+import com.auth0.jwt.exceptions.InvalidClaimException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
 import com.auth0.jwt.verification.VerificationAndAssertion;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
 public class JWT {
@@ -72,6 +79,8 @@ public class JWT {
      * Note that this method <b>doesn't verify the token's signature!</b> Use it only if you trust the token or you already verified it.
      *
      * @param token with jwt format as string.
+     * @param jwksFile
+     * @param pemFile
      * @return a decoded JWT.
      * @throws AlgorithmMismatchException     if the algorithm stated in the token's header it's not equal to the one defined in the {@link JWT}.
      * @throws SignatureVerificationException if the signature is invalid.
@@ -112,6 +121,8 @@ public class JWT {
      * Note that this method <b>doesn't verify the token's signature!</b> Use it only if you trust the token or you already verified it.
      *
      * @param token with jwt format as string.
+     * @param jwksFile
+     * @param pemFile
      * @return a decoded JWT.
      * @throws AlgorithmMismatchException     if the algorithm stated in the token's header it's not equal to the one defined in the {@link JWT}.
      * @throws SignatureVerificationException if the signature is invalid.
@@ -152,6 +163,8 @@ public class JWT {
      * Note that this method <b>doesn't verify the token's signature!</b> Use it only if you trust the token or you already verified it.
      *
      * @param token with jwt format as string.
+     * @param jwksFile
+     * @param pemFile
      * @return a decoded JWT.
      * @throws AlgorithmMismatchException     if the algorithm stated in the token's header it's not equal to the one defined in the {@link JWT}.
      * @throws SignatureVerificationException if the signature is invalid.
@@ -347,7 +360,7 @@ public class JWT {
         }
 
         /**
-         * Require a specific JWT Id (Claims.JWT_ID) claim.
+         * Require a specific JWT Id ("jti") claim.
          *
          * @param jwtId the required Id value
          * @return this same Verification instance.

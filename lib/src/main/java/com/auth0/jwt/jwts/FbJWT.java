@@ -42,7 +42,7 @@ public class FbJWT extends JWT.BaseVerification{
     }
 
     /**
-     * Require a specific userId (Claims.USER_ID) claim.
+     * Require a specific userId ("userId") claim.
      *
      * @param userId the required userId value
      * @return this same Verification instance.
@@ -53,7 +53,7 @@ public class FbJWT extends JWT.BaseVerification{
     }
 
     /**
-     * Require a specific appId (Claims.APP_ID) claim.
+     * Require a specific appId ("appId") claim.
      *
      * @param appId the required appId value
      * @return this same Verification instance.

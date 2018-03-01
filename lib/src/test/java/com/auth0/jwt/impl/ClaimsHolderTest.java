@@ -19,14 +19,15 @@
 
 package com.auth0.jwt.impl;
 
-import org.hamcrest.collection.IsMapContaining;
-import org.junit.Test;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import org.hamcrest.collection.IsMapContaining;
+import org.junit.Test;
 
 public class ClaimsHolderTest {
 

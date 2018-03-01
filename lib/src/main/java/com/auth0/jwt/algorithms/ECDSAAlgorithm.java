@@ -19,43 +19,21 @@
 
 package com.auth0.jwt.algorithms;
 
-import com.auth0.jwk.Jwk;
-import com.auth0.jwk.JwkProvider;
-import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.creators.EncodeType;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
-import com.auth0.jwt.interfaces.Payload;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSObject;
-import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.crypto.RSASSAVerifier;
-import com.nimbusds.jose.jwk.JWK;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.binary.StringUtils;
-
-import java.io.File;
-import java.io.FileReader;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.List;
 
 class ECDSAAlgorithm extends Algorithm {
 
@@ -86,12 +64,12 @@ class ECDSAAlgorithm extends Algorithm {
         String urlDecoded = null;
         switch (encodeType) {
             case Base16:
-                urlDecoded = URLDecoder.decode(signature, "UTF-8");
+                urlDecoded = URLDecoder.decode(signature, StandardCharsets.UTF_8.name());
                 signatureBytes = Hex.decodeHex(urlDecoded);
                 break;
             case Base32:
                 Base32 base32 = new Base32();
-                urlDecoded = URLDecoder.decode(signature, "UTF-8");
+                urlDecoded = URLDecoder.decode(signature, StandardCharsets.UTF_8.name());
                 signatureBytes = base32.decode(urlDecoded);
                 break;
             case Base64:
@@ -116,7 +94,7 @@ class ECDSAAlgorithm extends Algorithm {
 
     @Override
     public void verifyWithX509(DecodedJWT jwt, String jwksFile, String pemFile) throws Exception {
-        throw new UnsupportedOperationException("X509 is not supported for ECDSA");
+        throw new UnsupportedOperationException("X509 is not supported for ECDSA algorithm");
     }
 
     @Override
