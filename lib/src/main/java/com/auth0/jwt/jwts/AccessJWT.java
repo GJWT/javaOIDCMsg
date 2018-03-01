@@ -26,7 +26,7 @@ import com.auth0.jwt.interfaces.Verification;
 
 import java.util.List;
 
-public class AccessJWT extends JWT.BaseVerification implements Verification {
+public class AccessJWT extends JWT.BaseVerification {
 
     AccessJWT(Algorithm algorithm) throws IllegalArgumentException {
         super(algorithm);

@@ -19,33 +19,38 @@
 
 package com.auth0.jwt.algorithms;
 
-import com.auth0.jwt.creators.EncodeType;
-import com.auth0.jwt.exceptions.AlgorithmMismatchException;
-import com.auth0.jwt.exceptions.SignatureGenerationException;
-import com.auth0.jwt.exceptions.SignatureVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.auth0.jwt.interfaces.RSAKeyProvider;
-import com.auth0.jwt.jwts.JWT;
-import org.apache.commons.codec.binary.Base64;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.security.interfaces.RSAKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-
 import static com.auth0.jwt.PemUtils.readPrivateKeyFromFile;
 import static com.auth0.jwt.PemUtils.readPublicKeyFromFile;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import com.auth0.jwt.exceptions.AlgorithmMismatchException;
+import com.auth0.jwt.exceptions.SignatureGenerationException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.RSAKeyProvider;
+import com.auth0.jwt.jwts.JWT;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.interfaces.RSAKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import org.apache.commons.codec.binary.Base64;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 @SuppressWarnings("deprecation")
 public class RSAAlgorithmTest {
@@ -65,7 +70,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA256((RSAKey) readPublicKeyFromFile(PUBLIC_KEY_FILE, "RSA"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -74,7 +78,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) readPublicKeyFromFile(PUBLIC_KEY_FILE, "RSA"), (RSAPrivateKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE, "RSA"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -86,7 +89,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA256(provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -101,7 +103,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA256(provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -112,7 +113,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA256((RSAKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE, "RSA"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -125,7 +125,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA256((RSAKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE, "RSA"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -134,7 +133,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA384((RSAKey) readPublicKeyFromFile(PUBLIC_KEY_FILE, "RSA"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -143,7 +141,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA384((RSAPublicKey) readPublicKeyFromFile(PUBLIC_KEY_FILE, "RSA"), (RSAPrivateKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE, "RSA"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -155,7 +152,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA384(provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -170,7 +166,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA384(provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -181,7 +176,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA384((RSAKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE, "RSA"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -194,7 +188,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA384((RSAKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE, "RSA"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -203,7 +196,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA512((RSAKey) readPublicKeyFromFile(PUBLIC_KEY_FILE, "RSA"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -212,7 +204,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA512((RSAPublicKey) readPublicKeyFromFile(PUBLIC_KEY_FILE, "RSA"), (RSAPrivateKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE, "RSA"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -224,7 +215,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA512(provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -239,7 +229,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA512(provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -250,7 +239,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA512((RSAKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE, "RSA"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -263,7 +251,6 @@ public class RSAAlgorithmTest {
         Algorithm algorithm = Algorithm.RSA512((RSAKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE, "RSA"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -282,7 +269,6 @@ public class RSAAlgorithmTest {
         String token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCJ9.dxXF3MdsyW-AuvwJpaQtrZ33fAde9xWxpLIg9cO2tMLH2GSRNuLAe61KsJusZhqZB9Iy7DvflcmRz-9OZndm6cj_ThGeJH2LLc90K83UEvvRPo8l85RrQb8PcanxCgIs2RcZOLygERizB3pr5icGkzR7R2y6zgNCjKJ5_NJ6EiZsGN6_nc2PRK_DbyY-Wn0QDxIxKoA5YgQJ9qafe7IN980pXvQv2Z62c3XR8dYuaXBqhthBj-AbaFHEpZapN-V-TmuLNzR2MCB6Xr7BYMuCaqWf_XU8og4XNe8f_8w9Wv5vvgqMM1KhqVpG5VdMJv4o_L4NoCROHhtUQSLRh2M9cA";
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -301,7 +287,6 @@ public class RSAAlgorithmTest {
         String token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCJ9.dxXF3MdsyW-AuvwJpaQtrZ33fAde9xWxpLIg9cO2tMLH2GSRNuLAe61KsJusZhqZB9Iy7DvflcmRz-9OZndm6cj_ThGeJH2LLc90K83UEvvRPo8l85RrQb8PcanxCgIs2RcZOLygERizB3pr5icGkzR7R2y6zgNCjKJ5_NJ6EiZsGN6_nc2PRK_DbyY-Wn0QDxIxKoA5YgQJ9qafe7IN980pXvQv2Z62c3XR8dYuaXBqhthBj-AbaFHEpZapN-V-TmuLNzR2MCB6Xr7BYMuCaqWf_XU8og4XNe8f_8w9Wv5vvgqMM1KhqVpG5VdMJv4o_L4NoCROHhtUQSLRh2M9cA";
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -320,7 +305,6 @@ public class RSAAlgorithmTest {
         String token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCJ9.dxXF3MdsyW-AuvwJpaQtrZ33fAde9xWxpLIg9cO2tMLH2GSRNuLAe61KsJusZhqZB9Iy7DvflcmRz-9OZndm6cj_ThGeJH2LLc90K83UEvvRPo8l85RrQb8PcanxCgIs2RcZOLygERizB3pr5icGkzR7R2y6zgNCjKJ5_NJ6EiZsGN6_nc2PRK_DbyY-Wn0QDxIxKoA5YgQJ9qafe7IN980pXvQv2Z62c3XR8dYuaXBqhthBj-AbaFHEpZapN-V-TmuLNzR2MCB6Xr7BYMuCaqWf_XU8og4XNe8f_8w9Wv5vvgqMM1KhqVpG5VdMJv4o_L4NoCROHhtUQSLRh2M9cA";
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
 
@@ -346,7 +330,6 @@ public class RSAAlgorithmTest {
         assertThat(jwtSignature, is(expectedSignature));
         JWT jwt = JWT.require(algorithmVerify).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithmVerify.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -364,7 +347,6 @@ public class RSAAlgorithmTest {
         assertThat(jwtSignature, is(expectedSignature));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -384,7 +366,6 @@ public class RSAAlgorithmTest {
         assertThat(signatureBytes, is(notNullValue()));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -427,7 +408,6 @@ public class RSAAlgorithmTest {
         assertThat(jwtSignature, is(expectedSignature));
         JWT jwt = JWT.require(algorithmVerify).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithmVerify.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -445,7 +425,6 @@ public class RSAAlgorithmTest {
         assertThat(jwtSignature, is(expectedSignature));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -465,7 +444,6 @@ public class RSAAlgorithmTest {
         assertThat(signatureBytes, is(notNullValue()));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -508,7 +486,6 @@ public class RSAAlgorithmTest {
         assertThat(jwtSignature, is(expectedSignature));
         JWT jwt = JWT.require(algorithmVerify).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithmVerify.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -526,7 +503,6 @@ public class RSAAlgorithmTest {
         assertThat(jwtSignature, is(expectedSignature));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -546,7 +522,6 @@ public class RSAAlgorithmTest {
         assertThat(signatureBytes, is(notNullValue()));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test

@@ -21,6 +21,7 @@ package com.auth0.jwt.jwts;
 
 import com.auth0.jwt.ClockImpl;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.GoogleVerification;
 import com.auth0.jwt.interfaces.Verification;
@@ -56,7 +57,7 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
      */
     @Override
     public GoogleVerification withPicture(String picture) {
-        requireClaim("picture", picture);
+        requireClaim(Claims.PICTURE, picture);
         return this;
     }
 
@@ -68,7 +69,7 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
      */
     @Override
     public GoogleVerification withEmail(String email) {
-        requireClaim("email", email);
+        requireClaim(Claims.EMAIL, email);
         return this;
     }
 
@@ -80,13 +81,13 @@ public class GoogleJWT extends JWT.BaseVerification implements GoogleVerificatio
      */
     @Override
     public GoogleVerification withName(String name) {
-        requireClaim("name", name);
+        requireClaim(Claims.NAME, name);
         return this;
     }
 
     @Override
     public Verification createVerifierForExtended(String picture, String email, List<String> issuer, List<String> audience, String name, long nbf, long expLeeway, long iatLeeway) {
-        throw new UnsupportedOperationException("you shouldn't be calling this method");
+        throw new UnsupportedOperationException("this method has not been implemented");
     }
 
     /**

@@ -21,25 +21,24 @@ package com.auth0.jwt.creators;
 
 import static com.auth0.jwt.TimeUtil.generateRandomExpDateInFuture;
 import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertTrue;
+
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.creators.GoogleJwtCreator;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.GoogleVerification;
 import com.auth0.jwt.jwts.GoogleJWT;
 import com.auth0.jwt.jwts.JWT;
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertTrue;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 public class GoogleJwtCreatorTest {
 
@@ -118,7 +117,7 @@ public class GoogleJwtCreatorTest {
     @Test
     public void testGoogleJwtCreatorWhenCertainRequiredClaimIsntProvided() throws Exception {
         thrown.expect(Exception.class);
-        thrown.expectMessage("Standard claim: Picture has not been set");
+        thrown.expectMessage("Standard claim: picture has not been set");
 
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = GoogleJwtCreator.build()
@@ -538,7 +537,7 @@ public class GoogleJwtCreatorTest {
     @Test
     public void testCreateVerifierForExtended() throws Exception{
         thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("you shouldn't be calling this method");
+        thrown.expectMessage("this method has not been implemented");
         GoogleVerification verification = GoogleJWT.require(Algorithm.HMAC256("secret"));
         verification.createVerifierForExtended(null, null, null, null, null, 1L, 1L, 1L);
     }
@@ -546,10 +545,10 @@ public class GoogleJwtCreatorTest {
     protected static void verifyClaims(Map<String,Claim> claims, Date exp) {
         assertTrue(claims.get(PICTURE).asString().equals(PICTURE));
         assertTrue(claims.get(EMAIL).asString().equals(EMAIL));
-        assertTrue(claims.get(PublicClaims.ISSUER).asList(String.class).get(0).equals("issuer"));
-        assertTrue(claims.get(PublicClaims.SUBJECT).asList(String.class).get(0).equals("subject"));
-        assertTrue(claims.get(PublicClaims.AUDIENCE).asString().equals("audience"));
-        assertTrue(claims.get(PublicClaims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
+        assertTrue(claims.get(Claims.ISSUER).asString().equals("issuer"));
+        assertTrue(claims.get(Claims.SUBJECT).asString().equals("subject"));
+        assertTrue(claims.get(Claims.AUDIENCE).asString().equals("audience"));
+        assertTrue(claims.get(Claims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
         assertTrue(claims.get(NAME).asString().equals(NAME));
     }
 }

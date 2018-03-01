@@ -43,7 +43,7 @@ public class PayloadSerializer extends StdSerializer<ClaimsHolder> {
         HashMap<Object, Object> safePayload = new HashMap<>();
         for (Map.Entry<String, Object> e : holder.getClaims().entrySet()) {
             switch (e.getKey()) {
-                case PublicClaims.AUDIENCE:
+                case Claims.AUDIENCE:
                     if (e.getValue() instanceof String) {
                         safePayload.put(e.getKey(), e.getValue());
                         break;
@@ -55,9 +55,9 @@ public class PayloadSerializer extends StdSerializer<ClaimsHolder> {
                         safePayload.put(e.getKey(), audArray);
                     }
                     break;
-                case PublicClaims.EXPIRES_AT:
-                case PublicClaims.ISSUED_AT:
-                case PublicClaims.NOT_BEFORE:
+                case Claims.EXPIRES_AT:
+                case Claims.ISSUED_AT:
+                case Claims.NOT_BEFORE:
                     safePayload.put(e.getKey(), dateToSeconds((Date) e.getValue()));
                     break;
                 default:

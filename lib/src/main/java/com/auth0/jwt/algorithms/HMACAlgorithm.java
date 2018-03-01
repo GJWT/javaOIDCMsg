@@ -20,22 +20,18 @@
 package com.auth0.jwt.algorithms;
 
 import com.auth0.jwt.creators.EncodeType;
-import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.binary.StringUtils;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 class HMACAlgorithm extends Algorithm {
 
@@ -76,12 +72,12 @@ class HMACAlgorithm extends Algorithm {
         String urlDecoded = null;
         switch (encodeType) {
             case Base16:
-                urlDecoded = URLDecoder.decode(signature, "UTF-8");
+                urlDecoded = URLDecoder.decode(signature, StandardCharsets.UTF_8.name());
                 signatureBytes = Hex.decodeHex(urlDecoded);
                 break;
             case Base32:
                 Base32 base32 = new Base32();
-                urlDecoded = URLDecoder.decode(signature, "UTF-8");
+                urlDecoded = URLDecoder.decode(signature, StandardCharsets.UTF_8.name());
                 signatureBytes = base32.decode(urlDecoded);
                 break;
             case Base64:
@@ -97,6 +93,11 @@ class HMACAlgorithm extends Algorithm {
         } catch (IllegalStateException | InvalidKeyException | NoSuchAlgorithmException e) {
             throw new SignatureVerificationException(this, e);
         }
+    }
+
+    @Override
+    public void verifyWithX509(DecodedJWT jwt, String jwksFile, String pemFile) throws Exception {
+        throw new UnsupportedOperationException("X509 is not supported for HMAC algorithm");
     }
 
     @Override

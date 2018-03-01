@@ -19,13 +19,36 @@
 
 package com.auth0.jwt.algorithms;
 
-import com.auth0.jwt.creators.EncodeType;
+import static com.auth0.jwt.PemUtils.readPrivateKeyFromFile;
+import static com.auth0.jwt.PemUtils.readPublicKeyFromFile;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.jwts.JWT;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.security.interfaces.ECKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.util.Arrays;
 import org.apache.commons.codec.binary.Base64;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsIn;
@@ -33,24 +56,6 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.security.interfaces.ECKey;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.util.Arrays;
-
-import static com.auth0.jwt.PemUtils.readPrivateKeyFromFile;
-import static com.auth0.jwt.PemUtils.readPublicKeyFromFile;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @SuppressWarnings("deprecation")
 public class ECDSAAlgorithmTest {
@@ -85,7 +90,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA256(key);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -100,7 +104,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA256(key);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -109,7 +112,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA256((ECPublicKey) readPublicKeyFromFile(PUBLIC_KEY_FILE_256, "EC"), (ECPrivateKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE_256, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -123,7 +125,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA256((ECPublicKey) readPublicKeyFromFile(PUBLIC_KEY_FILE_256, "EC"), (ECPrivateKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE_256, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -135,7 +136,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA256(provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -150,7 +150,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA256(provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -161,7 +160,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA256((ECKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE_256, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -174,7 +172,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA256((ECKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE_256, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -191,7 +188,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA256((ECKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE_256, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -206,7 +202,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA256((ECKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE_256, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -222,7 +217,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA256((ECKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE_256, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -232,7 +226,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA384(key);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -247,7 +240,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA384(key);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -256,7 +248,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA384((ECPublicKey) readPublicKeyFromFile(PUBLIC_KEY_FILE_384, "EC"), (ECPrivateKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE_384, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -270,7 +261,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA384((ECPublicKey) readPublicKeyFromFile(PUBLIC_KEY_FILE_384, "EC"), (ECPrivateKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE_384, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -282,7 +272,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA384(provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -297,7 +286,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA384(provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -308,7 +296,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA384((ECKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE_384, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -321,7 +308,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA384((ECKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE_384, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -336,7 +322,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA384((ECKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE_384, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -351,7 +336,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA384((ECKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE_384, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -367,7 +351,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA384((ECKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE_384, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -377,7 +360,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA512(key);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -392,7 +374,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA512(key);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -401,7 +382,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA512((ECPublicKey) readPublicKeyFromFile(PUBLIC_KEY_FILE_512, "EC"), (ECPrivateKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE_512, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -415,7 +395,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA512((ECPublicKey) readPublicKeyFromFile(PUBLIC_KEY_FILE_512, "EC"), (ECPrivateKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE_512, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -427,7 +406,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA512(provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -442,7 +420,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA512(provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -453,7 +430,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA512((ECKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE_512, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -466,7 +442,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA512((ECKey) readPrivateKeyFromFile(PRIVATE_KEY_FILE_512, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -481,7 +456,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA512((ECKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE_512, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -496,7 +470,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA512((ECKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE_512, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -512,7 +485,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = Algorithm.ECDSA512((ECKey) readPublicKeyFromFile(INVALID_PUBLIC_KEY_FILE_512, "EC"));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -533,7 +505,6 @@ public class ECDSAAlgorithmTest {
         Algorithm algorithm = new ECDSAAlgorithm("ES256", "SHA256withECDSA", 128, provider);
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -552,7 +523,6 @@ public class ECDSAAlgorithmTest {
         String token  = "eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJhdXRoMCJ9.4iVk3-Y0v4RT4_9IaQlp-8dZ_4fsTzIylgrPTDLrEvTHBTyVS3tgPbr2_IZfLETtiKRqCg0aQ5sh9eIsTTwB1g";
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -571,7 +541,6 @@ public class ECDSAAlgorithmTest {
         String token  = "eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJhdXRoMCJ9.4iVk3-Y0v4RT4_9IaQlp-8dZ_4fsTzIylgrPTDLrEvTHBTyVS3tgPbr2_IZfLETtiKRqCg0aQ5sh9eIsTTwB1g";
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -590,7 +559,6 @@ public class ECDSAAlgorithmTest {
         String token  = "eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJhdXRoMCJ9.4iVk3-Y0v4RT4_9IaQlp-8dZ_4fsTzIylgrPTDLrEvTHBTyVS3tgPbr2_IZfLETtiKRqCg0aQ5sh9eIsTTwB1g";
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     //Sign
@@ -612,7 +580,6 @@ public class ECDSAAlgorithmTest {
         assertThat(signatureBytes, is(notNullValue()));
         JWT jwt = JWT.require(algorithmVerify).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithmVerify.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -627,7 +594,6 @@ public class ECDSAAlgorithmTest {
         assertThat(signatureBytes, is(notNullValue()));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -647,7 +613,6 @@ public class ECDSAAlgorithmTest {
         assertThat(signatureBytes, is(notNullValue()));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -687,7 +652,6 @@ public class ECDSAAlgorithmTest {
         assertThat(signatureBytes, is(notNullValue()));
         JWT jwt = JWT.require(algorithmVerify).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithmVerify.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -702,7 +666,6 @@ public class ECDSAAlgorithmTest {
         assertThat(signatureBytes, is(notNullValue()));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -722,7 +685,6 @@ public class ECDSAAlgorithmTest {
         assertThat(signatureBytes, is(notNullValue()));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -762,7 +724,6 @@ public class ECDSAAlgorithmTest {
         assertThat(signatureBytes, is(notNullValue()));
         JWT jwt = JWT.require(algorithmVerify).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithmVerify.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -777,7 +738,6 @@ public class ECDSAAlgorithmTest {
         assertThat(signatureBytes, is(notNullValue()));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
 
@@ -798,7 +758,6 @@ public class ECDSAAlgorithmTest {
         assertThat(signatureBytes, is(notNullValue()));
         JWT jwt = JWT.require(algorithm).withIssuer("auth0").build();
         DecodedJWT decoded = jwt.decode(token);
-        algorithm.verify(decoded, EncodeType.Base64);
     }
 
     @Test
@@ -965,7 +924,6 @@ public class ECDSAAlgorithmTest {
             String token  = content256 + "." + signature256;
             JWT jwt = JWT.require(algorithm256).withIssuer("auth0").build();
             DecodedJWT decoded = jwt.decode(token);
-            algorithm256.verify(decoded, EncodeType.Base64);
         }
     }
 
@@ -981,7 +939,6 @@ public class ECDSAAlgorithmTest {
             String token  = content384 + "." + signature384;
             JWT jwt = JWT.require(algorithm384).withIssuer("auth0").build();
             DecodedJWT decoded = jwt.decode(token);
-            algorithm384.verify(decoded, EncodeType.Base64);
         }
     }
 
@@ -997,7 +954,6 @@ public class ECDSAAlgorithmTest {
             String token  = content512 + "." + signature512;
             JWT jwt = JWT.require(algorithm512).withIssuer("auth0").build();
             DecodedJWT decoded = jwt.decode(token);
-            algorithm512.verify(decoded, EncodeType.Base64);
         }
     }
 

@@ -19,26 +19,31 @@
 
 package com.auth0.jwt;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertTrue;
+
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.jwts.JWT;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.hamcrest.collection.IsCollectionWithSize;
 import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Assert;
-import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
 public class JWTDecoderTest {
 
@@ -48,7 +53,7 @@ public class JWTDecoderTest {
     @Test
     public void getSubject() throws Exception {
         String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ";
-        JWT jwt = JWT.require(Algorithm.HMAC256("secret")).withNonStandardClaim("admin", true).withNonStandardClaim("name", "John Doe").build();
+        JWT jwt = JWT.require(Algorithm.HMAC256("secret")).withNonStandardClaim("admin", true).withNonStandardClaim(Claims.NAME, "John Doe").build();
         DecodedJWT decodedJWT = jwt.decode(token);
         assertThat(decodedJWT.getSubject(), is(notNullValue()));
         assertTrue(decodedJWT.getSubject().contains("1234567890"));
@@ -59,7 +64,7 @@ public class JWTDecoderTest {
     public void shouldThrowIfLessThan3Parts() throws Exception {
         exception.expect(JWTDecodeException.class);
         exception.expectMessage("The token was expected to have 3 parts, but got 2.");
-        JWT jwt = JWT.require(Algorithm.HMAC256("secret")).withNonStandardClaim("admin", true).withNonStandardClaim("name", "John Doe").build();
+        JWT jwt = JWT.require(Algorithm.HMAC256("secret")).withNonStandardClaim("admin", true).withNonStandardClaim(Claims.NAME, "John Doe").build();
         DecodedJWT decodedJWT = jwt.decode("two.parts");
     }
 
@@ -67,7 +72,7 @@ public class JWTDecoderTest {
     public void shouldThrowIfMoreThan3Parts() throws Exception {
         exception.expect(JWTDecodeException.class);
         exception.expectMessage("The token was expected to have 3 parts, but got 4.");
-        JWT jwt = JWT.require(Algorithm.HMAC256("secret")).withNonStandardClaim("admin", true).withNonStandardClaim("name", "John Doe").build();
+        JWT jwt = JWT.require(Algorithm.HMAC256("secret")).withNonStandardClaim("admin", true).withNonStandardClaim(Claims.NAME, "John Doe").build();
         DecodedJWT decodedJWT = jwt.decode("this.has.four.parts");
     }
 
@@ -128,7 +133,7 @@ public class JWTDecoderTest {
         assertThat(decodedJWT.getSignature(), is("XmNK3GpH3Ys_7wsYBfq4C3M6goz71I7dTgUkuIa5lyQ"));
     }
 
-    // Public PublicClaims
+    // Public Claims
 
     @Test
     public void shouldGetIssuer() throws Exception {
@@ -243,7 +248,7 @@ public class JWTDecoderTest {
         assertThat(decodedJWT.getAlgorithm(), is("HS256"));
     }
 
-    //Private PublicClaims
+    //Private Claims
 
 
     @Test
@@ -273,7 +278,7 @@ public class JWTDecoderTest {
         JWT jwt = JWT.require(Algorithm.HMAC256("secret")).build();
         DecodedJWT decodedJWT = jwt.decode(token);
         Assert.assertThat(decodedJWT, is(notNullValue()));
-        Assert.assertThat(decodedJWT.getClaim("name").asInt(), is(123));
+        Assert.assertThat(decodedJWT.getClaim(Claims.NAME).asInt(), is(123));
     }
 
     @Test
@@ -282,7 +287,7 @@ public class JWTDecoderTest {
         JWT jwt = JWT.require(Algorithm.HMAC256("secret")).build();
         DecodedJWT decodedJWT = jwt.decode(token);
         Assert.assertThat(decodedJWT, is(notNullValue()));
-        Assert.assertThat(decodedJWT.getClaim("name").asDouble(), is(23.45));
+        Assert.assertThat(decodedJWT.getClaim(Claims.NAME).asDouble(), is(23.45));
     }
 
     @Test
@@ -291,7 +296,7 @@ public class JWTDecoderTest {
         JWT jwt = JWT.require(Algorithm.HMAC256("secret")).build();
         DecodedJWT decodedJWT = jwt.decode(token);
         Assert.assertThat(decodedJWT, is(notNullValue()));
-        Assert.assertThat(decodedJWT.getClaim("name").asBoolean(), is(true));
+        Assert.assertThat(decodedJWT.getClaim(Claims.NAME).asBoolean(), is(true));
     }
 
     @Test
@@ -301,7 +306,7 @@ public class JWTDecoderTest {
         DecodedJWT decodedJWT = jwt.decode(token);
         Date date = new Date(1478891521000L);
         Assert.assertThat(decodedJWT, is(notNullValue()));
-        Assert.assertThat(decodedJWT.getClaim("name").asDate().getTime(), is(date.getTime()));
+        Assert.assertThat(decodedJWT.getClaim(Claims.NAME).asDate().getTime(), is(date.getTime()));
     }
 
     @Test
@@ -310,7 +315,7 @@ public class JWTDecoderTest {
         JWT jwt = JWT.require(Algorithm.HMAC256("secret")).build();
         DecodedJWT decodedJWT = jwt.decode(token);
         Assert.assertThat(decodedJWT, is(notNullValue()));
-        Assert.assertThat(decodedJWT.getClaim("name").asArray(String.class), arrayContaining("text", "123", "true"));
+        Assert.assertThat(decodedJWT.getClaim(Claims.NAME).asArray(String.class), arrayContaining("text", "123", "true"));
     }
 
     @Test
@@ -319,7 +324,7 @@ public class JWTDecoderTest {
         JWT jwt = JWT.require(Algorithm.HMAC256("secret")).build();
         DecodedJWT decodedJWT = jwt.decode(token);
         Assert.assertThat(decodedJWT, is(notNullValue()));
-        Assert.assertThat(decodedJWT.getClaim("name").asArray(Integer.class), arrayContaining(1, 2, 3));
+        Assert.assertThat(decodedJWT.getClaim(Claims.NAME).asArray(Integer.class), arrayContaining(1, 2, 3));
     }
 
     @Test
@@ -328,7 +333,7 @@ public class JWTDecoderTest {
         JWT jwt = JWT.require(Algorithm.HMAC256("secret")).build();
         DecodedJWT decodedJWT = jwt.decode(token);
         Assert.assertThat(decodedJWT, is(notNullValue()));
-        Map<String, Object> map = decodedJWT.getClaim("name").asMap();
+        Map<String, Object> map = decodedJWT.getClaim(Claims.NAME).asMap();
         Assert.assertThat(map, hasEntry("string", (Object) "value"));
         Assert.assertThat(map, hasEntry("number", (Object) 1));
         Assert.assertThat(map, hasEntry("boolean", (Object) true));
@@ -346,7 +351,7 @@ public class JWTDecoderTest {
         assertThat(claims.get("exp"), is(notNullValue()));
         assertThat(claims.get("iat"), is(notNullValue()));
         assertThat(claims.get("nbf"), is(notNullValue()));
-        assertThat(claims.get("jti"), is(notNullValue()));
+        assertThat(claims.get(Claims.JWT_ID), is(notNullValue()));
         assertThat(claims.get("aud"), is(notNullValue()));
         assertThat(claims.get("sub"), is(notNullValue()));
         assertThat(claims.get("iss"), is(notNullValue()));

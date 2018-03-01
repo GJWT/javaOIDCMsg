@@ -19,22 +19,23 @@
 
 package com.auth0.jwt.impl;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
 import com.auth0.jwt.UserPojo;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import org.junit.Before;
+import org.junit.Test;
 
 public class PayloadSerializerTest {
 
@@ -157,7 +158,7 @@ public class PayloadSerializerTest {
 
     @Test
     public void shouldSerializeStrings() throws Exception {
-        ClaimsHolder holder = holderFor("name", "Auth0 Inc");
+        ClaimsHolder holder = holderFor(Claims.NAME, "Auth0 Inc");
         serializer.serialize(holder, jsonGenerator, serializerProvider);
         jsonGenerator.flush();
 

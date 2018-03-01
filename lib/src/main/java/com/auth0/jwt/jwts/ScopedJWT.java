@@ -21,12 +21,13 @@ package com.auth0.jwt.jwts;
 
 import com.auth0.jwt.ClockImpl;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.Verification;
 
 import java.util.List;
 
-public class ScopedJWT extends JWT.BaseVerification implements Verification{
+public class ScopedJWT extends JWT.BaseVerification {
 
     ScopedJWT(Algorithm algorithm) throws IllegalArgumentException {
         super(algorithm);
@@ -52,7 +53,7 @@ public class ScopedJWT extends JWT.BaseVerification implements Verification{
      * @return this same Verification instance.
      */
     public Verification withScope(String scope) {
-        requireClaim("scope", scope);
+        requireClaim(Claims.SCOPE, scope);
         return this;
     }
 

@@ -17,24 +17,28 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package com.auth0.jwt.impl;
+package com.auth0.jwt.utils;
 
+import com.auth0.jwt.exceptions.JWTDecodeException;
 
-public interface PublicClaims {
+public abstract class TokenUtils {
 
-    //Header
-    String ALGORITHM = "alg";
-    String CONTENT_TYPE = "cty";
-    String TYPE = "typ";
-    String KEY_ID = "kid";
-
-    //Payload
-    String ISSUER = "iss";
-    String SUBJECT = "sub";
-    String EXPIRES_AT = "exp";
-    String NOT_BEFORE = "nbf";
-    String ISSUED_AT = "iat";
-    String JWT_ID = "jti";
-    String AUDIENCE = "aud";
-
+    /**
+     * Splits the given token on the "." chars into a String array with 3 parts.
+     *
+     * @param token the string to split.
+     * @return the array representing the 3 parts of the token.
+     * @throws JWTDecodeException if the Token doesn't have 3 parts.
+     */
+    public static String[] splitToken(String token) throws JWTDecodeException {
+        String[] parts = token.split("\\.");
+        if (parts.length == 2 && token.endsWith(".")) {
+            //Tokens with alg='none' have empty String as Signature.
+            parts = new String[]{parts[0], parts[1], ""};
+        }
+        if (parts.length != 3) {
+            throw new JWTDecodeException(String.format("The token was expected to have 3 parts, but got %s.", parts.length));
+        }
+        return parts;
+    }
 }

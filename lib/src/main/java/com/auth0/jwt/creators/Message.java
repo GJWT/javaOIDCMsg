@@ -22,22 +22,22 @@ package com.auth0.jwt.creators;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Message {
 
     public String toUrlEncoded(String json) throws UnsupportedEncodingException {
-        return URLEncoder.encode(json, "UTF-8");
+        return URLEncoder.encode(json, StandardCharsets.UTF_8.name());
     }
 
     public String toUrlDecoded(String urlEncoded) throws UnsupportedEncodingException {
-        return URLDecoder.decode(urlEncoded, "UTF-8");
+        return URLDecoder.decode(urlEncoded, StandardCharsets.UTF_8.name());
     }
 
     public String toJSON(HashMap<String,Object> hashMap) {

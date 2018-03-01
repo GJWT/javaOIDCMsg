@@ -25,9 +25,14 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
-
 import java.io.UnsupportedEncodingException;
-import java.security.interfaces.*;
+import java.security.interfaces.ECKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+
 
 /**
  * The Algorithm class represents an algorithm to be used in the Signing or Verification process of a Token.
@@ -384,6 +389,15 @@ public abstract class Algorithm {
      * @throws SignatureVerificationException if the Token's Signature is invalid, meaning that it doesn't match the signatureBytes, or if the Key is invalid.
      */
     public abstract void verify(DecodedJWT jwt, EncodeType encodeType) throws Exception;
+
+    /**
+     * Verify the given token including x509 functionality
+     * @param jwt the already decoded JWT that it's going to be verified.
+     * @param jwksFile
+     * @param pemFile
+     * @throws Exception
+     */
+    public abstract void verifyWithX509(DecodedJWT jwt, String jwksFile, String pemFile) throws Exception;
 
     /**
      * Sign the given content using this Algorithm instance.

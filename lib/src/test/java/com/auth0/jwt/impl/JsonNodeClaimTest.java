@@ -19,6 +19,21 @@
 
 package com.auth0.jwt.impl;
 
+import static com.auth0.jwt.impl.JWTParser.getDefaultObjectMapper;
+import static com.auth0.jwt.impl.JsonNodeClaim.claimFromNode;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 import com.auth0.jwt.UserPojo;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.Claim;
@@ -30,23 +45,19 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentMatchers;
-
-import java.io.IOException;
-import java.util.*;
-
-import static com.auth0.jwt.impl.JWTParser.getDefaultObjectMapper;
-import static com.auth0.jwt.impl.JsonNodeClaim.claimFromNode;
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.core.IsNull.notNullValue;
-import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
 
 public class JsonNodeClaimTest {
 
@@ -328,7 +339,7 @@ public class JsonNodeClaimTest {
 
         assertThat(claim, is(notNullValue()));
         Map map = claim.as(Map.class);
-        assertThat(((Map<String, Object>) map.get("key")), hasEntry("name", (Object) "john"));
+        assertThat(((Map<String, Object>) map.get("key")), hasEntry(Claims.NAME, (Object) "john"));
         assertThat(((Map<String, Object>) map.get("key")), hasEntry("id", (Object) 123));
     }
 

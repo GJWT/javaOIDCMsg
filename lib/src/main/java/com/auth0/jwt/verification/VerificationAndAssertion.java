@@ -23,7 +23,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -56,27 +56,26 @@ public class VerificationAndAssertion {
     public static void verifyClaims(Clock clock, DecodedJWT jwt, Map<String, Object> claims) throws TokenExpiredException, InvalidClaimException {
         for (Map.Entry<String, Object> entry : claims.entrySet()) {
             switch (entry.getKey()) {
-                case PublicClaims.AUDIENCE:
-                    //noinspection unchecked
-                    VerificationAndAssertion.assertValidAudienceClaim(jwt.getAudience(), (List<String>) entry.getValue());
+                case Claims.AUDIENCE:
+                    assertValidAudienceClaim(jwt.getAudience(), (List<String>) entry.getValue());
                     break;
-                case PublicClaims.EXPIRES_AT:
+                case Claims.EXPIRES_AT:
                     assertValidDateClaim(clock, jwt.getExpiresAt(), (Long) entry.getValue(), true);
                     break;
-                case PublicClaims.ISSUED_AT:
+                case Claims.ISSUED_AT:
                     assertValidDateClaim(clock, jwt.getIssuedAt(), (Long) entry.getValue(), false);
                     break;
-                case PublicClaims.NOT_BEFORE:
+                case Claims.NOT_BEFORE:
                     assertValidDateClaim(clock, jwt.getNotBefore(), (Long) entry.getValue(), false);
                     break;
-                case PublicClaims.ISSUER:
-                    VerificationAndAssertion.assertValidIssuerClaim(jwt.getIssuer(), (List<String>) entry.getValue());
+                case Claims.ISSUER:
+                    assertValidIssuerClaim(jwt.getIssuer(), (List<String>) entry.getValue());
                     break;
-                case PublicClaims.JWT_ID:
-                    VerificationAndAssertion.assertValidStringClaim(entry.getKey(), jwt.getId(), (String) entry.getValue());
+                case Claims.JWT_ID:
+                    assertValidStringClaim(entry.getKey(), jwt.getId(), (String) entry.getValue());
                     break;
                 default:
-                    VerificationAndAssertion.assertValidClaim(jwt.getClaim(entry.getKey()), entry.getKey(), entry.getValue());
+                    assertValidClaim(jwt.getClaim(entry.getKey()), entry.getKey(), entry.getValue());
                     break;
             }
         }
@@ -137,14 +136,14 @@ public class VerificationAndAssertion {
         }
     }
 
-    private static void assertValidAudienceClaim(List<String> audience, List<String> value) {
-        if (audience == null || !audience.containsAll(value) || audience.size() != value.size()) {
+    private static void assertValidAudienceClaim(List<String> actual, List<String> expected) {
+        if (actual == null || !actual.containsAll(expected)) {
             throw new InvalidClaimException("The Claim 'aud' value doesn't contain the required audience.");
         }
     }
 
-    private static void assertValidIssuerClaim(List<String> issuer, List<String> value) {
-        if (issuer == null || !issuer.containsAll(value) || issuer.size() != value.size()) {
+    private static void assertValidIssuerClaim(List<String> actual, List<String> expected) {
+        if (actual == null || !actual.containsAll(expected)) {
             throw new InvalidClaimException("The Claim 'iss' value doesn't match the required one.");
         }
     }

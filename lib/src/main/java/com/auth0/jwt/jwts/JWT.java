@@ -20,18 +20,25 @@
 package com.auth0.jwt.jwts;
 
 import com.auth0.jwt.ClockImpl;
-import com.auth0.jwt.creators.EncodeType;
-import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.JWTDecoder;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.*;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.creators.EncodeType;
+import com.auth0.jwt.creators.JWTCreator;
+import com.auth0.jwt.exceptions.AlgorithmMismatchException;
+import com.auth0.jwt.exceptions.InvalidClaimException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Clock;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
 import com.auth0.jwt.verification.VerificationAndAssertion;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
 public class JWT {
@@ -72,6 +79,28 @@ public class JWT {
      * Note that this method <b>doesn't verify the token's signature!</b> Use it only if you trust the token or you already verified it.
      *
      * @param token with jwt format as string.
+     * @param jwksFile
+     * @param pemFile
+     * @return a decoded JWT.
+     * @throws AlgorithmMismatchException     if the algorithm stated in the token's header it's not equal to the one defined in the {@link JWT}.
+     * @throws SignatureVerificationException if the signature is invalid.
+     * @throws TokenExpiredException          if the token has expired.
+     * @throws InvalidClaimException          if a claim contained a different value than the expected one.
+     */
+    public DecodedJWT decodeWithX509(String token, String jwksFile, String pemFile) throws Exception {
+        DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base64);
+        VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
+        algorithm.verifyWithX509(jwt, jwksFile, pemFile);
+        VerificationAndAssertion.verifyClaims(clock, jwt, claims);
+        return jwt;
+    }
+
+    /**
+     * Convert the given token to a DecodedJWT
+     * <p>
+     * Note that this method <b>doesn't verify the token's signature!</b> Use it only if you trust the token or you already verified it.
+     *
+     * @param token with jwt format as string.
      * @return a decoded JWT.
      * @throws AlgorithmMismatchException     if the algorithm stated in the token's header it's not equal to the one defined in the {@link JWT}.
      * @throws SignatureVerificationException if the signature is invalid.
@@ -82,6 +111,28 @@ public class JWT {
         DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base16);
         VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
         algorithm.verify(jwt, EncodeType.Base16);
+        VerificationAndAssertion.verifyClaims(clock, jwt, claims);
+        return jwt;
+    }
+
+    /**
+     * Convert the given token to a DecodedJWT
+     * <p>
+     * Note that this method <b>doesn't verify the token's signature!</b> Use it only if you trust the token or you already verified it.
+     *
+     * @param token with jwt format as string.
+     * @param jwksFile
+     * @param pemFile
+     * @return a decoded JWT.
+     * @throws AlgorithmMismatchException     if the algorithm stated in the token's header it's not equal to the one defined in the {@link JWT}.
+     * @throws SignatureVerificationException if the signature is invalid.
+     * @throws TokenExpiredException          if the token has expired.
+     * @throws InvalidClaimException          if a claim contained a different value than the expected one.
+     */
+    public DecodedJWT decode16BytesWithX509(String token, String jwksFile, String pemFile) throws Exception {
+        DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base16);
+        VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
+        algorithm.verifyWithX509(jwt, jwksFile, pemFile);
         VerificationAndAssertion.verifyClaims(clock, jwt, claims);
         return jwt;
     }
@@ -107,6 +158,28 @@ public class JWT {
     }
 
     /**
+     * Convert the given token to a DecodedJWT
+     * <p>
+     * Note that this method <b>doesn't verify the token's signature!</b> Use it only if you trust the token or you already verified it.
+     *
+     * @param token with jwt format as string.
+     * @param jwksFile
+     * @param pemFile
+     * @return a decoded JWT.
+     * @throws AlgorithmMismatchException     if the algorithm stated in the token's header it's not equal to the one defined in the {@link JWT}.
+     * @throws SignatureVerificationException if the signature is invalid.
+     * @throws TokenExpiredException          if the token has expired.
+     * @throws InvalidClaimException          if a claim contained a different value than the expected one.
+     */
+    public DecodedJWT decode32BytesWithX509(String token, String jwksFile, String pemFile) throws Exception {
+        DecodedJWT jwt = new JWTDecoder(token, EncodeType.Base32);
+        VerificationAndAssertion.verifyAlgorithm(jwt, algorithm);
+        algorithm.verifyWithX509(jwt, jwksFile, pemFile);
+        VerificationAndAssertion.verifyClaims(clock, jwt, claims);
+        return jwt;
+    }
+
+    /**
      * Returns a {Verification} to be used to validate token signature.
      *
      * @param algorithm that will be used to verify the token's signature.
@@ -114,7 +187,7 @@ public class JWT {
      * @throws IllegalArgumentException if the provided algorithm is null.
      */
     public static Verification require(Algorithm algorithm) {
-        return JWT.init(algorithm);
+        return new JWT.BaseVerification(algorithm);
     }
 
     /**
@@ -127,17 +200,6 @@ public class JWT {
     }
 
     //----------------this is from JWTVerifier--------
-
-    /**
-     * Initialize a Verification instance using the given Algorithm.
-     *
-     * @param algorithm the Algorithm to use on the JWT verification.
-     * @return a JWT.BaseVerification instance to configure.
-     * @throws IllegalArgumentException if the provided algorithm is null.
-     */
-    static Verification init(Algorithm algorithm) throws IllegalArgumentException {
-        return new JWT.BaseVerification(algorithm);
-    }
 
     /**
      * The Verification class holds the Claims required by a JWT to be valid.
@@ -159,43 +221,43 @@ public class JWT {
 
         @Override
         public Verification withNbf(long nbf) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification createVerifierForRisc(String jti, List<String> issuer,
                                                   List<String> audience, long iatLeeway, long expLeeway, long nbf) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification createVerifierForScoped(String scope, List<String> issuer, List<String> audience, long expLeeway, long iatLeeway) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification createVerifierForImplicit(List<String> issuer, List<String> audience, long iatLeeway) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification createVerifierForFb(String userId, String appId) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification withUserId(String userId) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification withAppId(String appId) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         @Override
         public Verification createVerifierForAccess(List<String> issuer, List<String> audience, long expLeeway, long iatLeeway) {
-            throw new UnsupportedOperationException("you shouldn't be calling this method");
+            throw new UnsupportedOperationException("this method has not been implemented");
         }
 
         /**
@@ -207,7 +269,7 @@ public class JWT {
          */
         @Override
         public Verification withIssuer(String... issuer) {
-            requireClaim(PublicClaims.ISSUER, Arrays.asList(issuer));
+            requireClaim(Claims.ISSUER, Arrays.asList(issuer));
             return this;
         }
 
@@ -220,7 +282,7 @@ public class JWT {
          */
         @Override
         public Verification withSubject(String... subject) {
-            requireClaim(PublicClaims.SUBJECT, Arrays.asList(subject));
+            requireClaim(Claims.SUBJECT, Arrays.asList(subject));
             return this;
         }
 
@@ -233,7 +295,7 @@ public class JWT {
          */
         @Override
         public Verification withAudience(String... audience) {
-            requireClaim(PublicClaims.AUDIENCE, Arrays.asList(audience));
+            requireClaim(Claims.AUDIENCE, Arrays.asList(audience));
             return this;
         }
 
@@ -263,7 +325,7 @@ public class JWT {
         @Override
         public Verification acceptExpiresAt(long leeway) throws IllegalArgumentException {
             VerificationAndAssertion.assertPositive(leeway);
-            requireClaim(PublicClaims.EXPIRES_AT, leeway);
+            requireClaim(Claims.EXPIRES_AT, leeway);
             return this;
         }
 
@@ -278,7 +340,7 @@ public class JWT {
         @Override
         public Verification acceptNotBefore(long leeway) throws IllegalArgumentException {
             VerificationAndAssertion.assertPositive(leeway);
-            requireClaim(PublicClaims.NOT_BEFORE, leeway);
+            requireClaim(Claims.NOT_BEFORE, leeway);
             return this;
         }
 
@@ -293,7 +355,7 @@ public class JWT {
         @Override
         public Verification acceptIssuedAt(long leeway) throws IllegalArgumentException {
             VerificationAndAssertion.assertPositive(leeway);
-            requireClaim(PublicClaims.ISSUED_AT, leeway);
+            requireClaim(Claims.ISSUED_AT, leeway);
             return this;
         }
 
@@ -305,7 +367,7 @@ public class JWT {
          */
         @Override
         public Verification withJWTId(String jwtId) {
-            requireClaim(PublicClaims.JWT_ID, jwtId);
+            requireClaim(Claims.JWT_ID, jwtId);
             return this;
         }
 
@@ -452,14 +514,14 @@ public class JWT {
         }
 
         protected void addLeewayToDateClaims() {
-            if (!claims.containsKey(PublicClaims.EXPIRES_AT)) {
-                claims.put(PublicClaims.EXPIRES_AT, defaultLeeway);
+            if (!claims.containsKey(Claims.EXPIRES_AT)) {
+                claims.put(Claims.EXPIRES_AT, defaultLeeway);
             }
-            if (!claims.containsKey(PublicClaims.NOT_BEFORE)) {
-                claims.put(PublicClaims.NOT_BEFORE, defaultLeeway);
+            if (!claims.containsKey(Claims.NOT_BEFORE)) {
+                claims.put(Claims.NOT_BEFORE, defaultLeeway);
             }
-            if (!claims.containsKey(PublicClaims.ISSUED_AT)) {
-                claims.put(PublicClaims.ISSUED_AT, defaultLeeway);
+            if (!claims.containsKey(Claims.ISSUED_AT)) {
+                claims.put(Claims.ISSUED_AT, defaultLeeway);
             }
         }
 

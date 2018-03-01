@@ -22,26 +22,22 @@ package com.auth0.jwt.creators;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.impl.ClaimsHolder;
 import com.auth0.jwt.impl.PayloadSerializer;
-import com.auth0.jwt.impl.PublicClaims;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.apache.commons.codec.Encoder;
-import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.binary.StringUtils;
-
-import java.io.*;
-import java.net.URLDecoder;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 
 /**
  * The JWTCreator class holds the sign method to generate a complete JWT (with Signature) from a given Header and Payload content.
@@ -85,6 +81,7 @@ public final class JWTCreator {
         private final Map<String, Object> payloadClaims;
         private Map<String, Object> headerClaims;
         private boolean isNoneAlgorithmAllowed;
+        public static EncodeType encodeTypeStatic = null;
 
         Builder() {
             this.payloadClaims = new HashMap<>();
@@ -111,31 +108,29 @@ public final class JWTCreator {
          * @return this same Builder instance.
          */
         public Builder withKeyId(String keyId) {
-            this.headerClaims.put(PublicClaims.KEY_ID, keyId);
+            this.headerClaims.put(Claims.KEY_ID, keyId);
             return this;
         }
 
         /**
          * Add a specific Issuer ("iss") claim to the Payload.
-         * Allows for multiple issuers
          *
          * @param issuer the Issuer value.
          * @return this same Builder instance.
          */
-        public Builder withIssuer(String... issuer) {
-            addClaim(PublicClaims.ISSUER, issuer);
+        public Builder withIssuer(String issuer) {
+            addClaim(Claims.ISSUER, issuer);
             return this;
         }
 
         /**
          * Add a specific Subject ("sub") claim to the Payload.
-         * Allows for multiple subjects
          *
          * @param subject the Subject value.
          * @return this same Builder instance.
          */
-        public Builder withSubject(String... subject) {
-            addClaim(PublicClaims.SUBJECT, subject);
+        public Builder withSubject(String subject) {
+            addClaim(Claims.SUBJECT, subject);
             return this;
         }
 
@@ -147,7 +142,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          */
         public Builder withAudience(String... audience) {
-            addClaim(PublicClaims.AUDIENCE, audience);
+            addClaim(Claims.AUDIENCE, audience);
             return this;
         }
 
@@ -158,7 +153,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          */
         public Builder withExpiresAt(Date expiresAt) {
-            addClaim(PublicClaims.EXPIRES_AT, expiresAt);
+            addClaim(Claims.EXPIRES_AT, expiresAt);
             return this;
         }
 
@@ -169,7 +164,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          */
         public Builder withNotBefore(Date notBefore) {
-            addClaim(PublicClaims.NOT_BEFORE, notBefore);
+            addClaim(Claims.NOT_BEFORE, notBefore);
             return this;
         }
 
@@ -180,7 +175,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          */
         public Builder withIssuedAt(Date issuedAt) {
-            addClaim(PublicClaims.ISSUED_AT, issuedAt);
+            addClaim(Claims.ISSUED_AT, issuedAt);
             return this;
         }
 
@@ -191,7 +186,7 @@ public final class JWTCreator {
          * @return this same Builder instance.
          */
         public Builder withJWTId(String jwtId) {
-            addClaim(PublicClaims.JWT_ID, jwtId);
+            addClaim(Claims.JWT_ID, jwtId);
             return this;
         }
 
@@ -366,8 +361,8 @@ public final class JWTCreator {
             if(encodeType == null) {
                 throw new IllegalArgumentException("Encodetype cannot be null.");
             }
-            headerClaims.put(PublicClaims.ALGORITHM, algorithm.getName());
-            headerClaims.put(PublicClaims.TYPE, "JWT");
+            headerClaims.put(Claims.ALGORITHM, algorithm.getName());
+            headerClaims.put(Claims.TYPE, "JWT");
             String signingKeyId = algorithm.getSigningKeyId();
             if (signingKeyId != null) {
                 withKeyId(signingKeyId);
@@ -377,12 +372,15 @@ public final class JWTCreator {
             switch (encodeType) {
                 case Base16:
                     token = jwtCreator.signBase16Encoding();
+                    encodeTypeStatic = EncodeType.Base16;
                     break;
                 case Base32:
                     token = jwtCreator.signBase32Encoding();
+                    encodeTypeStatic = EncodeType.Base32;
                     break;
                 case Base64:
                     token = jwtCreator.defaultSign();
+                    encodeTypeStatic = EncodeType.Base64;
                     break;
             }
 
@@ -405,38 +403,38 @@ public final class JWTCreator {
     }
 
     private String signBase16Encoding() throws UnsupportedEncodingException {
-        String header = URLEncoder.encode(headerJson, "UTF-8");
-        String payload = URLEncoder.encode(payloadJson, "UTF-8");
+        String header = URLEncoder.encode(headerJson, StandardCharsets.UTF_8.name());
+        String payload = URLEncoder.encode(payloadJson, StandardCharsets.UTF_8.name());
 
-        byte[] bHeader = header.getBytes("UTF-8");
+        byte[] bHeader = header.getBytes(StandardCharsets.UTF_8.name());
         String encodedHeader = Hex.encodeHexString(bHeader);
 
-        byte[] bPayload = payload.getBytes("UTF-8");
+        byte[] bPayload = payload.getBytes(StandardCharsets.UTF_8.name());
         String encodedPayload = Hex.encodeHexString(bPayload);
 
         String content = String.format("%s.%s", encodedHeader, encodedPayload);
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
         String signature = Hex.encodeHexString(signatureBytes);
-        String signatureFinal = URLEncoder.encode(signature, "UTF-8");
+        String signatureFinal = URLEncoder.encode(signature, StandardCharsets.UTF_8.name());
 
         return String.format("%s.%s", content, signatureFinal);
     }
 
     private String signBase32Encoding() throws UnsupportedEncodingException{
         Base32 base32 = new Base32();
-        String header = URLEncoder.encode(headerJson, "UTF-8");
-        String payload = URLEncoder.encode(payloadJson, "UTF-8");
+        String header = URLEncoder.encode(headerJson, StandardCharsets.UTF_8.name());
+        String payload = URLEncoder.encode(payloadJson, StandardCharsets.UTF_8.name());
 
-        byte[] bHeader = header.getBytes("UTF-8");
+        byte[] bHeader = header.getBytes(StandardCharsets.UTF_8.name());
         String encodedHeader = base32.encodeAsString(bHeader);
 
-        byte[] bPayload = payload.getBytes("UTF-8");
+        byte[] bPayload = payload.getBytes(StandardCharsets.UTF_8.name());
         String encodedPayload = base32.encodeAsString(bPayload);
 
         String content = String.format("%s.%s", encodedHeader, encodedPayload);
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
         String signature = base32.encodeAsString(signatureBytes);
-        String signatureFinal = URLEncoder.encode(signature, "UTF-8");
+        String signatureFinal = URLEncoder.encode(signature, StandardCharsets.UTF_8.name());
 
         return String.format("%s.%s", content, signatureFinal);
     }
@@ -448,7 +446,6 @@ public final class JWTCreator {
 
         byte[] signatureBytes = algorithm.sign(content.getBytes(StandardCharsets.UTF_8));
         String signature = Base64.encodeBase64URLSafeString(signatureBytes);
-
         return String.format("%s.%s", content, signature);
     }
 }

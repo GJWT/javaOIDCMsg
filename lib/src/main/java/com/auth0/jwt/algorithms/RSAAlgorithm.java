@@ -19,22 +19,37 @@
 
 package com.auth0.jwt.algorithms;
 
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.creators.EncodeType;
+import com.auth0.jwt.creators.JWTCreator;
 import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
-import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
-
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
+import java.util.List;
+import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.util.io.pem.PemReader;
 
 class RSAAlgorithm extends Algorithm {
 
@@ -56,28 +71,32 @@ class RSAAlgorithm extends Algorithm {
     }
 
     @Override
-    public void verify(DecodedJWT jwt, EncodeType encodeType) throws Exception {
-        byte[] contentBytes = String.format("%s.%s", jwt.getHeader(), jwt.getPayload()).getBytes(StandardCharsets.UTF_8);
-        byte[] signatureBytes = null;
-        String signature = jwt.getSignature();
-        String urlDecoded = null;
-        switch (encodeType) {
-            case Base16:
-                urlDecoded = URLDecoder.decode(signature, "UTF-8");
-                signatureBytes = Hex.decodeHex(urlDecoded);
-                break;
-            case Base32:
-                Base32 base32 = new Base32();
-                urlDecoded = URLDecoder.decode(signature, "UTF-8");
-                signatureBytes = base32.decode(urlDecoded);
-                break;
-            case Base64:
-                signatureBytes = Base64.decodeBase64(signature);
-                break;
-        }
-
+    public void verifyWithX509(DecodedJWT jwt, String jwksFile, String pemFile) throws Exception {
+        List<byte[]> byteArrayList = fetchContentAndSignatureByteArrays(jwt, JWTCreator.Builder.encodeTypeStatic);
+        byte[] contentBytes = byteArrayList.get(0);
+        byte[] signatureBytes = byteArrayList.get(1);
         try {
-            RSAPublicKey publicKey = keyProvider.getPublicKeyById(jwt.getKeyId());
+            PublicKey publicKey;
+            if(jwksFile != null && !jwksFile.isEmpty() && jwksFile.endsWith(".json")) {
+                String kid = jwt.getKeyId();
+                JwkProvider provider = new UrlJwkProvider(new File(jwksFile).toURI().toURL());
+                Jwk jwk = provider.get(kid);
+                String cert = jwk.getCertificateChain().get(0);
+                try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream("./jwks.cert"), StandardCharsets.UTF_8.name()))) {
+                    writer.write("-----BEGIN CERTIFICATE-----");
+                    writer.append("\n" + cert + "\n");
+                    writer.append("-----END CERTIFICATE-----");
+                }
+
+                FileReader file = new FileReader(pemFile);
+                PemReader reader = new PemReader(file);
+                X509EncodedKeySpec caKeySpec = new X509EncodedKeySpec(reader.readPemObject().getContent());
+                KeyFactory kf = KeyFactory.getInstance("RSA");
+                publicKey = kf.generatePublic(caKeySpec);
+            } else {
+                throw new IllegalArgumentException("Not a proper jwks file");
+            }
             if (publicKey == null) {
                 throw new IllegalStateException("The given Public Key is null.");
             }
@@ -88,6 +107,48 @@ class RSAAlgorithm extends Algorithm {
         } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException | IllegalStateException e) {
             throw new SignatureVerificationException(this, e);
         }
+    }
+
+    @Override
+    public void verify(DecodedJWT jwt, EncodeType encodeType) throws Exception {
+        List<byte[]> byteArrayList = fetchContentAndSignatureByteArrays(jwt, encodeType);
+        byte[] contentBytes = byteArrayList.get(0);
+        byte[] signatureBytes = byteArrayList.get(1);
+        try {
+            PublicKey publicKey = keyProvider.getPublicKeyById(jwt.getKeyId());
+            if (publicKey == null) {
+                throw new IllegalStateException("The given Public Key is null.");
+            }
+            boolean valid = crypto.verifySignatureFor(getDescription(), publicKey, contentBytes, signatureBytes);
+            if (!valid) {
+                throw new SignatureVerificationException(this);
+            }
+        } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException | IllegalStateException e) {
+            throw new SignatureVerificationException(this, e);
+        }
+    }
+
+    private List<byte[]> fetchContentAndSignatureByteArrays(DecodedJWT jwt, EncodeType encodeType) throws Exception{
+        byte[] contentBytes = String.format("%s.%s", jwt.getHeader(), jwt.getPayload()).getBytes(StandardCharsets.UTF_8.name());
+        byte[] signatureBytes = null;
+        String signature = jwt.getSignature();
+        String urlDecoded = null;
+        switch (encodeType) {
+            case Base16:
+                urlDecoded = URLDecoder.decode(signature, StandardCharsets.UTF_8.name());
+                signatureBytes = Hex.decodeHex(urlDecoded);
+                break;
+            case Base32:
+                Base32 base32 = new Base32();
+                urlDecoded = URLDecoder.decode(signature, StandardCharsets.UTF_8.name());
+                signatureBytes = base32.decode(urlDecoded);
+                break;
+            case Base64:
+                signatureBytes = Base64.decodeBase64(signature);
+                break;
+        }
+
+        return Arrays.asList(contentBytes, signatureBytes);
     }
 
     @Override

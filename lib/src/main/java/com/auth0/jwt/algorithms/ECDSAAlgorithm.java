@@ -24,11 +24,6 @@ import com.auth0.jwt.exceptions.SignatureGenerationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
-import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.binary.StringUtils;
-
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -36,6 +31,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 
 class ECDSAAlgorithm extends Algorithm {
 
@@ -66,12 +64,12 @@ class ECDSAAlgorithm extends Algorithm {
         String urlDecoded = null;
         switch (encodeType) {
             case Base16:
-                urlDecoded = URLDecoder.decode(signature, "UTF-8");
+                urlDecoded = URLDecoder.decode(signature, StandardCharsets.UTF_8.name());
                 signatureBytes = Hex.decodeHex(urlDecoded);
                 break;
             case Base32:
                 Base32 base32 = new Base32();
-                urlDecoded = URLDecoder.decode(signature, "UTF-8");
+                urlDecoded = URLDecoder.decode(signature, StandardCharsets.UTF_8.name());
                 signatureBytes = base32.decode(urlDecoded);
                 break;
             case Base64:
@@ -92,6 +90,11 @@ class ECDSAAlgorithm extends Algorithm {
         } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException | IllegalStateException e) {
             throw new SignatureVerificationException(this, e);
         }
+    }
+
+    @Override
+    public void verifyWithX509(DecodedJWT jwt, String jwksFile, String pemFile) throws Exception {
+        throw new UnsupportedOperationException("X509 is not supported for ECDSA algorithm");
     }
 
     @Override
@@ -241,6 +244,7 @@ class ECDSAAlgorithm extends Algorithm {
         if (publicKey == null && privateKey == null) {
             throw new IllegalArgumentException("Both provided Keys cannot be null.");
         }
+
         return new ECDSAKeyProvider() {
             @Override
             public ECPublicKey getPublicKeyById(String keyId) {

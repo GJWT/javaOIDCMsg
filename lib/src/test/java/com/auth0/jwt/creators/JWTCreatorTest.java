@@ -21,11 +21,14 @@ package com.auth0.jwt.creators;
 
 import com.auth0.jwt.JsonMatcher;
 import com.auth0.jwt.PemUtils;
-import com.auth0.jwt.TokenUtils;
+import com.auth0.jwt.utils.TokenUtils;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.creators.JWTCreator;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.impl.Claims;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
+import com.auth0.jwt.jwts.JWT;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,11 +47,20 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+
 public class JWTCreatorTest {
 
-    private static final String PRIVATE_KEY_FILE_RSA = "src/test/resources/rsa-private.pem";
+    private static final String PRIVATE_KEY_FILE_RSA = "src/test/resources/rsa-private-base16-64.pem";
+    private static final String PUBLIC_KEY_FILE_RSA = "src/test/resources/rsa-public-base16-64.pem";
+    private static final String PRIVATE_KEY_FILE = "src/test/resources/rsa-private.pem";
+    private static final String PUBLIC_KEY_FILE = "src/test/resources/rsa-public.pem";
+    private static final String PUBLIC_KEY_FILE_INVALID = "src/test/resources/rsa-public_invalid.pem";
+    private static final String PRIVATE_KEY_FILE_PKCS8 = "./src/test/resources/example_key_pcks8.pem";
+    private static final String PEM_FILE = "./src/main/java/com/auth0/jwt/algorithms/jwks.pem";
+    private static final String JWKS_FILE = "./jwksRSA.json";
+    private static final String JWKS_FILE_ANOTHER_EXAMPLE = "./src/test/resources/example_jwk.json";
+    private static final String INVALID_JWKS_FILE = "./jwksRSA.doc";
     private static final String PRIVATE_KEY_FILE_EC_256 = "src/test/resources/ec256-key-private.pem";
-
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -92,7 +104,7 @@ public class JWTCreatorTest {
     public void shouldAddKeyIdIfAvailableFromRSAAlgorithms() throws Exception {
         RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
         RSAKeyProvider provider = mock(RSAKeyProvider.class);
-        when(provider.getPrivateKeyId()).thenReturn("my-key-id");
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
         when(provider.getPrivateKey()).thenReturn(privateKey);
 
         String signed = JWTCreator.init()
@@ -101,14 +113,209 @@ public class JWTCreatorTest {
         assertThat(signed, is(notNullValue()));
         String[] parts = signed.split("\\.");
         String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));
+        assertThat(headerJson, JsonMatcher.hasEntry("kid", "8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI"));
+    }
+
+    @Test
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase16() throws Exception {
+        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
+        RSAKeyProvider provider = mock(RSAKeyProvider.class);
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
+        when(provider.getPrivateKey()).thenReturn(privateKey);
+        Algorithm algorithm = Algorithm.RSA256(provider);
+
+        String signed = JWTCreator.init()
+                .withKeyId("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI")
+                .withIssuer("auth0")
+                .sign(algorithm, EncodeType.Base16);
+
+        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
+        DecodedJWT decoded = jwt.decode16BytesWithX509(signed, JWKS_FILE, PEM_FILE);
+    }
+
+    @Test
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase16NotAProperJwksFile() throws Exception {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Not a proper jwks file");
+        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
+        RSAKeyProvider provider = mock(RSAKeyProvider.class);
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
+        when(provider.getPrivateKey()).thenReturn(privateKey);
+        Algorithm algorithm = Algorithm.RSA256(provider);
+
+        String signed = JWTCreator.init()
+                .withKeyId("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI")
+                .withIssuer("auth0")
+                .sign(algorithm, EncodeType.Base16);
+
+        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
+        DecodedJWT decoded = jwt.decode16BytesWithX509(signed, INVALID_JWKS_FILE, PEM_FILE);
+    }
+
+    @Test
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase16UsingRolandKeys() throws Exception {
+        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_PKCS8, "RSA");
+        RSAKeyProvider provider = mock(RSAKeyProvider.class);
+        when(provider.getPrivateKeyId()).thenReturn("dnVrY0tQcUZCUWh2T25EaVk3Q0ZLRW9VdnRxU0tiUHNiVkVGS3k1V1Jidw");
+        when(provider.getPrivateKey()).thenReturn(privateKey);
+        Algorithm algorithm = Algorithm.RSA256(provider);
+
+        String signed = JWTCreator.init()
+                .withKeyId("dnVrY0tQcUZCUWh2T25EaVk3Q0ZLRW9VdnRxU0tiUHNiVkVGS3k1V1Jidw")
+                .withIssuer("auth0")
+                .sign(algorithm, EncodeType.Base16);
+
+        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
+        DecodedJWT decoded = jwt.decode16BytesWithX509(signed, JWKS_FILE_ANOTHER_EXAMPLE, PUBLIC_KEY_FILE_RSA);
+    }
+
+    @Test
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase16UsingAuth0Keys() throws Exception {
+        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE, "RSA");
+        RSAKeyProvider provider = mock(RSAKeyProvider.class);
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
+        when(provider.getPrivateKey()).thenReturn(privateKey);
+        Algorithm algorithm = Algorithm.RSA256(provider);
+
+        String signed = JWTCreator.init()
+                .withKeyId("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI")
+                .withIssuer("auth0")
+                .sign(algorithm, EncodeType.Base16);
+
+        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
+        DecodedJWT decoded = jwt.decode16BytesWithX509(signed, JWKS_FILE, PUBLIC_KEY_FILE);
+    }
+
+    @Test
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase16UsingAuth0KeysInvalidSignatureVerification() throws Exception {
+        exception.expect(SignatureVerificationException.class);
+        exception.expectMessage("The Token's Signature resulted invalid when verified using the Algorithm: SHA256withRSA");
+        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE, "RSA");
+        RSAKeyProvider provider = mock(RSAKeyProvider.class);
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
+        when(provider.getPrivateKey()).thenReturn(privateKey);
+        Algorithm algorithm = Algorithm.RSA256(provider);
+
+        String signed = JWTCreator.init()
+                .withKeyId("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI")
+                .withIssuer("auth0")
+                .sign(algorithm, EncodeType.Base16);
+
+        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
+        DecodedJWT decoded = jwt.decode16BytesWithX509(signed, JWKS_FILE, PUBLIC_KEY_FILE_INVALID);
+    }
+
+    @Test
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase32() throws Exception {
+        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
+        RSAKeyProvider provider = mock(RSAKeyProvider.class);
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
+        when(provider.getPrivateKey()).thenReturn(privateKey);
+        Algorithm algorithm = Algorithm.RSA256(provider);
+
+        String signed = JWTCreator.init()
+                .withKeyId("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI")
+                .withIssuer("auth0")
+                .sign(algorithm, EncodeType.Base32);
+
+        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
+        DecodedJWT decoded = jwt.decode32BytesWithX509(signed, JWKS_FILE, PEM_FILE);
+    }
+
+    @Test
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase32UsingRolandKeys() throws Exception {
+        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_PKCS8, "RSA");
+        RSAKeyProvider provider = mock(RSAKeyProvider.class);
+        when(provider.getPrivateKeyId()).thenReturn("dnVrY0tQcUZCUWh2T25EaVk3Q0ZLRW9VdnRxU0tiUHNiVkVGS3k1V1Jidw");
+        when(provider.getPrivateKey()).thenReturn(privateKey);
+        Algorithm algorithm = Algorithm.RSA256(provider);
+
+        String signed = JWTCreator.init()
+                .withKeyId("dnVrY0tQcUZCUWh2T25EaVk3Q0ZLRW9VdnRxU0tiUHNiVkVGS3k1V1Jidw")
+                .withIssuer("auth0")
+                .sign(algorithm, EncodeType.Base32);
+
+        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
+        DecodedJWT decoded = jwt.decode32BytesWithX509(signed, JWKS_FILE_ANOTHER_EXAMPLE, PUBLIC_KEY_FILE_RSA);
+    }
+
+    @Test
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase32UsingAuth0Keys() throws Exception {
+        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE, "RSA");
+        RSAKeyProvider provider = mock(RSAKeyProvider.class);
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
+        when(provider.getPrivateKey()).thenReturn(privateKey);
+        Algorithm algorithm = Algorithm.RSA256(provider);
+
+        String signed = JWTCreator.init()
+                .withKeyId("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI")
+                .withIssuer("auth0")
+                .sign(algorithm, EncodeType.Base32);
+
+        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
+        DecodedJWT decoded = jwt.decode32BytesWithX509(signed, JWKS_FILE, PUBLIC_KEY_FILE);
+    }
+    @Test
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase64() throws Exception {
+        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
+        RSAKeyProvider provider = mock(RSAKeyProvider.class);
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
+        when(provider.getPrivateKey()).thenReturn(privateKey);
+        Algorithm algorithm = Algorithm.RSA256(provider);
+
+        String signed =
+                JWTCreator.init()
+                        .withKeyId("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI")
+                        .withIssuer("https://agaton-sax.com/")
+                        .withNonStandardClaim("foo","bar")
+                        .withNonStandardClaim("kit", "kat")
+                        .sign(algorithm, EncodeType.Base64);
+
+        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("https://agaton-sax.com/")
+                .withNonStandardClaim("foo","bar")
+                .withNonStandardClaim("kit", "kat").build();
+        DecodedJWT decoded = jwt.decodeWithX509(signed, JWKS_FILE, PEM_FILE);
+    }
+
+    @Test
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase64UsingRolandKeys() throws Exception {
+        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_PKCS8, "RSA");
+        RSAKeyProvider provider = mock(RSAKeyProvider.class);
+        when(provider.getPrivateKeyId()).thenReturn("dnVrY0tQcUZCUWh2T25EaVk3Q0ZLRW9VdnRxU0tiUHNiVkVGS3k1V1Jidw");
+        when(provider.getPrivateKey()).thenReturn(privateKey);
+        Algorithm algorithm = Algorithm.RSA256(provider);
+
+        String signed = JWTCreator.init()
+                .withKeyId("dnVrY0tQcUZCUWh2T25EaVk3Q0ZLRW9VdnRxU0tiUHNiVkVGS3k1V1Jidw")
+                .withIssuer("auth0")
+                .sign(algorithm, EncodeType.Base64);
+
+        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
+        DecodedJWT decoded = jwt.decodeWithX509(signed, JWKS_FILE_ANOTHER_EXAMPLE, PUBLIC_KEY_FILE_RSA);
+    }
+
+    @Test
+    public void shouldAddKeyIdIfAvailableFromRSAAlgorithmsForBase64UsingAuth0Keys() throws Exception {
+        RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE, "RSA");
+        RSAKeyProvider provider = mock(RSAKeyProvider.class);
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
+        when(provider.getPrivateKey()).thenReturn(privateKey);
+        Algorithm algorithm = Algorithm.RSA256(provider);
+
+        String signed = JWTCreator.init()
+                .withKeyId("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI")
+                .withIssuer("auth0")
+                .sign(algorithm, EncodeType.Base64);
+
+        JWT jwt = JWT.require(Algorithm.RSA256(provider)).withIssuer("auth0").build();
+        DecodedJWT decoded = jwt.decodeWithX509(signed, JWKS_FILE, PUBLIC_KEY_FILE);
     }
 
     @Test
     public void shouldNotOverwriteKeyIdIfAddedFromRSAAlgorithms() throws Exception {
         RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_RSA, "RSA");
         RSAKeyProvider provider = mock(RSAKeyProvider.class);
-        when(provider.getPrivateKeyId()).thenReturn("my-key-id");
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
         when(provider.getPrivateKey()).thenReturn(privateKey);
 
         String signed = JWTCreator.init()
@@ -118,14 +325,14 @@ public class JWTCreatorTest {
         assertThat(signed, is(notNullValue()));
         String[] parts = signed.split("\\.");
         String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));
+        assertThat(headerJson, JsonMatcher.hasEntry("kid", "8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI"));
     }
 
     @Test
     public void shouldAddKeyIdIfAvailableFromECDSAAlgorithms() throws Exception {
         ECPrivateKey privateKey = (ECPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_EC_256, "EC");
         ECDSAKeyProvider provider = mock(ECDSAKeyProvider.class);
-        when(provider.getPrivateKeyId()).thenReturn("my-key-id");
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
         when(provider.getPrivateKey()).thenReturn(privateKey);
 
         String signed = JWTCreator.init()
@@ -134,14 +341,14 @@ public class JWTCreatorTest {
         assertThat(signed, is(notNullValue()));
         String[] parts = signed.split("\\.");
         String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));
+        assertThat(headerJson, JsonMatcher.hasEntry("kid", "8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI"));
     }
 
     @Test
     public void shouldNotOverwriteKeyIdIfAddedFromECDSAAlgorithms() throws Exception {
         ECPrivateKey privateKey = (ECPrivateKey) PemUtils.readPrivateKeyFromFile(PRIVATE_KEY_FILE_EC_256, "EC");
         ECDSAKeyProvider provider = mock(ECDSAKeyProvider.class);
-        when(provider.getPrivateKeyId()).thenReturn("my-key-id");
+        when(provider.getPrivateKeyId()).thenReturn("8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI");
         when(provider.getPrivateKey()).thenReturn(privateKey);
 
         String signed = JWTCreator.init()
@@ -151,7 +358,7 @@ public class JWTCreatorTest {
         assertThat(signed, is(notNullValue()));
         String[] parts = signed.split("\\.");
         String headerJson = new String(Base64.decodeBase64(parts[0]), StandardCharsets.UTF_8);
-        assertThat(headerJson, JsonMatcher.hasEntry("kid", "my-key-id"));
+        assertThat(headerJson, JsonMatcher.hasEntry("kid", "8RGoVdVjD8fItyR3FFo0hVNaZYtPGwoP6xKi9e_V7bI"));
     }
 
     @Test
@@ -161,7 +368,7 @@ public class JWTCreatorTest {
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(signed, is(notNullValue()));
-        assertThat(TokenUtils.splitToken(signed)[1], is("eyJpc3MiOlsiYXV0aDAiXX0"));
+        assertThat(TokenUtils.splitToken(signed)[1], is("eyJpc3MiOiJhdXRoMCJ9"));
     }
 
     @Test
@@ -171,7 +378,7 @@ public class JWTCreatorTest {
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(signed, is(notNullValue()));
-        assertThat(TokenUtils.splitToken(signed)[1], is("eyJzdWIiOlsiMTIzNDU2Nzg5MCJdfQ"));
+        assertThat(TokenUtils.splitToken(signed)[1], is("eyJzdWIiOiIxMjM0NTY3ODkwIn0"));
     }
 
     @Test
@@ -284,7 +491,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeString() throws Exception {
         String jwt = JWTCreator.init()
-                .withNonStandardClaim("name", "value")
+                .withNonStandardClaim(Claims.NAME, "value")
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -295,7 +502,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeInteger() throws Exception {
         String jwt = JWTCreator.init()
-                .withNonStandardClaim("name", 123)
+                .withNonStandardClaim(Claims.NAME, 123)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -306,7 +513,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeLong() throws Exception {
         String jwt = JWTCreator.init()
-                .withNonStandardClaim("name", Long.MAX_VALUE)
+                .withNonStandardClaim(Claims.NAME, Long.MAX_VALUE)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -317,7 +524,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeDouble() throws Exception {
         String jwt = JWTCreator.init()
-                .withNonStandardClaim("name", 23.45)
+                .withNonStandardClaim(Claims.NAME, 23.45)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -328,7 +535,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomClaimOfTypeBoolean() throws Exception {
         String jwt = JWTCreator.init()
-                .withNonStandardClaim("name", true)
+                .withNonStandardClaim(Claims.NAME, true)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -340,7 +547,7 @@ public class JWTCreatorTest {
     public void shouldAcceptCustomClaimOfTypeDate() throws Exception {
         Date date = new Date(1478891521000L);
         String jwt = JWTCreator.init()
-                .withNonStandardClaim("name", date)
+                .withNonStandardClaim(Claims.NAME, date)
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -351,7 +558,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomArrayClaimOfTypeString() throws Exception {
         String jwt = JWTCreator.init()
-                .withArrayClaim("name", new String[]{"text", "123", "true"})
+                .withArrayClaim(Claims.NAME, new String[]{"text", "123", "true"})
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -362,7 +569,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomArrayClaimOfTypeInteger() throws Exception {
         String jwt = JWTCreator.init()
-                .withArrayClaim("name", new Integer[]{1, 2, 3})
+                .withArrayClaim(Claims.NAME, new Integer[]{1, 2, 3})
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));
@@ -373,7 +580,7 @@ public class JWTCreatorTest {
     @Test
     public void shouldAcceptCustomArrayClaimOfTypeLong() throws Exception {
         String jwt = JWTCreator.init()
-                .withArrayClaim("name", new Long[]{1L, 2L, 3L})
+                .withArrayClaim(Claims.NAME, new Long[]{1L, 2L, 3L})
                 .sign(Algorithm.HMAC256("secret"));
 
         assertThat(jwt, is(notNullValue()));

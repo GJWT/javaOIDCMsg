@@ -19,23 +19,25 @@
 
 package com.auth0.jwt.creators;
 
-import com.auth0.jwt.TimeUtil;
 import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertTrue;
+
+import com.auth0.jwt.TimeUtil;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.InvalidClaimException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.exceptions.RequiredClaimException;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
 import com.auth0.jwt.jwts.ImplicitJWT;
 import com.auth0.jwt.jwts.JWT;
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertTrue;
+import java.util.Date;
+import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.util.*;
 
 public class ImplicitJwtCreatorTest {
 
@@ -130,8 +132,8 @@ public class ImplicitJwtCreatorTest {
 
     @Test
     public void testImplicitJwtCreatorIssuerNotProvided() throws Exception {
-        thrown.expect(Exception.class);
-        thrown.expectMessage("Standard claim: Issuer has not been set");
+        thrown.expect(RequiredClaimException.class);
+        thrown.expectMessage("Standard claim: iss has not been set");
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = ImplicitJwtCreator.build()
                 .withSubject("subject")
@@ -318,8 +320,8 @@ public class ImplicitJwtCreatorTest {
     }
 
     private static void verifyClaims(Map<String,Claim> claims) {
-        assertTrue(claims.get(PublicClaims.ISSUER).asList(String.class).get(0).equals("issuer"));
-        assertTrue(claims.get(PublicClaims.SUBJECT).asList(String.class).get(0).equals("subject"));
-        assertTrue(claims.get(PublicClaims.AUDIENCE).asString().equals("audience"));
+        assertTrue(claims.get(Claims.ISSUER).asString().equals("issuer"));
+        assertTrue(claims.get(Claims.SUBJECT).asString().equals("subject"));
+        assertTrue(claims.get(Claims.AUDIENCE).asString().equals("audience"));
     }
 }

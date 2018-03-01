@@ -21,23 +21,23 @@ package com.auth0.jwt.creators;
 
 import static com.auth0.jwt.TimeUtil.generateRandomExpDateInFuture;
 import static com.auth0.jwt.TimeUtil.generateRandomIatDateInPast;
+import static org.junit.Assert.assertTrue;
+
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.creators.FbJwtCreator;
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.impl.PublicClaims;
+import com.auth0.jwt.impl.Claims;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
 import com.auth0.jwt.jwts.FbJWT;
 import com.auth0.jwt.jwts.JWT;
-import static org.junit.Assert.assertTrue;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 public class FbJwtCreatorTest {
 
@@ -131,7 +131,7 @@ public class FbJwtCreatorTest {
     @Test
     public void testFbJwtCreatorUserIdNotProvided() throws Exception {
         thrown.expect(Exception.class);
-        thrown.expectMessage("Standard claim: UserId has not been set");
+        thrown.expectMessage("Standard claim: userId has not been set");
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = FbJwtCreator.build()
                 .withExp(exp)
@@ -351,6 +351,6 @@ public class FbJwtCreatorTest {
     private static void verifyClaims(Map<String,Claim> claims) {
         assertTrue(claims.get(USER_ID).asString().equals(USER_ID));
         assertTrue(claims.get(APP_ID).asString().equals(APP_ID));
-        assertTrue(claims.get(PublicClaims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
+        assertTrue(claims.get(Claims.EXPIRES_AT).asDate().toString().equals(exp.toString()));
     }
 }

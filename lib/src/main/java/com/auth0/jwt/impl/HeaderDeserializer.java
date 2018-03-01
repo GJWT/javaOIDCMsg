@@ -47,10 +47,10 @@ class HeaderDeserializer extends StdDeserializer<BasicHeader> {
             throw new JWTDecodeException("Parsing the Header's JSON resulted on a Null map");
         }
 
-        String algorithm = getString(tree, PublicClaims.ALGORITHM);
-        String type = getString(tree, PublicClaims.TYPE);
-        String contentType = getString(tree, PublicClaims.CONTENT_TYPE);
-        String keyId = getString(tree, PublicClaims.KEY_ID);
+        String algorithm = getString(tree, Claims.ALGORITHM);
+        String type = getString(tree, Claims.TYPE);
+        String contentType = getString(tree, Claims.CONTENT_TYPE);
+        String keyId = getString(tree, Claims.KEY_ID);
         return new BasicHeader(algorithm, type, contentType, keyId, tree);
     }
 
